@@ -1,0 +1,535 @@
+import { useState, useEffect, useMemo } from "react";
+import {
+  Save, Upload, Send, Archive, History, RefreshCw, Eye, AlertCircle,
+  CheckCircle2, Image as ImageIcon, Trash2, Plus, RotateCcw, Monitor,
+  Tablet, Smartphone, X,
+} from "lucide-react";
+
+const C = {
+  verde: "#127369", oscuro: "#0d3330", amarillo: "#F5C518",
+  medio: "#7a9e9b", gris: "#4C5958", grisClaro: "#8AA6A3",
+  fondo: "#f0f4f3", blanco: "#ffffff", rojo: "#e05252", naranja: "#e67e22",
+  borde: "#e2edeb",
+};
+
+const SECCIONES = [
+  { key: "HERO", label: "Hero" },
+  { key: "DESTINOS", label: "Destinos" },
+  { key: "BENEFICIOS", label: "Beneficios" },
+  { key: "NOSOTROS", label: "Nosotros" },
+  { key: "CONTACTO", label: "Contacto" },
+  { key: "FOOTER", label: "Footer" },
+];
+
+const ICONOS = ["ticket", "package", "mappin", "shield", "clock", "user", "bus", "route", "heart", "star", "check", "info", "phone", "mail"];
+
+const estadoColor = (e) =>
+  e === "PUBLICADO" ? { bg: "rgba(18,115,105,0.12)", fg: C.verde }
+  : e === "ARCHIVADO" ? { bg: "rgba(224,82,82,0.12)", fg: C.rojo }
+  : { bg: "rgba(230,126,34,0.14)", fg: C.naranja };
+
+const campo = { width: "100%", padding: "9px 11px", border: `1px solid ${C.borde}`, borderRadius: 8, fontSize: 13, fontFamily: "inherit", color: C.oscuro, background: C.blanco, boxSizing: "border-box" };
+const labelS = { display: "block", fontSize: 11, fontWeight: 700, color: C.gris, marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.04em" };
+const btn = (bg, fg) => ({ background: bg, color: fg, border: "none", borderRadius: 8, padding: "9px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 7, fontFamily: "inherit" });
+
+function Campo({ label, value, onChange, textarea }) {
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <label style={labelS}>{label}</label>
+      {textarea ? (
+        <textarea style={{ ...campo, minHeight: 90, resize: "vertical" }} value={value ?? ""} onChange={(e) => onChange(e.target.value)} />
+      ) : (
+        <input style={campo} value={value ?? ""} onChange={(e) => onChange(e.target.value)} />
+      )}
+    </div>
+  );
+}
+
+function Check({ label, value, onChange }) {
+  return (
+    <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: C.oscuro, fontWeight: 600, marginBottom: 12, cursor: "pointer" }}>
+      <input type="checkbox" checked={!!value} onChange={(e) => onChange(e.target.checked)} style={{ width: 16, height: 16, accentColor: C.verde }} />
+      {label}
+    </label>
+  );
+}
+
+export default function PortalGestion({ headers, showToast }) {
+  const [secciones, setSecciones] = useState([]);
+  const [activa, setActiva] = useState("HERO");
+  const [form, setForm] = useState({});
+  const [cargando, setCargando] = useState(true);
+  const [guardando, setGuardando] = useState(false);
+  const [historial, setHistorial] = useState(null);
+  const [verHistorial, setVerHistorial] = useState(false);
+  const [preview, setPreview] = useState("desktop");
+  const [storage, setStorage] = useState({ disponible: false, tipo: "none" });
+  const [imagenes, setImagenes] = useState([]);
+  const [subiendo, setSubiendo] = useState(false);
+  const [imgForm, setImgForm] = useState({
+    textoAlt: "", autor: "", fuente: "", licencia: "", urlOrigen: "", autorizacionComercial: false, archivo: null,
+  });
+
+  const seccionActual = useMemo(() => secciones.find((s) => s.seccion === activa) || null, [secciones, activa]);
+
+  const cargar = async () => {
+    setCargando(true);
+    try {
+      const [rSec, rImg, rAlm] = await Promise.all([
+        fetch("/api/v1/portal/admin/secciones", { headers }),
+        fetch("/api/v1/portal/admin/imagenes", { headers }),
+        fetch("/api/v1/portal/admin/almacenamiento", { headers }),
+      ]);
+      const sec = rSec.ok ? await rSec.json() : null;
+      const img = rImg.ok ? await rImg.json() : null;
+      const alm = rAlm.ok ? await rAlm.json() : null;
+      setSecciones(sec?.data || []);
+      setImagenes(img?.data || []);
+      if (alm?.data) setStorage(alm.data);
+    } catch {
+      showToast("Error al cargar la gestión del portal");
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { cargar(); }, []);
+
+  useEffect(() => {
+    const s = secciones.find((x) => x.seccion === activa);
+    setForm(s?.borrador ? structuredClone(s.borrador) : {});
+    setHistorial(null);
+    setVerHistorial(false);
+  }, [activa, secciones]);
+
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  const setArr = (k, idx, field, v) => setForm((f) => {
+    const arr = [...(f[k] || [])];
+    arr[idx] = { ...arr[idx], [field]: v };
+    return { ...f, [k]: arr };
+  });
+  const addItem = (k, item) => setForm((f) => ({ ...f, [k]: [...(f[k] || []), item] }));
+  const delItem = (k, idx) => setForm((f) => ({ ...f, [k]: (f[k] || []).filter((_, i) => i !== idx) }));
+
+  const guardar = async () => {
+    setGuardando(true);
+    try {
+      const res = await fetch(`/api/v1/portal/admin/secciones/${activa}/borrador`, {
+        method: "PUT", headers, body: JSON.stringify({ contenido: form }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.mensaje || "No se pudo guardar");
+      showToast("Borrador guardado");
+      await cargar();
+    } catch (e) { showToast(`Error: ${e.message}`); }
+    finally { setGuardando(false); }
+  };
+
+  const accion = async (ruta, mensaje, extra = {}) => {
+    setGuardando(true);
+    try {
+      const res = await fetch(`/api/v1/portal/admin/secciones/${activa}/${ruta}`, {
+        method: "POST", headers, body: JSON.stringify(extra),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.mensaje || "Acción no permitida");
+      showToast(mensaje);
+      await cargar();
+    } catch (e) { showToast(`Error: ${e.message}`); }
+    finally { setGuardando(false); }
+  };
+
+  const verHist = async () => {
+    try {
+      const res = await fetch(`/api/v1/portal/admin/secciones/${activa}/historial`, { headers });
+      const data = res.ok ? await res.json() : null;
+      setHistorial(data?.data || []);
+      setVerHistorial(true);
+    } catch { showToast("Error al cargar historial"); }
+  };
+
+  const restaurar = async (versionId) => {
+    if (!window.confirm("¿Restaurar esta versión? Se aplicará al contenido de la sección.")) return;
+    await accion(`restaurar?versionId=${versionId}`, "Versión restaurada");
+    verHist();
+  };
+
+  const subirImagen = async (e) => {
+    e.preventDefault();
+    if (!imgForm.archivo) return showToast("Seleccione un archivo");
+    setSubiendo(true);
+    try {
+      const fd = new FormData();
+      fd.append("archivo", imgForm.archivo);
+      fd.append("seccion", activa);
+      fd.append("textoAlt", imgForm.textoAlt);
+      fd.append("autor", imgForm.autor);
+      fd.append("fuente", imgForm.fuente);
+      fd.append("licencia", imgForm.licencia);
+      if (imgForm.urlOrigen) fd.append("urlOrigen", imgForm.urlOrigen);
+      fd.append("autorizacionComercial", imgForm.autorizacionComercial ? "true" : "false");
+      const res = await fetch("/api/v1/portal/admin/imagenes", {
+        method: "POST", headers: { Authorization: headers.Authorization }, body: fd,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.mensaje || "No se pudo subir la imagen");
+      showToast("Imagen validada y registrada");
+      setImgForm({ textoAlt: "", autor: "", fuente: "", licencia: "", urlOrigen: "", autorizacionComercial: false, archivo: null });
+      await cargar();
+    } catch (err) { showToast(`Error: ${err.message}`); }
+    finally { setSubiendo(false); }
+  };
+
+  const renderForm = () => {
+    if (!seccionActual) return null;
+    switch (activa) {
+      case "HERO":
+        return (<>
+          <Campo label="Título" value={form.titulo} onChange={(v) => set("titulo", v)} />
+          <Campo label="Subtítulo" value={form.subtitulo} onChange={(v) => set("subtitulo", v)} />
+          <Campo label="URL imagen de fondo" value={form.imagenFondoUrl} onChange={(v) => set("imagenFondoUrl", v)} />
+          <Campo label="URL imagen del bus (opcional)" value={form.imagenBusUrl} onChange={(v) => set("imagenBusUrl", v)} />
+          <Campo label="Texto alternativo (alt)" value={form.imagenAlt} onChange={(v) => set("imagenAlt", v)} />
+          <Campo label="Autor" value={form.autor} onChange={(v) => set("autor", v)} />
+          <Campo label="Fuente" value={form.fuente} onChange={(v) => set("fuente", v)} />
+          <Campo label="Licencia" value={form.licencia} onChange={(v) => set("licencia", v)} />
+          <Campo label="Atribución" value={form.atribucion} onChange={(v) => set("atribucion", v)} />
+          <Check label="Mostrar buscador de bus" value={form.mostrarBus} onChange={(v) => set("mostrarBus", v)} />
+        </>);
+      case "NOSOTROS":
+        return (<>
+          <Campo label="Título" value={form.titulo} onChange={(v) => set("titulo", v)} />
+          <Campo label="Descripción" textarea value={form.descripcion} onChange={(v) => set("descripcion", v)} />
+          <Campo label="URL imagen" value={form.imagenUrl} onChange={(v) => set("imagenUrl", v)} />
+          <Campo label="Texto alternativo (alt)" value={form.imagenAlt} onChange={(v) => set("imagenAlt", v)} />
+          <Campo label="Autor" value={form.autor} onChange={(v) => set("autor", v)} />
+          <Campo label="Fuente" value={form.fuente} onChange={(v) => set("fuente", v)} />
+          <Campo label="Licencia" value={form.licencia} onChange={(v) => set("licencia", v)} />
+        </>);
+      case "CONTACTO":
+        return (<>
+          <Campo label="Teléfono" value={form.telefono} onChange={(v) => set("telefono", v)} />
+          <Campo label="Correo" value={form.correo} onChange={(v) => set("correo", v)} />
+          <Campo label="Dirección" value={form.direccion} onChange={(v) => set("direccion", v)} />
+          <Campo label="Horario" value={form.horario} onChange={(v) => set("horario", v)} />
+          <Check label="Mostrar sección de contacto" value={form.visible} onChange={(v) => set("visible", v)} />
+          <ListaRedes form={form} setArr={setArr} addItem={addItem} delItem={delItem} />
+        </>);
+      case "FOOTER":
+        return (<>
+          <Campo label="Descripción" value={form.descripcion} onChange={(v) => set("descripcion", v)} />
+          <Campo label="Información legal" value={form.infoLegal} onChange={(v) => set("infoLegal", v)} />
+          <Campo label="Créditos fotográficos" value={form.creditosFotograficos} onChange={(v) => set("creditosFotograficos", v)} />
+          <ListaEnlaces form={form} setArr={setArr} addItem={addItem} delItem={delItem} />
+        </>);
+      case "DESTINOS":
+        return <ListaDestinos form={form} setArr={setArr} addItem={addItem} delItem={delItem} />;
+      case "BENEFICIOS":
+        return <ListaBeneficios form={form} setArr={setArr} addItem={addItem} delItem={delItem} />;
+      default:
+        return null;
+    }
+  };
+
+  if (cargando) {
+    return <div style={{ padding: 40, textAlign: "center", color: C.medio }}><RefreshCw size={22} style={{ animation: "spin 1s linear infinite" }} /> Cargando gestión del portal…</div>;
+  }
+
+  const ec = seccionActual ? estadoColor(seccionActual.estado) : estadoColor("BORRADOR");
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {!storage.disponible && (
+        <div style={{ background: "rgba(230,126,34,0.1)", border: "1px solid rgba(230,126,34,0.35)", borderRadius: 10, padding: "12px 16px", display: "flex", gap: 10, alignItems: "flex-start" }}>
+          <AlertCircle size={18} color={C.naranja} style={{ flexShrink: 0, marginTop: 1 }} />
+          <div style={{ fontSize: 12.5, color: C.gris }}>
+            <strong style={{ color: C.naranja }}>Almacenamiento no persistente.</strong> La subida de imágenes está deshabilitada
+            (tipo actual: {storage.tipo}). El contenido editorial puede administrarse, pero no debe declararse listo para producción
+            hasta configurar un almacenamiento persistente.
+          </div>
+        </div>
+      )}
+
+      {storage.disponible && storage.persistente === false && (
+        <div role="alert" style={{ background: "rgba(230,126,34,0.1)", border: "1px solid rgba(230,126,34,0.35)", borderRadius: 10, padding: "12px 16px", display: "flex", gap: 10, alignItems: "flex-start" }}>
+          <AlertCircle size={18} color={C.naranja} style={{ flexShrink: 0, marginTop: 1 }} />
+          <div style={{ fontSize: 12.5, color: C.gris }}>
+            <strong style={{ color: C.naranja }}>Almacenamiento no persistente (tipo actual: {storage.tipo}).</strong> Las imágenes
+            se guardan en el sistema de archivos local y pueden perderse al reiniciar o volver a desplegar. El contenido
+            editorial puede administrarse, pero <strong style={{ color: C.naranja }}>no debe declararse listo para producción</strong>{" "}
+            hasta configurar un almacenamiento persistente (proveedor de objetos o disco persistente).
+          </div>
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        {SECCIONES.map((s) => {
+          const info = secciones.find((x) => x.seccion === s.key);
+          const act = activa === s.key;
+          const col = info ? estadoColor(info.estado) : estadoColor("BORRADOR");
+          return (
+            <button key={s.key} onClick={() => setActiva(s.key)} style={{
+              background: act ? C.oscuro : C.blanco, color: act ? C.blanco : C.gris,
+              border: `1px solid ${act ? C.oscuro : C.borde}`, borderRadius: 9, padding: "8px 14px",
+              fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+              display: "flex", alignItems: "center", gap: 8,
+            }}>
+              {s.label}
+              {info && <span style={{ fontSize: 10, fontWeight: 800, padding: "1px 6px", borderRadius: 6, background: col.bg, color: col.fg }}>{info.estado}</span>}
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1.15fr) minmax(0,0.85fr)", gap: 16, alignItems: "start" }}>
+        {/* Editor */}
+        <div style={{ background: C.blanco, border: `1px solid ${C.borde}`, borderRadius: 12, padding: 20 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 16, color: C.oscuro }}>{SECCIONES.find((s) => s.key === activa)?.label}</div>
+              <div style={{ fontSize: 11, color: C.medio }}>
+                Estado: <strong style={{ color: ec.fg }}>{seccionActual?.estado || "—"}</strong> · Versión: {seccionActual?.version ?? 0}
+                {seccionActual?.publicadoEn ? ` · Publicado: ${new Date(seccionActual.publicadoEn).toLocaleString("es-PE")}` : ""}
+              </div>
+            </div>
+          </div>
+
+          {renderForm()}
+
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8, borderTop: `1px solid ${C.borde}`, paddingTop: 14 }}>
+            <button style={btn(C.verde, "white")} disabled={guardando} onClick={guardar}><Save size={15} /> Guardar borrador</button>
+            <button style={btn(C.oscuro, "white")} disabled={guardando} onClick={() => accion("publicar", "Sección publicada")}><Send size={15} /> Publicar</button>
+            <button style={btn("rgba(224,82,82,0.12)", C.rojo)} disabled={guardando} onClick={() => accion("archivar", "Sección archivada")}><Archive size={15} /> Archivar</button>
+            <button style={btn(C.fondo, C.gris)} onClick={verHist}><History size={15} /> Historial</button>
+          </div>
+        </div>
+
+        {/* Vista previa */}
+        <div style={{ background: C.blanco, border: `1px solid ${C.borde}`, borderRadius: 12, padding: 18 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <div style={{ fontWeight: 800, fontSize: 14, color: C.oscuro, display: "flex", alignItems: "center", gap: 7 }}><Eye size={16} /> Vista previa (borrador)</div>
+            <div style={{ display: "flex", gap: 4 }}>
+              {[["desktop", <Monitor size={15} />], ["tablet", <Tablet size={15} />], ["mobile", <Smartphone size={15} />]].map(([k, icono]) => (
+                <button key={k} onClick={() => setPreview(k)} title={k} style={{ background: preview === k ? C.verde : C.fondo, color: preview === k ? "white" : C.gris, border: "none", borderRadius: 7, width: 30, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {icono}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div style={{ background: "#f7faf9", border: `1px solid ${C.borde}`, borderRadius: 10, padding: 12, display: "flex", justifyContent: "center" }}>
+            <div style={{ width: preview === "desktop" ? "100%" : preview === "tablet" ? "78%" : "46%", transition: "width .2s", background: "white", border: `1px solid ${C.borde}`, borderRadius: 10, padding: 14, minHeight: 260 }}>
+              <PreviewPortal seccion={activa} form={form} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Imágenes */}
+      <div style={{ background: C.blanco, border: `1px solid ${C.borde}`, borderRadius: 12, padding: 20 }}>
+        <div style={{ fontWeight: 800, fontSize: 15, color: C.oscuro, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+          <ImageIcon size={17} /> Imágenes del portal <span style={{ fontSize: 11, color: C.medio, fontWeight: 600 }}>(WebP / JPEG / PNG · validación real por contenido)</span>
+        </div>
+        <form onSubmit={subirImagen} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <label style={labelS}>Archivo</label>
+            <input type="file" accept="image/png,image/jpeg,image/webp" disabled={!storage.disponible}
+              onChange={(e) => setImgForm((f) => ({ ...f, archivo: e.target.files?.[0] || null }))} style={{ ...campo, padding: 7 }} />
+          </div>
+          <Campo label="Texto alternativo (alt)" value={imgForm.textoAlt} onChange={(v) => setImgForm((f) => ({ ...f, textoAlt: v }))} />
+          <Campo label="Autor" value={imgForm.autor} onChange={(v) => setImgForm((f) => ({ ...f, autor: v }))} />
+          <Campo label="Fuente" value={imgForm.fuente} onChange={(v) => setImgForm((f) => ({ ...f, fuente: v }))} />
+          <Campo label="Licencia" value={imgForm.licencia} onChange={(v) => setImgForm((f) => ({ ...f, licencia: v }))} />
+          <Campo label="URL de origen (opcional)" value={imgForm.urlOrigen} onChange={(v) => setImgForm((f) => ({ ...f, urlOrigen: v }))} />
+          <div style={{ display: "flex", alignItems: "flex-end" }}>
+            <Check label="Declaro autorización comercial" value={imgForm.autorizacionComercial} onChange={(v) => setImgForm((f) => ({ ...f, autorizacionComercial: v }))} />
+          </div>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <button type="submit" style={btn(C.verde, "white")} disabled={subiendo || !storage.disponible}><Upload size={15} /> {subiendo ? "Validando…" : "Subir imagen"}</button>
+          </div>
+        </form>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(150px,1fr))", gap: 10 }}>
+          {imagenes.map((im) => (
+            <div key={im.id} style={{ border: `1px solid ${C.borde}`, borderRadius: 9, overflow: "hidden" }}>
+              <img src={im.miniaturaUrl || im.url} alt={im.textoAlt || "imagen"} style={{ width: "100%", height: 90, objectFit: "cover", display: "block" }} />
+              <div style={{ padding: 7, fontSize: 10, color: C.gris }}>
+                <div style={{ fontWeight: 700, color: C.oscuro, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{im.textoAlt || "Sin alt"}</div>
+                {im.ancho && <div>{im.ancho}×{im.alto} · {(im.pesoBytes / 1024).toFixed(0)} KB</div>}
+                <div style={{ color: im.autorizacionComercial ? C.verde : C.rojo }}>{im.autorizacionComercial ? "Autorizada" : "Sin autorización"}</div>
+              </div>
+            </div>
+          ))}
+          {imagenes.length === 0 && <div style={{ fontSize: 12, color: C.medio, gridColumn: "1 / -1" }}>Sin imágenes registradas.</div>}
+        </div>
+      </div>
+
+      {/* Historial modal */}
+      {verHistorial && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(3,40,36,0.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1200, padding: 20 }} onClick={() => setVerHistorial(false)}>
+          <div style={{ background: "white", borderRadius: 14, width: "min(760px,100%)", maxHeight: "82vh", overflow: "auto", padding: 22 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+              <div style={{ fontWeight: 800, fontSize: 16, color: C.oscuro }}>Historial · {activa}</div>
+              <button onClick={() => setVerHistorial(false)} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.gris }}><X size={20} /></button>
+            </div>
+            {(historial || []).map((v) => (
+              <div key={v.id} style={{ border: `1px solid ${C.borde}`, borderRadius: 9, padding: 12, marginBottom: 9 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+                  <div style={{ fontSize: 12.5, color: C.oscuro }}>
+                    <strong>v{v.version}</strong> · {v.accion} · <span style={{ color: estadoColor(v.estado).fg }}>{v.estado}</span>
+                  </div>
+                  <button style={btn(C.fondo, C.verde)} onClick={() => restaurar(v.id)}><RotateCcw size={13} /> Restaurar</button>
+                </div>
+                <div style={{ fontSize: 11, color: C.medio, marginTop: 4 }}>
+                  {v.username || "—"} ({v.rol || "—"}) · {v.fechaHora ? new Date(v.fechaHora).toLocaleString("es-PE") : "—"}
+                  {v.observacion ? ` · ${v.observacion}` : ""}
+                </div>
+              </div>
+            ))}
+            {historial && historial.length === 0 && <div style={{ fontSize: 12, color: C.medio }}>Sin versiones registradas.</div>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Listas ──────────────────────────────────────────────────────────────────
+
+function ListaDestinos({ form, setArr, addItem, delItem }) {
+  const arr = form.destinos || [];
+  return (
+    <div>
+      {arr.map((d, i) => (
+        <div key={i} style={{ border: `1px solid ${C.borde}`, borderRadius: 9, padding: 12, marginBottom: 10 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <strong style={{ fontSize: 12, color: C.oscuro }}>Destino #{i + 1}</strong>
+            <button style={btn("rgba(224,82,82,0.12)", C.rojo)} onClick={() => delItem("destinos", i)}><Trash2 size={13} /></button>
+          </div>
+          <Campo label="Título" value={d.titulo} onChange={(v) => setArr("destinos", i, "titulo", v)} />
+          <Campo label="Texto breve" value={d.texto} onChange={(v) => setArr("destinos", i, "texto", v)} />
+          <Campo label="URL imagen" value={d.imagenUrl} onChange={(v) => setArr("destinos", i, "imagenUrl", v)} />
+          <Campo label="Texto alternativo (alt)" value={d.imagenAlt} onChange={(v) => setArr("destinos", i, "imagenAlt", v)} />
+          <Check label="Visible" value={d.visible} onChange={(v) => setArr("destinos", i, "visible", v)} />
+        </div>
+      ))}
+      <button style={btn(C.fondo, C.verde)} onClick={() => addItem("destinos", { titulo: "", texto: "", imagenUrl: "", imagenAlt: "", orden: arr.length, visible: true })}><Plus size={14} /> Añadir destino</button>
+    </div>
+  );
+}
+
+function ListaBeneficios({ form, setArr, addItem, delItem }) {
+  const arr = form.beneficios || [];
+  return (
+    <div>
+      {arr.map((b, i) => (
+        <div key={i} style={{ border: `1px solid ${C.borde}`, borderRadius: 9, padding: 12, marginBottom: 10 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <strong style={{ fontSize: 12, color: C.oscuro }}>Beneficio #{i + 1}</strong>
+            <button style={btn("rgba(224,82,82,0.12)", C.rojo)} onClick={() => delItem("beneficios", i)}><Trash2 size={13} /></button>
+          </div>
+          <Campo label="Título" value={b.titulo} onChange={(v) => setArr("beneficios", i, "titulo", v)} />
+          <Campo label="Descripción" value={b.descripcion} onChange={(v) => setArr("beneficios", i, "descripcion", v)} />
+          <div style={{ marginBottom: 12 }}>
+            <label style={labelS}>Icono</label>
+            <select style={campo} value={b.icono || ""} onChange={(e) => setArr("beneficios", i, "icono", e.target.value)}>
+              <option value="">—</option>
+              {ICONOS.map((ic) => <option key={ic} value={ic}>{ic}</option>)}
+            </select>
+          </div>
+          <Check label="Visible" value={b.visible} onChange={(v) => setArr("beneficios", i, "visible", v)} />
+        </div>
+      ))}
+      <button style={btn(C.fondo, C.verde)} onClick={() => addItem("beneficios", { titulo: "", descripcion: "", icono: "ticket", orden: arr.length, visible: true })}><Plus size={14} /> Añadir beneficio</button>
+    </div>
+  );
+}
+
+function ListaRedes({ form, setArr, addItem, delItem }) {
+  const arr = form.redes || [];
+  return (
+    <div>
+      <label style={labelS}>Redes sociales</label>
+      {arr.map((r, i) => (
+        <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+          <input style={campo} placeholder="Nombre" value={r.nombre || ""} onChange={(e) => setArr("redes", i, "nombre", e.target.value)} />
+          <input style={campo} placeholder="URL" value={r.url || ""} onChange={(e) => setArr("redes", i, "url", e.target.value)} />
+          <button style={btn("rgba(224,82,82,0.12)", C.rojo)} onClick={() => delItem("redes", i)}><Trash2 size={13} /></button>
+        </div>
+      ))}
+      <button style={btn(C.fondo, C.verde)} onClick={() => addItem("redes", { nombre: "", url: "" })}><Plus size={14} /> Añadir red</button>
+    </div>
+  );
+}
+
+function ListaEnlaces({ form, setArr, addItem, delItem }) {
+  const arr = form.enlaces || [];
+  return (
+    <div>
+      <label style={labelS}>Enlaces del footer</label>
+      {arr.map((e, i) => (
+        <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+          <input style={campo} placeholder="Texto" value={e.texto || ""} onChange={(ev) => setArr("enlaces", i, "texto", ev.target.value)} />
+          <input style={campo} placeholder="URL" value={e.url || ""} onChange={(ev) => setArr("enlaces", i, "url", ev.target.value)} />
+          <button style={btn("rgba(224,82,82,0.12)", C.rojo)} onClick={() => delItem("enlaces", i)}><Trash2 size={13} /></button>
+        </div>
+      ))}
+      <button style={btn(C.fondo, C.verde)} onClick={() => addItem("enlaces", { texto: "", url: "" })}><Plus size={14} /> Añadir enlace</button>
+    </div>
+  );
+}
+
+function PreviewPortal({ seccion, form }) {
+  const box = { fontSize: 12, color: C.oscuro };
+  if (seccion === "HERO") return (
+    <div style={{ ...box, background: "linear-gradient(rgba(3,59,49,.85),rgba(2,40,33,.9))", color: "white", padding: 18, borderRadius: 8 }}>
+      <div style={{ fontSize: 20, fontWeight: 800 }}>{form.titulo || "Título"}</div>
+      <div style={{ fontSize: 12, opacity: .85, marginTop: 6 }}>{form.subtitulo || "Subtítulo"}</div>
+      <div style={{ fontSize: 10, opacity: .7, marginTop: 10 }}>{form.imagenFondoUrl || "Sin imagen de fondo"}</div>
+    </div>
+  );
+  if (seccion === "DESTINOS") return (
+    <div style={box}>
+      <div style={{ fontWeight: 800, marginBottom: 8 }}>Destinos</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+        {(form.destinos || []).filter((d) => d.visible !== false).map((d, i) => (
+          <div key={i} style={{ border: `1px solid ${C.borde}`, borderRadius: 7, padding: 7, fontSize: 11 }}>{d.titulo || "—"}</div>
+        ))}
+      </div>
+    </div>
+  );
+  if (seccion === "BENEFICIOS") return (
+    <div style={box}>
+      {(form.beneficios || []).filter((b) => b.visible !== false).map((b, i) => (
+        <div key={i} style={{ borderBottom: `1px solid ${C.borde}`, padding: "6px 0" }}>
+          <strong style={{ fontSize: 12 }}>{b.titulo || "—"}</strong>
+          <div style={{ fontSize: 11, color: C.gris }}>{b.descripcion}</div>
+        </div>
+      ))}
+    </div>
+  );
+  if (seccion === "NOSOTROS") return (
+    <div style={box}>
+      <div style={{ fontWeight: 800, marginBottom: 6 }}>{form.titulo || "Nosotros"}</div>
+      <div style={{ fontSize: 11, whiteSpace: "pre-line", color: C.gris }}>{form.descripcion || "—"}</div>
+    </div>
+  );
+  if (seccion === "CONTACTO") return (
+    <div style={box}>
+      <div style={{ fontWeight: 800, marginBottom: 6 }}>Contacto {form.visible === false && <span style={{ color: C.rojo, fontSize: 10 }}>(oculto)</span>}</div>
+      <div style={{ fontSize: 11 }}>{form.telefono || "—"}</div>
+      <div style={{ fontSize: 11 }}>{form.correo || "—"}</div>
+      <div style={{ fontSize: 11 }}>{form.direccion || "—"}</div>
+      <div style={{ fontSize: 11 }}>{form.horario || "—"}</div>
+    </div>
+  );
+  if (seccion === "FOOTER") return (
+    <div style={box}>
+      <div style={{ fontWeight: 800, marginBottom: 6 }}>Footer</div>
+      <div style={{ fontSize: 11, color: C.gris }}>{form.descripcion || "—"}</div>
+      {(form.enlaces || []).map((e, i) => <div key={i} style={{ fontSize: 11 }}>· {e.texto}</div>)}
+      <div style={{ fontSize: 10, color: C.medio, marginTop: 6 }}>{form.infoLegal}</div>
+    </div>
+  );
+  return null;
+}

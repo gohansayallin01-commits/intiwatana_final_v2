@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "INTIWATANA: Backend Spring Boot (F5) + Frontend Vite + Navegador",
+            "request": "launch",
+            "mainClass": "com.transporte.sistema.SistemaTransporteApplication",
+            "projectName": "sistema-transporte",
+            "cwd": "${workspaceFolder}/backend/bus-system",
+            "console": "integratedTerminal",
+            "javaExecPath": "C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.18.8-hotspot\\bin\\java.exe",
+            "preLaunchTask": "Frontend: preparar (desacoplado, preLaunchTask del F5)",
+            "env": {
+                "DB_URL": "jdbc:postgresql://localhost:5432/transporte_bd",
+                "DB_USERNAME": "postgres",
+                "DB_PASSWORD": "2007",
+                "CORS_ALLOWED_ORIGINS": "http://localhost:5173,http://localhost:3000"
+            },
+            "sourcePaths": [
+                "${workspaceFolder}/backend/bus-system/src/main/java",
+                "${workspaceFolder}/backend/bus-system/src/main/resources"
+            ]
+        }
+    ]
+}

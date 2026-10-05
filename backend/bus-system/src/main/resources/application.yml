@@ -1,0 +1,152 @@
+# =============================================================================
+# INTIWATANA - Configuracion COMUN a todos los entornos
+# =============================================================================
+# Este archivo NO contiene contrasenas ni secretos.
+#   - Desarrollo  -> application-dev.yml   (perfil por defecto)
+#   - Pruebas     -> application-test.yml
+#   - Produccion  -> application-prod.yml  (variables de entorno obligatorias)
+#
+# Los valores sensibles se resuelven desde variables de entorno o desde un
+# archivo .env local (ignorado por git) importado de forma opcional.
+# =============================================================================
+
+server:
+  port: ${SERVER_PORT:8080}
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html
+    min-response-size: 1024
+
+spring:
+  application:
+    name: sistema-transporte
+
+  # Perfil por defecto cuando no se especifica ninguno: dev.
+  # En produccion SIEMPRE debe pasarse SPRING_PROFILES_ACTIVE=prod.
+  profiles:
+    default: dev
+
+  # Carga opcional de un .env local (KEY=VALUE) para desarrollo.
+  # En produccion los valores llegan por variables de entorno del sistema.
+  config:
+    import: optional:file:.env[.properties]
+
+  # Valores concretos de conexion los aporta cada perfil. Aqui solo la
+  # configuracion comun del pool y el driver.
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:10}
+      minimum-idle: ${DB_POOL_MIN:3}
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      pool-name: TransporteHikariPool
+
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        default_schema: public
+        jdbc:
+          batch_size: 20
+          order_inserts: true
+          order_updates: true
+        generate_statistics: false
+    open-in-view: false
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+    deserialization:
+      fail-on-unknown-properties: false
+    time-zone: America/Lima
+    default-property-inclusion: non_null
+
+  # Subida de imágenes editoriales del Portal (validación adicional en el servicio)
+  servlet:
+    multipart:
+      max-file-size: ${PORTAL_MAX_FILE_SIZE:5MB}
+      max-request-size: ${PORTAL_MAX_REQUEST_SIZE:8MB}
+
+app:
+  jwt:
+    # El secreto (app.jwt.secret) es OBLIGATORIO y lo define cada perfil.
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+    refresh-expiration-ms: ${JWT_REFRESH_MS:604800000}
+
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+
+  # Endurecimiento de la autenticacion (ver security/).
+  security:
+    login:
+      # Intentos fallidos por usuario antes de bloquear temporally.
+      max-intentos: ${LOGIN_MAX_INTENTOS:5}
+      # Ventana deslizante en la que se cuentan los intentos (5 min por defecto).
+      ventana-ms: ${LOGIN_VENTANA_MS:300000}
+      # Techo por IP para no bloquear una oficina entera por un atacante.
+      max-intentos-por-ip: ${LOGIN_MAX_INTENTOS_IP:40}
+    token:
+      # Tope de revocaciones guardadas en memoria (proteccion ante fuga de memoria).
+      revocacion-max-entradas: ${TOKEN_REVOCACION_MAX:20000}
+      # Cada cuanto se purgan las revocaciones de tokens ya expirados.
+      revocacion-limpieza-ms: ${TOKEN_REVOCACION_LIMPIEZA_MS:600000}
+
+  boleto:
+    prefix: "BOL"
+  guia:
+    prefix: "GUI"
+
+  # Flujo comercial de compra (invitado y presencial).
+  # Los valores por defecto son de PRUEBA: los valores productivos deben
+  # definirse por variable de entorno (ver informe, decisión pendiente).
+  ventas:
+    # Minutos que un asiento queda retenido mientras el comprador decide.
+    hold-minutos: ${SEAT_HOLD_MINUTES:15}
+    # ¿Se permite dejar la reserva en PENDIENTE_PAGO (pago en caja) sin perder los asientos?
+    permitir-pago-pendiente: ${ALLOW_PENDING_PAYMENT:true}
+    # Minutos de vigencia de una reserva pendiente de pago (pago presencial).
+    pago-pendiente-minutos: ${PENDING_PAYMENT_MINUTES:1440}
+    # Frecuencia del proceso de mantenimiento que libera reservas vencidas.
+    retencion-limpieza-ms: ${RETENCION_LIMPIEZA_MS:60000}
+    # Máximo de intentos de recuperación por documento (rate limiting básico).
+    recuperacion-max-intentos: ${RECUPERACION_MAX_INTENTOS:10}
+
+  # Gestión del Portal: almacenamiento de imágenes y límites de validación.
+  # tipo=local usa disco (válido con disco persistente). En un PaaS con disco
+  # efímero debe implementarse un proveedor de objetos (ver informe).
+  portal:
+    media-prefix: ${PORTAL_MEDIA_PREFIX:/media/portal}
+    storage:
+      tipo: ${PORTAL_STORAGE_TIPO:local}
+      directorio: ${PORTAL_STORAGE_DIR:storage/portal}
+    imagen:
+      max-bytes: ${PORTAL_IMG_MAX_BYTES:5242880}
+      min-ancho: ${PORTAL_IMG_MIN_ANCHO:200}
+      min-alto: ${PORTAL_IMG_MIN_ALTO:200}
+      max-ancho: ${PORTAL_IMG_MAX_ANCHO:6000}
+      max-alto: ${PORTAL_IMG_MAX_ALTO:6000}
+
+logging:
+  level:
+    com.transporte: ${LOG_LEVEL_APP:INFO}
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ${LOG_FILE:logs/sistema-transporte.log}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # Por defecto SOLO health e info. Las metricas son informacion
+        # sensible de la aplicacion: exigiran rol ADMIN (ver SecurityConfig).
+        include: ${ACTUATOR_ENDPOINTS:health,info}
+  endpoint:
+    health:
+      show-details: ${ACTUATOR_HEALTH_DETAILS:when-authorized}

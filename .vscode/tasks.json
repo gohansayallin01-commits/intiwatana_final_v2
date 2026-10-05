@@ -1,0 +1,47 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Frontend: preparar (desacoplado, preLaunchTask del F5)",
+            "type": "shell",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/.vscode/start-frontend-detached.ps1"
+            ],
+            "detail": "Tarea CORTA usada como preLaunchTask del F5. Invoca start-frontend-detached.ps1, que lanza Vite en un proceso DESACOPLADO (no como tarea de larga duracion), lanza tambien el lanzador del navegador desacoplado y TERMINA de inmediato para liberar el Java Debugger. No espera al puerto 8080 ni depende de problemMatcher de background.",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true,
+                "showReuseMessage": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "mvn: compile INTIWATANA",
+            "type": "shell",
+            "command": "mvn",
+            "args": [
+                "-f",
+                "${workspaceFolder}/backend/bus-system/pom.xml",
+                "-q",
+                "-DskipTests",
+                "compile"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}

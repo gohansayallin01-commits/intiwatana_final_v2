@@ -1,0 +1,45 @@
+# =============================================================================
+# INTIWATANA - Archivos ignorados por git
+# =============================================================================
+
+# --- Secretos / entorno -----------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- Backend (Maven / Java) -------------------------------------------------
+backend/**/target/
+backend/**/logs/
+target/
+logs/
+*.log
+*.class
+
+# --- Frontend (Node / Vite) -------------------------------------------------
+frontend/**/node_modules/
+frontend/**/dist/
+frontend/**/.env
+frontend/**/.env.local
+frontend/**/.env.*.local
+node_modules/
+dist/
+
+# --- Respaldos de base de datos --------------------------------------------
+# Los volcados pueden contener hashes BCrypt de credenciales de demostracion:
+# no deben versionarse. El esquema versionado vive en Flyway
+# (backend/bus-system/src/main/resources/db/migration).
+database/*.backup
+database/*.dump
+database/*.sql
+*.sql.gz
+
+# --- IDE / sistema ----------------------------------------------------------
+.idea/
+*.iml
+.vscode/settings.json
+Thumbs.db
+desktop.ini
+*.tmp
+
