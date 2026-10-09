@@ -2,7 +2,8 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import LogoSVG from "./LogoSVG";
-import { Ticket, Package, UserCircle, LogOut } from "lucide-react";
+import { Ticket, Package, UserCircle, LogOut, Smartphone, FileText, Loader2 } from "lucide-react";
+import { ModalDeclararYape } from "./PasajesPage";
 
 const C = {
   oscuro:  "#0f3d38",
@@ -465,7 +466,104 @@ function PanelEncomiendas({ encomiendas, loading, headers }) {
   );
 }
 
+const ESTADO_RESERVA = {
+  RETENIDO:      { label: "Retenido",      cls: "badge-pendiente" },
+  PENDIENTE_PAGO:{ label: "Pendiente de pago", cls: "badge-pendiente" },
+  CONFIRMADO:    { label: "Confirmado",    cls: "badge-confirmado" },
+  VENCIDO:       { label: "Vencido",       cls: "badge-cancelado" },
+  CANCELADO:     { label: "Cancelado",     cls: "badge-cancelado" },
+};
+
+function PanelReservas({ reservas, loading, documentoSession, onCambiar }) {
+  const [declarar, setDeclarar] = useState(null);
+
+  const etiquetaYape = (estado) => {
+    const mapa = {
+      PENDIENTE_VERIFICACION: { label: "Yape en verificación", cls: "badge-pendiente" },
+      APROBADO: { label: "Yape aprobado", cls: "badge-confirmado" },
+      RECHAZADO: { label: "Yape rechazado", cls: "badge-cancelado" },
+    };
+    return mapa[estado] || null;
+  };
+
+  if (loading) return <div className="cli-loading">Cargando tus reservas...</div>;
+  return (
+    <>
+      {!reservas.length ? (
+        <div className="cli-empty">
+          <Ticket size={40} color={C.medio} strokeWidth={1.5}/>
+          <p>No tienes reservas</p>
+          <small>Tus reservas temporales y confirmadas aparecerán aquí</small>
+        </div>
+      ) : (
+        <div className="cli-cards">
+          {reservas.map((r) => {
+            const ye = r.pagoYape ? etiquetaYape(r.pagoYape.estado) : null;
+            const esBoleto = r.validoParaEmbarque && r.boletos?.length;
+            const puedeDeclarar = r.requierePago !== false && !esBoleto && r.pagoYape?.estado !== "PENDIENTE_VERIFICACION";
+            return (
+              <div className="cli-card" key={r.referencia}>
+                <div className="cli-card-top">
+                  <span className="cli-mono">{r.referencia}</span>
+                  <EstadoBadge estado={r.estado} mapa={ESTADO_RESERVA}/>
+                </div>
+                <div className="cli-card-body">
+                  <div className="cli-card-row"><span>Ruta</span><span>{r.origen||"—"} → {r.destino||"—"}</span></div>
+                  <div className="cli-card-row"><span>Salida</span><span style={{fontSize:"12px"}}>{fmtFecha(r.fechaHoraSalida)}</span></div>
+                  <div className="cli-card-row"><span>Asientos</span><span>{r.asientos?.map((a)=>`N°${a.numeroAsiento}`).join(", ")||"—"}</span></div>
+                  <div className="cli-card-row"><span>Importe</span><span>S/ {Number(r.total||0).toFixed(2)}</span></div>
+                  {r.expiraEn && r.requierePago !== false && (
+                    <div className="cli-card-row"><span>Vence</span><span style={{fontSize:"12px"}}>{fmtFecha(r.expiraEn)}</span></div>
+                  )}
+                </div>
+                {r.pagoYape && ye && (
+                  <div className="cli-card-row" style={{padding:"6px 14px",background:"#FBF8EE"}}>
+                    <span style={{display:"flex",alignItems:"center",gap:6,fontSize:"12px",color:"#b45309"}}>
+                      <Smartphone size={13}/> {ye.label}
+                      {r.pagoYape.operacionEnmascarada && <> · operación <strong>{r.pagoYape.operacionEnmascarada}</strong></>}
+                      {r.pagoYape.importeDeclarado!=null && <> · S/ {Number(r.pagoYape.importeDeclarado).toFixed(2)}</>}
+                    </span>
+                    {r.pagoYape.motivoRechazo && (
+                      <span style={{display:"block",fontSize:"11.5px",color:"#b91c1c",marginTop:3}}>{r.pagoYape.motivoRechazo}</span>
+                    )}
+                  </div>
+                )}
+                <div style={{display:"flex",gap:8,padding:"10px 14px 12px"}}>
+                  {esBoleto ? (
+                    <a className="cli-track-btn" style={{textDecoration:"none",display:"inline-flex",alignItems:"center",gap:6}} href={`/api/v1/ventas/boleto/${encodeURIComponent(r.boletos[0].numeroBoleto)}/pdf?documento=${encodeURIComponent(documentoSession||"")}`} target="_blank" rel="noopener noreferrer">
+                      <FileText size={14}/> Boleto PDF
+                    </a>
+                  ) : (
+                    <a className="cli-track-btn" style={{textDecoration:"none",display:"inline-flex",alignItems:"center",gap:6}} href={`/api/v1/ventas/retencion/${encodeURIComponent(r.referencia)}/constancia.pdf?documento=${encodeURIComponent(documentoSession||"")}`} target="_blank" rel="noopener noreferrer">
+                      <FileText size={14}/> Constancia
+                    </a>
+                  )}
+                  {puedeDeclarar && (
+                    <button className="cli-track-btn" style={{flex:1}} onClick={()=>setDeclarar(r)}>
+                      <Smartphone size={14}/> {r.pagoYape?.estado==="RECHAZADO"?"Re-declarar Yape":"Declarar pago Yape"}
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {declarar && (
+        <ModalDeclararYape
+          referencia={declarar.referencia}
+          documento={documentoSession || ""}
+          totalEsperado={Number(declarar.total || 0)}
+          onCerrar={()=>setDeclarar(null)}
+          onDeclarada={()=>{ setDeclarar(null); onCambiar(); }}
+        />
+      )}
+    </>
+  );
+}
+
 const MENU = [
+  { key:"reservas",    icon:<Smartphone size={19}/>, label:"Mis reservas" },
   { key:"boletos",     icon:<Ticket size={19}/>,     label:"Mis viajes"  },
   { key:"encomiendas", icon:<Package size={19}/>,    label:"Encomiendas" },
   { key:"perfil",      icon:<UserCircle size={19}/>, label:"Mi perfil"   },
@@ -478,8 +576,10 @@ export default function ClienteDashboard() {
   const [seccion,     setSeccion]     = useState(seccionParam === "encomiendas" || seccionParam === "perfil" ? seccionParam : "boletos");
   const [boletos,     setBoletos]     = useState([]);
   const [encomiendas, setEncomiendas] = useState([]);
+  const [reservas,    setReservas]    = useState([]);
   const [loadBoletos, setLoadBoletos] = useState(true);
   const [loadEncom,   setLoadEncom]   = useState(false);
+  const [loadReservas,setLoadReservas]= useState(false);
   const [perfil,      setPerfil]      = useState(null);
 
   const headers = useMemo(
@@ -503,6 +603,13 @@ export default function ClienteDashboard() {
       .catch(()=>setEncomiendas([])).finally(()=>setLoadEncom(false));
   }, [encomiendas.length, headers]);
 
+  const cargarReservas = useCallback(() => {
+    setLoadReservas(true);
+    fetch("/api/v1/ventas/reservas",{headers})
+      .then(r=>r.ok?r.json():[]).then(d=>setReservas(Array.isArray(d)?d:[]))
+      .catch(()=>setReservas([])).finally(()=>setLoadReservas(false));
+  }, [headers]);
+
   // Carga inicial. Las peticiones se lanzan aquí y actualizan el estado solo
   // dentro de sus callbacks, y se ignoran si el componente ya se desmontó.
   useEffect(()=>{
@@ -522,10 +629,11 @@ export default function ClienteDashboard() {
   // Permite abrir directamente "Mis encomiendas" desde el portal (?seccion=encomiendas).
   useEffect(() => {
     if (seccion === "encomiendas") cargarEncomiendas();
+    if (seccion === "reservas") cargarReservas();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seccion]);
 
-  const cambiarSeccion = (s) => { setSeccion(s); if(s==="encomiendas") cargarEncomiendas(); };
+  const cambiarSeccion = (s) => { setSeccion(s); if(s==="encomiendas") cargarEncomiendas(); if(s==="reservas") cargarReservas(); };
   const iniciales = (session.nombreCompleto||session.username||"CL").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
 
   return (
@@ -570,6 +678,17 @@ export default function ClienteDashboard() {
 
       {/* MAIN */}
       <main style={{ flex:1, overflowY:"auto", padding:"2rem 2.5rem" }}>
+        {seccion==="reservas"&&(
+          <>
+            <div className="admin-topbar">
+              <div>
+                <h1 className="admin-page-title">Mis reservas</h1>
+                <p className="admin-page-sub">Reservas temporales, pagos Yape declarados y confirmaciones</p>
+              </div>
+            </div>
+            <PanelReservas reservas={reservas} loading={loadReservas} headers={headers} documentoSession={session.documento} onCambiar={cargarReservas}/>
+          </>
+        )}
         {seccion==="boletos"&&(
           <>
             <div className="admin-topbar">

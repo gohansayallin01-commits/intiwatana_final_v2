@@ -1,0 +1,29 @@
+# =============================================================================
+# INTIWATANA - Perfil DESARROLLO (perfil por defecto)
+# =============================================================================
+# - Base de datos local sobre la instancia PostgreSQL de desarrollo.
+# - Hibernate gestiona el esquema (ddl-auto: update) EXCLUSIVAMENTE aqui.
+# - Flyway DESACTIVADO: la base de desarrollo se conserva tal cual (QA).
+# - El secreto JWT y la contrasena de la base llegan por variables de entorno
+#   o por el archivo .env local (ignorado por git). NO escribir secretos aqui.
+# =============================================================================
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/transporte_bd}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+  flyway:
+    enabled: false
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+
+logging:
+  level:
+    com.transporte: DEBUG

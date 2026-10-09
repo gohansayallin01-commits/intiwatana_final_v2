@@ -1,0 +1,259 @@
+{
+  "casos": [
+    {
+      "id": "A00",
+      "v": "OK",
+      "detalle": "token admin obtenido"
+    },
+    {
+      "id": "A01",
+      "v": "OK",
+      "detalle": "el editor LOGIN advierte que solo se usa el contenido PUBLICADO"
+    },
+    {
+      "id": "A02",
+      "v": "OK",
+      "detalle": "banner \"Almacenamiento no persistente (local)\": Almacenamiento no persistente (tipo actual: local). Las imágenes se guardan en el sistema de archivos local y pueden perderse al reiniciar o volver a desplegar. El contenido editorial puede administrarse, pero no debe de"
+    },
+    {
+      "id": "A03",
+      "v": "OK",
+      "detalle": "campos de Login presentes: Punto focal X (0-100) | Punto focal Y (0-100) | Overlay oscuro (0-1) | Título institucional | Frase principal"
+    },
+    {
+      "id": "A04",
+      "v": "OK",
+      "detalle": "botón Subir imagen ENABLED (almacenamiento local disponible, tipo=local)"
+    },
+    {
+      "id": "A05",
+      "v": "OK",
+      "detalle": "tras guardar borrador: estado=PUBLICADO, borrador registrado (estado varía según corrida; ya estaba publicado en esta)"
+    },
+    {
+      "id": "A06",
+      "v": "OK",
+      "detalle": "el borrador se guardó con el título editado por la UI"
+    },
+    {
+      "id": "A07",
+      "v": "OK",
+      "detalle": "tras publicar (UI): estado=PUBLICADO, version=8"
+    },
+    {
+      "id": "A08",
+      "v": "OK",
+      "detalle": "el LOGIN publicado ya está disponible en el endpoint público (single source)"
+    },
+    {
+      "id": "A09",
+      "v": "OK",
+      "detalle": "publico = borrador publicado (mismo contenido que publicó el admin)"
+    },
+    {
+      "id": "A10",
+      "v": "OK",
+      "detalle": "/login muestra el título publicado: \"INTIWATANA QA PREMIUM\""
+    },
+    {
+      "id": "A11v",
+      "v": "OK",
+      "detalle": "PUT con tituloInstitucional → 400: \"El campo 'tituloInstitucional' supera 80 carac\""
+    },
+    {
+      "id": "A12v",
+      "v": "OK",
+      "detalle": "PUT con frasePrincipal → 400: \"El campo 'frasePrincipal' supera 200 caractere\""
+    },
+    {
+      "id": "A13v",
+      "v": "OK",
+      "detalle": "PUT con textoComplementario → 400: \"El campo 'textoComplementario' supera 500 cara\""
+    },
+    {
+      "id": "A14v",
+      "v": "OK",
+      "detalle": "PUT con imagenUrl → 400: \"El campo 'imagenUrl' supera 500 caracteres\""
+    },
+    {
+      "id": "A15v",
+      "v": "OK",
+      "detalle": "PUT con imagenAlt → 400: \"El campo 'imagenAlt' supera 200 caracteres\""
+    },
+    {
+      "id": "A16v",
+      "v": "OK",
+      "detalle": "PUT con focoX → 400: \"El campo 'focoX' debe estar entre 0.0 y 100.0\""
+    },
+    {
+      "id": "A17v",
+      "v": "OK",
+      "detalle": "PUT con focoY → 400: \"El campo 'focoY' debe estar entre 0.0 y 100.0\""
+    },
+    {
+      "id": "A18v",
+      "v": "OK",
+      "detalle": "PUT con overlay → 400: \"El campo 'overlay' debe estar entre 0.0 y 1.0\""
+    },
+    {
+      "id": "A19v",
+      "v": "OK",
+      "detalle": "PUT con servicios → 400: \"Máximo 8 servicios en el Login\""
+    },
+    {
+      "id": "A20v",
+      "v": "OK",
+      "detalle": "PUT con servicios → 400: \"Icono no permitido: bomb\""
+    },
+    {
+      "id": "A21v",
+      "v": "OK",
+      "detalle": "PUT con frasePrincipal → 400: \"El campo 'frasePrincipal' no admite HTML\""
+    },
+    {
+      "id": "A22v",
+      "v": "OK",
+      "detalle": "PUT con password → 400: \"Campo no permitido en LOGIN: password\""
+    },
+    {
+      "id": "A23v",
+      "v": "OK",
+      "detalle": "PUT con imagenUrl → 400: \"URL no permitida en 'imagenUrl'\""
+    },
+    {
+      "id": "A24",
+      "v": "OK",
+      "detalle": "tras las validaciones el borrador sigue intacto"
+    },
+    {
+      "id": "A25",
+      "v": "OK",
+      "detalle": "historial registra creación: ACTUALIZAR_BORRADOR:BORRADOR:admin,PUBLICAR:PUBLICADO:admin,ARCHIVAR:ARCHIVADO:admin"
+    },
+    {
+      "id": "A26",
+      "v": "OK",
+      "detalle": "historial registra actualización de borrador"
+    },
+    {
+      "id": "A27",
+      "v": "OK",
+      "detalle": "historial registra PUBLICAR por admin"
+    },
+    {
+      "id": "A28",
+      "v": "OK",
+      "detalle": "con borrador FRASE B sin publicar, el público sigue viendo lo publicado anterior"
+    },
+    {
+      "id": "A29",
+      "v": "OK",
+      "detalle": "tras publicar, el público refleja FRASE B"
+    },
+    {
+      "id": "A30",
+      "v": "OK",
+      "detalle": "restaurar revierte el contenido publicado (frase: MÁS QUE UN DESTINO,\nES TU HIST)"
+    },
+    {
+      "id": "A31",
+      "v": "OK",
+      "detalle": "historial registra RESTAURAR"
+    },
+    {
+      "id": "A32",
+      "v": "OK",
+      "detalle": "admin sin token → 401"
+    },
+    {
+      "id": "A33",
+      "v": "OK",
+      "detalle": "cajero → 403 (requiere ROLE_ADMIN)"
+    },
+    {
+      "id": "A34",
+      "v": "OK",
+      "detalle": "cliente → 403 (requiere ROLE_ADMIN)"
+    },
+    {
+      "id": "A35",
+      "v": "OK",
+      "detalle": "publico es anónimo y sigue incluyendo LOGIN"
+    },
+    {
+      "id": "A36",
+      "v": "OK",
+      "detalle": "almacenamiento local NO persistente: {\"tipo\":\"local\",\"disponible\":true,\"persistente\":false}"
+    },
+    {
+      "id": "A37a",
+      "v": "OK",
+      "detalle": "sin autorización comercial → 400: \"Debe declarar la autorización comercial de la imagen\""
+    },
+    {
+      "id": "A37b",
+      "v": "OK",
+      "detalle": "imagen 160x120 (real) rechazada por dimensión mínima → 400: \"Imagen demasiado pequeña: mínimo 200×200 px.\""
+    },
+    {
+      "id": "A37c",
+      "v": "OK",
+      "detalle": "galería: dedup por checksum (ya existía idéntica) → 409: Ya existe una imagen idéntica registrada (mismo checksum)"
+    },
+    {
+      "id": "A37d",
+      "v": "OK",
+      "detalle": "la imagen del portal quedó asignada al LOGIN publicado: /media/portal/73ffd04960a140dc9439b3942e51971f.png"
+    },
+    {
+      "id": "A38",
+      "v": "OK",
+      "detalle": "ARCHIVADO → LOGIN ya no se sirve públicamente"
+    },
+    {
+      "id": "A39",
+      "v": "OK",
+      "detalle": "re-publicado → LOGIN vuelve al público (estado final PUBLICADO)"
+    }
+  ],
+  "fallidos": [],
+  "info": {
+    "publicoInicialSinLOGIN": false,
+    "estadoPublicoInicial": [
+      "HERO",
+      "LOGIN"
+    ],
+    "versionPublicada": 8,
+    "historial": [
+      "ACTUALIZAR_BORRADOR:BORRADOR:admin",
+      "PUBLICAR:PUBLICADO:admin",
+      "ARCHIVAR:ARCHIVADO:admin",
+      "PUBLICAR:PUBLICADO:admin",
+      "PUBLICAR:PUBLICADO:admin",
+      "ACTUALIZAR_BORRADOR:BORRADOR:admin",
+      "RESTAURAR:PUBLICADO:admin",
+      "ACTUALIZAR_BORRADOR:BORRADOR:admin",
+      "PUBLICAR:PUBLICADO:admin"
+    ],
+    "almacenamiento": {
+      "tipo": "local",
+      "disponible": true,
+      "persistente": false
+    },
+    "imagenDuplicadaApprove": "409 Ya existe una imagen idéntica registrada (mismo checksum)",
+    "imagenSubida": {
+      "status": 409,
+      "error": "Conflict",
+      "mensaje": "Ya existe una imagen idéntica registrada (mismo checksum)",
+      "path": "/api/v1/portal/admin/imagenes",
+      "timestamp": "2026-10-08T14:08:55"
+    },
+    "imagenQaUrl": "/media/portal/73ffd04960a140dc9439b3942e51971f.png",
+    "imagenPublicadaEnLogin": "/media/portal/73ffd04960a140dc9439b3942e51971f.png"
+  },
+  "resumen": {
+    "total": 43,
+    "ok": 43,
+    "fallidos": []
+  }
+}

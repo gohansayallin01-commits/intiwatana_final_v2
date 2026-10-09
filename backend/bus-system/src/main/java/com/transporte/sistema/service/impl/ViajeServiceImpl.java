@@ -1,5 +1,6 @@
 package com.transporte.sistema.service.impl;
 
+import com.transporte.sistema.dto.ConfiguracionAsientos;
 import com.transporte.sistema.dto.request.ViajeRequest;
 import com.transporte.sistema.dto.response.*;
 import com.transporte.sistema.entity.*;
@@ -10,8 +11,10 @@ import com.transporte.sistema.enums.TipoAsiento;
 import com.transporte.sistema.exception.ConflictoException;
 import com.transporte.sistema.exception.NegocioException;
 import com.transporte.sistema.exception.RecursoNoEncontradoException;
+import com.transporte.sistema.exception.SinAutorizacionException;
 import com.transporte.sistema.repository.*;
 import com.transporte.sistema.security.PropiedadChoferValidator;
+import com.transporte.sistema.service.ConfiguracionAsientosService;
 import com.transporte.sistema.service.ViajeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +42,7 @@ public class ViajeServiceImpl implements ViajeService {
     private final AsientoRepository asientoRepository;
     private final BoletoRepository  boletoRepository;
     private final PropiedadChoferValidator propiedadChofer;
+    private final ConfiguracionAsientosService configuracionAsientosService;
 
     @Override
     @Transactional
@@ -47,6 +51,16 @@ public class ViajeServiceImpl implements ViajeService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Ruta", request.getRutaId()));
         Bus bus = busRepository.findById(request.getBusId())
                 .orElseThrow(() -> new RecursoNoEncontradoException("Bus", request.getBusId()));
+
+        ConfiguracionAsientos configuracion = configuracionAsientosService
+                .parse(bus.getConfiguracionAsientos());
+        if (!configuracionAsientosService.estaCompleta(configuracion, bus.getCapacidadAsientos())) {
+            throw new NegocioException("El vehiculo " + bus.getPlaca()
+                    + " tiene el mapa de asientos incompleto o no configurado ("
+                    + configuracionAsientosService.totalAsientos(configuracion)
+                    + "/" + bus.getCapacidadAsientos()
+                    + "). Configure los asientos antes de programar un viaje.");
+        }
 
         validarDisponibilidadBus(bus.getId(),
                 request.getFechaHoraSalida(),
@@ -73,7 +87,7 @@ public class ViajeServiceImpl implements ViajeService {
                 .build();
 
         viaje = viajeRepository.save(viaje);
-        generarAsientos(viaje, bus);
+        generarAsientos(viaje, bus, configuracion);
 
         log.info("Viaje creado: id={} | {} → {} | {}",
                 viaje.getId(),
@@ -280,7 +294,7 @@ public class ViajeServiceImpl implements ViajeService {
         }
         boolean asignado = viaje.getChofer() != null && viaje.getChofer().getId().equals(usuarioId);
         if (!asignado) {
-            throw new NegocioException("El viaje no está asignado a tu usuario");
+            throw new SinAutorizacionException("El viaje no está asignado a tu usuario");
         }
     }
 
@@ -296,38 +310,26 @@ public class ViajeServiceImpl implements ViajeService {
         }
     }
 
-    private void generarAsientos(Viaje viaje, Bus bus) {
-        int total    = bus.getCapacidadAsientos();
-        int columnas = 4;
-        List<Asiento> lista = new ArrayList<>(total);
+    private void generarAsientos(Viaje viaje, Bus bus, ConfiguracionAsientos configuracion) {
+        List<ConfiguracionAsientosService.PosicionAsiento> posiciones =
+                configuracionAsientosService.generarPosiciones(configuracion);
+        List<Asiento> lista = new ArrayList<>(posiciones.size());
 
-        for (int i = 1; i <= total; i++) {
-            int fila = (int) Math.ceil((double) i / columnas);
-            int col  = ((i - 1) % columnas) + 1;
-
-            TipoAsiento tipo = (col == 1 || col == 4) ? TipoAsiento.VENTANA : TipoAsiento.PASILLO;
-
-            String letra = switch (col) {
-                case 1 -> "A";
-                case 2 -> "B";
-                case 3 -> "C";
-                case 4 -> "D";
-                default -> String.valueOf(col);
-            };
-
+        for (ConfiguracionAsientosService.PosicionAsiento p : posiciones) {
             lista.add(Asiento.builder()
                     .viaje(viaje)
-                    .numeroAsiento(fila + letra)
-                    .fila(fila)
-                    .columna(col)
-                    .piso(1)
-                    .tipo(tipo)
+                    .numeroAsiento(p.numeroAsiento())
+                    .fila(p.fila())
+                    .columna(p.columna())
+                    .piso(p.piso())
+                    .tipo(p.tipo())
                     .estado(EstadoAsiento.DISPONIBLE)
                     .activo(true)
                     .build());
         }
         asientoRepository.saveAll(lista);
-        log.info("Generados {} asientos para viaje {}", lista.size(), viaje.getId());
+        log.info("Generados {} asientos para viaje {} (capacidad vehiculo {})",
+                lista.size(), viaje.getId(), bus.getCapacidadAsientos());
     }
 
     private ViajeResponse toResponse(Viaje v) {
@@ -435,6 +437,7 @@ public class ViajeServiceImpl implements ViajeService {
 
     private BusResponse toBusResponse(Bus b) {
         if (b == null) return null;
+        ConfiguracionAsientos config = configuracionAsientosService.parse(b.getConfiguracionAsientos());
         return BusResponse.builder()
                 .id(b.getId())
                 .placa(b.getPlaca())
@@ -444,6 +447,9 @@ public class ViajeServiceImpl implements ViajeService {
                 .numPisos(b.getNumPisos())
                 .tipo(b.getTipo())
                 .activo(b.getActivo())
+                .configuracionAsientos(config)
+                .asientosConfigurados(configuracionAsientosService.totalAsientos(config))
+                .estadoConfiguracion(configuracionAsientosService.estado(config, b.getCapacidadAsientos()))
                 .build();
     }
 

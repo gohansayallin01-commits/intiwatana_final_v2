@@ -97,6 +97,8 @@ public class SecurityConfig {
     .requestMatchers(HttpMethod.GET, "/api/v1/ventas/retencion/**").permitAll()
     .requestMatchers(HttpMethod.GET, "/api/v1/ventas/boleto/**").permitAll()
     .requestMatchers(HttpMethod.GET, "/api/v1/ventas/recuperar").permitAll()
+    .requestMatchers(HttpMethod.GET, "/api/v1/ventas/configurar/yape/publica").permitAll()
+
 
     // Gestión de reservas (listar, confirmar pago, liberar): sólo personal.
     .requestMatchers("/api/v1/ventas/reservas/**").hasAnyRole("ADMIN","CAJERO","VENDEDOR")

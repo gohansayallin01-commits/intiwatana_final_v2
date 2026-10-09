@@ -1,0 +1,70 @@
+﻿{
+    "capturadoEn":  "2026-10-08T18:56:53.2571468-05:00",
+    "baseDatos":  "transporte_bd",
+    "perfil":  "dev",
+    "hero":  {
+                 "id":  1,
+                 "seccion":  "HERO",
+                 "estado":  "PUBLICADO",
+                 "version":  1,
+                 "borrador":  {
+                                  "titulo":  "Viaja con INTIWATANA",
+                                  "subtitulo":  "Conectamos destinos con seguridad, comodidad y atenciÃ³n cercana.",
+                                  "imagenFondoUrl":  "/assets/img/rutas/vilcas.jpg",
+                                  "imagenBusUrl":  "",
+                                  "imagenAlt":  "Paisaje andino de la regiÃ³n de Ayacucho",
+                                  "autor":  "",
+                                  "fuente":  "",
+                                  "licencia":  "",
+                                  "atribucion":  "",
+                                  "mostrarBus":  true
+                              },
+                 "publicado":  {
+                                   "titulo":  "Viaja con INTIWATANA",
+                                   "subtitulo":  "Conectamos destinos con seguridad, comodidad y atenciÃ³n cercana.",
+                                   "imagenFondoUrl":  "/assets/img/rutas/vilcas.jpg",
+                                   "imagenBusUrl":  "",
+                                   "imagenAlt":  "Paisaje andino de la regiÃ³n de Ayacucho",
+                                   "autor":  "",
+                                   "fuente":  "",
+                                   "licencia":  "",
+                                   "atribucion":  "",
+                                   "mostrarBus":  true
+                               },
+                 "actualizadoPor":  "admin",
+                 "publicadoEn":  "2026-10-08T13:50:47",
+                 "actualizadoEn":  "2026-10-08T13:50:47"
+             },
+    "footer":  {
+                   "id":  6,
+                   "seccion":  "FOOTER",
+                   "estado":  "BORRADOR",
+                   "version":  0,
+                   "borrador":  {
+                                    "descripcion":  "Empresa de Transportes Â· Ayacucho, PerÃº",
+                                    "enlaces":  [
+                                                    {
+                                                        "texto":  "Destinos y horarios",
+                                                        "url":  "/#destinos"
+                                                    },
+                                                    {
+                                                        "texto":  "Rastrear encomienda",
+                                                        "url":  "/encomiendas/seguimiento"
+                                                    },
+                                                    {
+                                                        "texto":  "Sobre nosotros",
+                                                        "url":  "/#nosotros"
+                                                    }
+                                                ],
+                                    "infoLegal":  "Â© 2026 Empresa de Transportes INTIWATANA S.R.L. Â· Todos los derechos reservados",
+                                    "creditosFotograficos":  ""
+                                },
+                   "actualizadoPor":  "sistema",
+                   "actualizadoEn":  "2026-10-03T08:49:46"
+               },
+    "portalPublicoClaves":  [
+                                "HERO",
+                                "LOGIN"
+                            ],
+    "imagenesCount":  2
+}

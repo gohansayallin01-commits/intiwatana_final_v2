@@ -464,7 +464,7 @@ class EncomiendaFlujoIT {
 
     @Test
     @Order(12)
-    @DisplayName("Dos peticiones simultaneas con la misma clave no duplican la encomienda")
+    @DisplayName("Diez peticiones simultaneas con la misma clave no duplican la encomienda")
     void concurrenciaMismaClave() throws Exception {
         ResponseEntity<JsonNode> rem = post("/api/v1/clientes", tokenAdmin, Map.of(
                 "dniRuc", dniUnico(), "nombres", "QA", "apellidos", "Carrera",
@@ -495,8 +495,9 @@ class EncomiendaFlujoIT {
         cuerpo.put("metodoPago", "EFECTIVO");
         cuerpo.put("claveIdempotencia", claveCarrera);
 
-        ExecutorService pool = Executors.newFixedThreadPool(2);
-        CountDownLatch listos = new CountDownLatch(2);
+        int hilos = 10;
+        ExecutorService pool = Executors.newFixedThreadPool(hilos);
+        CountDownLatch listos = new CountDownLatch(hilos);
         CountDownLatch disparo = new CountDownLatch(1);
         Callable<ResponseEntity<JsonNode>> tarea = () -> {
             listos.countDown();
@@ -504,20 +505,25 @@ class EncomiendaFlujoIT {
             return post("/api/v1/encomiendas", tokenAdmin, cuerpo);
         };
         try {
-            Future<ResponseEntity<JsonNode>> f1 = pool.submit(tarea);
-            Future<ResponseEntity<JsonNode>> f2 = pool.submit(tarea);
-            assertTrue(listos.await(20, TimeUnit.SECONDS), "Los dos hilos deben quedar listos");
+            var futuros = new java.util.ArrayList<Future<ResponseEntity<JsonNode>>>();
+            for (int i = 0; i < hilos; i++) futuros.add(pool.submit(tarea));
+            assertTrue(listos.await(20, TimeUnit.SECONDS), "Los " + hilos + " hilos deben quedar listos");
             disparo.countDown();
-            ResponseEntity<JsonNode> a = f1.get(60, TimeUnit.SECONDS);
-            ResponseEntity<JsonNode> b = f2.get(60, TimeUnit.SECONDS);
 
-            check("las dos peticiones saline con exito o con conflicto controlado ("
-                            + a.getStatusCodeValue() + " y " + b.getStatusCodeValue() + ")",
-                    !a.getStatusCode().is5xxServerError() && !b.getStatusCode().is5xxServerError());
+            boolean sin5xx = true;
+            var ids = new java.util.HashSet<Long>();
+            for (Future<ResponseEntity<JsonNode>> f : futuros) {
+                ResponseEntity<JsonNode> r = f.get(60, TimeUnit.SECONDS);
+                if (r.getStatusCode().is5xxServerError()) sin5xx = false;
+                if (r.getBody() != null && r.getBody().has("id")) ids.add(r.getBody().get("id").asLong());
+            }
+            check("ninguna de las " + hilos + " peticiones simultaneas devolvio 5xx", sin5xx);
+            check("todas las respuestas apuntan a UNA sola encomienda (ids distintas=" + ids.size() + ")",
+                    ids.size() == 1);
 
             Integer filas = jdbc.queryForObject(
                     "SELECT count(*) FROM encomiendas WHERE clave_idempotencia = ?", Integer.class, claveCarrera);
-            check("la carrera con la misma clave deja UNA sola encomienda (filas=" + filas + ")",
+            check("la carrera (" + hilos + " hilos) con la misma clave deja UNA sola encomienda (filas=" + filas + ")",
                     filas != null && filas == 1);
 
             Integer guias = jdbc.queryForObject(

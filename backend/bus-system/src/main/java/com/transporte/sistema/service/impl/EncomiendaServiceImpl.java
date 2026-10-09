@@ -480,7 +480,7 @@ public class EncomiendaServiceImpl implements EncomiendaService {
             String q, Long sucursalOrigenId, Long sucursalDestinoId,
             LocalDateTime desde, LocalDateTime hasta, Pageable pageable) {
 
-        String texto = q == null || q.isBlank() ? null : q.trim();
+        String texto = q == null || q.isBlank() ? "" : q.trim();
         Page<Encomienda> pagina = encomiendaRepository.buscarSolicitudesPendientes(
                 EstadoEncomienda.SOLICITUD_PENDIENTE, texto, sucursalOrigenId, sucursalDestinoId,
                 desde, hasta, pageable);

@@ -1,0 +1,1884 @@
+Comparando archivos REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak y BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+    8:  
+    9:  import com.transporte.sistema.dto.response.AsientoReservaResponse;
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+    8:  
+    9:  import com.transporte.sistema.dto.request.DatosCompradorRequest;
+   10:  
+   11:  import com.transporte.sistema.dto.request.VentaPresencialRequest;
+   12:  
+   13:  import com.transporte.sistema.dto.response.AsientoReservaResponse;
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  198:  
+  199:          String key = normalizarKey(request.getIdempotencyKey());
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  202:  
+  203:          return crearRetencion(request, CanalVenta.WEB);
+  204:  
+  205:      }
+  206:  
+  207:  
+  208:  
+  209:      private RetencionResponse crearRetencion(CrearRetencionRequest request, CanalVenta canal) {
+  210:  
+  211:          String key = normalizarKey(request.getIdempotencyKey());
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  286:  
+  287:                  .canal(CanalVenta.WEB)
+  288:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  298:  
+  299:                  .canal(canal)
+  300:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  348:  
+  349:      // +ó-ö-Ç+ó-ö-Ç Consulta +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó
+  350:  -ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-
+  351:  ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö
+  352:  -Ç+ó-ö-Ç
+  353:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  360:  
+  361:      // ÔöÇÔöÇ Venta presencial (caja) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö
+  362:  ÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  363:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  359:  
+  360:      public RetencionResponse obtenerPorReferencia(String referencia, String documento) {
+  361:  
+  362:          Retencion r = retencionRepository.findByReferencia(referencia)
+  363:  
+  364:                  .orElseThrow(() -> new RecursoNoEncontradoException(
+  365:  
+  366:                          "Reserva no encontrada con la referencia indicada"));
+  367:  
+  368:          verificarPropietario(r, documento);
+  369:  
+  370:          return toPublic(expirarSiNecesario(r));
+  371:  
+  372:      }
+  373:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  369:  
+  370:      public List<BoletoResponse> ventaPresencial(VentaPresencialRequest request, String username) {
+  371:  
+  372:          if (request.getMetodoPago() == null) {
+  373:  
+  374:              throw new NegocioException("El m+®todo de pago es obligatorio");
+  375:  
+  376:          }
+  377:  
+  378:          if (request.getMetodoPago() != MetodoPago.EFECTIVO) {
+  379:  
+  380:              throw new NegocioException("En caja solo se admite pago en efectivo");
+  381:  
+  382:          }
+  383:  
+  384:          if (request.getClienteId() == null) {
+  385:  
+  386:              throw new NegocioException("Debe seleccionar un cliente para registrar la venta");
+  387:  
+  388:          }
+  389:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  375:  
+  376:      // +ó-ö-Ç+ó-ö-Ç Reserva pendiente de pago +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-
+  377:  ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö
+  378:  -Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç
+  379:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  391:  
+  392:          Cliente cliente = clienteRepository.findById(request.getClienteId())
+  393:  
+  394:                  .orElseThrow(() -> new RecursoNoEncontradoException("Cliente", request.getClienteId()));
+  395:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  381:  
+  382:      @Override
+  383:  
+  384:      @Transactional
+  385:  
+  386:      public RetencionResponse reservarPendientePago(String referencia, MetodoPago metodoPago) {
+  387:  
+  388:          Retencion r = retencionRepository.findByReferenciaForUpdate(referencia)
+  389:  
+  390:                  .orElseThrow(() -> new RecursoNoEncontradoException("Reserva no encontrada"));
+  391:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  397:  
+  398:          DatosCompradorRequest comprador = DatosCompradorRequest.builder()
+  399:  
+  400:                  .nombres(cliente.getNombres() != null ? cliente.getNombres() : cliente.getRazonSocial())
+  401:  
+  402:                  .apellidos(cliente.getApellidos() != null ? cliente.getApellidos() : "")
+  403:  
+  404:                  .documento(cliente.getDniRuc())
+  405:  
+  406:                  .telefono(cliente.getTelefono())
+  407:  
+  408:                  .email(cliente.getEmail())
+  409:  
+  410:                  .build();
+  411:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  393:  
+  394:          expirarSiNecesario(r);
+  395:  
+  396:          if (r.getEstado() == EstadoRetencion.CONFIRMADO) {
+  397:  
+  398:              return toPublic(r);
+  399:  
+  400:          }
+  401:  
+  402:          if (r.getEstado() == EstadoRetencion.VENCIDO || r.getEstado() == EstadoRetencion.CANCELADO) {
+  403:  
+  404:              throw new ConflictoException("La reserva ya no est+â-í vigente");
+  405:  
+  406:          }
+  407:  
+  408:          if (!permitirPagoPendiente) {
+  409:  
+  410:              throw new NegocioException("El pago posterior en caja no est+â-í habilitado");
+  411:  
+  412:          }
+  413:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  413:  
+  414:          CrearRetencionRequest retencionRequest = CrearRetencionRequest.builder()
+  415:  
+  416:                  .viajeId(request.getViajeId())
+  417:  
+  418:                  .asientoIds(request.getAsientoIds())
+  419:  
+  420:                  .idempotencyKey(request.getIdempotencyKey())
+  421:  
+  422:                  .comprador(comprador)
+  423:  
+  424:                  .metodoPagoPreferido(request.getMetodoPago())
+  425:  
+  426:                  .observaciones(request.getObservaciones())
+  427:  
+  428:                  .build();
+  429:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  415:  
+  416:          LocalDateTime nuevaExpira = LocalDateTime.now().plusMinutes(Math.max(1, pagoPendienteMinutos));
+  417:  
+  418:          r.setEstado(EstadoRetencion.PENDIENTE_PAGO);
+  419:  
+  420:          r.setExpiraEn(nuevaExpira);
+  421:  
+  422:          if (metodoPago != null) {
+  423:  
+  424:              r.setMetodoPagoPreferido(metodoPago);
+  425:  
+  426:          }
+  427:  
+  428:          extenderAsientos(r, nuevaExpira);
+  429:  
+  430:          retencionRepository.save(r);
+  431:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  431:  
+  432:          // Bloqueo de asientos + datos del comprador en una retenci+¦n con canal CAJERO.
+  433:  
+  434:          RetencionResponse reserva = crearRetencion(retencionRequest, CanalVenta.CAJERO);
+  435:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  433:  
+  434:          registrarAuditoria("RESERVAR_PENDIENTE_PAGO", r.getId(), r.getReferencia());
+  435:  
+  436:          log.info("Reserva pendiente de pago: {}", r.getReferencia());
+  437:  
+  438:          return toPublic(r);
+  439:  
+  440:      }
+  441:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  437:  
+  438:          ConfirmarReservaRequest confirmacion = ConfirmarReservaRequest.builder()
+  439:  
+  440:                  .metodoPago(request.getMetodoPago())
+  441:  
+  442:                  .referenciaPago(request.getReferenciaPago())
+  443:  
+  444:                  .observaciones(request.getObservaciones())
+  445:  
+  446:                  .documento(cliente.getDniRuc())
+  447:  
+  448:                  .build();
+  449:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  443:  
+  444:      // +ó-ö-Ç+ó-ö-Ç Confirmaci+â-¦n de pago (caja/admin) +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö
+  445:  -Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-
+  446:  Ç+ó-ö-Ç+ó-ö-Ç
+  447:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  451:  
+  452:          // Mismo contexto transaccional: si algo falla, no queda ni reserva ni boleto.
+  453:  
+  454:          List<BoletoResponse> emitidos = confirmarPago(reserva.getReferencia(), confirmacion, username);
+  455:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  449:  
+  450:      @Override
+  451:  
+  452:      @Transactional
+  453:  
+  454:      public List<BoletoResponse> confirmarPago(String referencia, ConfirmarReservaRequest request, String username) {
+  455:  
+  456:          Retencion r = retencionRepository.findByReferenciaForUpdate(referencia)
+  457:  
+  458:                  .orElseThrow(() -> new RecursoNoEncontradoException("Reserva no encontrada"));
+  459:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  457:  
+  458:          log.info("Venta presencial: referencia={} | asientos={} | boletos={} | cajero={}",
+  459:  
+  460:                  reserva.getReferencia(), request.getAsientoIds().size(), emitidos.size(), username);
+  461:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  461:  
+  462:          // Idempotencia: si ya est+â-í confirmada, devolver los boletos ya emitidos.
+  463:  
+  464:          if (r.getEstado() == EstadoRetencion.CONFIRMADO) {
+  465:  
+  466:              return boletosDe(r);
+  467:  
+  468:          }
+  469:  
+  470:          if (r.getEstado() == EstadoRetencion.VENCIDO || r.getEstado() == EstadoRetencion.CANCELADO) {
+  471:  
+  472:              throw new ConflictoException("La reserva ya no est+â-í vigente y no puede confirmarse");
+  473:  
+  474:          }
+  475:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  463:  
+  464:          return emitidos;
+  465:  
+  466:      }
+  467:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  477:  
+  478:          LocalDateTime ahora = LocalDateTime.now();
+  479:  
+  480:          if (r.getExpiraEn().isBefore(ahora)) {
+  481:  
+  482:              expirar(r, ahora);
+  483:  
+  484:              throw new ConflictoException("La reserva venci+â-¦; los asientos fueron liberados");
+  485:  
+  486:          }
+  487:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  469:  
+  470:      // +ó-ö-Ç+ó-ö-Ç Consulta +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó
+  471:  -ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-
+  472:  ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö
+  473:  -Ç+ó-ö-Ç
+  474:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  489:  
+  490:          // Bloqueo f+â-¡sico de cada asiento y verificaci+â-¦n de que sigue retenido por esta reserva.
+  491:  
+  492:          List<Asiento> asientos = asientoRepository.findByRetencionId(r.getId());
+  493:  
+  494:          if (asientos.isEmpty()) {
+  495:  
+  496:              throw new ConflictoException("La reserva no tiene asientos vigentes");
+  497:  
+  498:          }
+  499:  
+  500:          for (Asiento a : asientos) {
+  501:  
+  502:              Asiento bloqueado = asientoRepository.findByIdForUpdate(a.getId())
+  503:  
+  504:                      .orElseThrow(() -> new RecursoNoEncontradoException("Asiento", a.getId()));
+  505:  
+  506:              if (bloqueado.getEstado() != EstadoAsiento.RESERVADO
+  507:  
+  508:                      || bloqueado.getRetencion() == null
+  509:  
+  510:                      || !bloqueado.getRetencion().getId().equals(r.getId())) {
+  511:  
+  512:                  throw new ConflictoException("El asiento " + bloqueado.getNumeroAsiento()
+  513:  
+  514:                          + " ya no est+â-í retenido por esta reserva");
+  515:  
+  516:              }
+  517:  
+  518:          }
+  519:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  476:  
+  477:      @Override
+  478:  
+  479:      @Transactional
+  480:  
+  481:      public RetencionResponse obtenerPorReferencia(String referencia, String documento) {
+  482:  
+  483:          Retencion r = retencionRepository.findByReferencia(referencia)
+  484:  
+  485:                  .orElseThrow(() -> new RecursoNoEncontradoException(
+  486:  
+  487:                          "Reserva no encontrada con la referencia indicada"));
+  488:  
+  489:          verificarPropietario(r, documento);
+  490:  
+  491:          return toPublic(expirarSiNecesario(r));
+  492:  
+  493:      }
+  494:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  521:  
+  522:          Cliente cliente = resolverCliente(r);
+  523:  
+  524:          Usuario cajero = usuarioRepository.findByUsername(username).orElse(null);
+  525:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  496:  
+  497:      // +ó-ö-Ç+ó-ö-Ç Reserva pendiente de pago +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-
+  498:  ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö
+  499:  -Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç
+  500:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  527:  
+  528:          Pago pago = pagoRepository.save(Pago.builder()
+  529:  
+  530:                  .monto(r.getTotal())
+  531:  
+  532:                  .fechaPago(ahora)
+  533:  
+  534:                  .metodo(request.getMetodoPago())
+  535:  
+  536:                  .estado(EstadoPago.COMPLETADO)
+  537:  
+  538:                  .referencia(request.getReferenciaPago())
+  539:  
+  540:                  .observacion(request.getObservaciones())
+  541:  
+  542:                  .cliente(cliente)
+  543:  
+  544:                  .cajero(cajero)
+  545:  
+  546:                  .activo(true)
+  547:  
+  548:                  .build());
+  549:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  502:  
+  503:      @Override
+  504:  
+  505:      @Transactional
+  506:  
+  507:      public RetencionResponse reservarPendientePago(String referencia, MetodoPago metodoPago) {
+  508:  
+  509:          Retencion r = retencionRepository.findByReferenciaForUpdate(referencia)
+  510:  
+  511:                  .orElseThrow(() -> new RecursoNoEncontradoException("Reserva no encontrada"));
+  512:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  551:  
+  552:          List<BoletoResponse> emitidos = new ArrayList<>();
+  553:  
+  554:          for (Asiento a : asientos) {
+  555:  
+  556:              Boleto b = boletoRepository.save(Boleto.builder()
+  557:  
+  558:                      .numeroBoleto("TMP-" + java.util.UUID.randomUUID().toString().substring(0, 26))
+  559:  
+  560:                      .viaje(r.getViaje())
+  561:  
+  562:                      .asiento(a)
+  563:  
+  564:                      .cliente(cliente)
+  565:  
+  566:                      .precioPagado(r.getPrecioUnitario())
+  567:  
+  568:                      .estado(EstadoBoleto.ACTIVO)
+  569:  
+  570:                      .pago(pago)
+  571:  
+  572:                      .cajero(cajero)
+  573:  
+  574:                      .observaciones(request.getObservaciones())
+  575:  
+  576:                      .activo(true)
+  577:  
+  578:                      .build());
+  579:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  514:  
+  515:          expirarSiNecesario(r);
+  516:  
+  517:          if (r.getEstado() == EstadoRetencion.CONFIRMADO) {
+  518:  
+  519:              return toPublic(r);
+  520:  
+  521:          }
+  522:  
+  523:          if (r.getEstado() == EstadoRetencion.VENCIDO || r.getEstado() == EstadoRetencion.CANCELADO) {
+  524:  
+  525:              throw new ConflictoException("La reserva ya no est+â-í vigente");
+  526:  
+  527:          }
+  528:  
+  529:          if (!permitirPagoPendiente) {
+  530:  
+  531:              throw new NegocioException("El pago posterior en caja no est+â-í habilitado");
+  532:  
+  533:          }
+  534:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  581:  
+  582:              String numero = generadorDocumentos.generarNumeroBoleto(b.getId());
+  583:  
+  584:              b.setNumeroBoleto(numero);
+  585:  
+  586:              b.setCodigoQr(numero);
+  587:  
+  588:              b.setQrImagenUrl(generadorDocumentos.generarQrBase64(numero));
+  589:  
+  590:              b = boletoRepository.save(b);
+  591:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  536:  
+  537:          LocalDateTime nuevaExpira = LocalDateTime.now().plusMinutes(Math.max(1, pagoPendienteMinutos));
+  538:  
+  539:          r.setEstado(EstadoRetencion.PENDIENTE_PAGO);
+  540:  
+  541:          r.setExpiraEn(nuevaExpira);
+  542:  
+  543:          if (metodoPago != null) {
+  544:  
+  545:              r.setMetodoPagoPreferido(metodoPago);
+  546:  
+  547:          }
+  548:  
+  549:          extenderAsientos(r, nuevaExpira);
+  550:  
+  551:          retencionRepository.save(r);
+  552:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  593:  
+  594:              a.setEstado(EstadoAsiento.VENDIDO);
+  595:  
+  596:              a.setRetencion(null);
+  597:  
+  598:              a.setRetenidoHasta(null);
+  599:  
+  600:              asientoRepository.save(a);
+  601:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  554:  
+  555:          registrarAuditoria("RESERVAR_PENDIENTE_PAGO", r.getId(), r.getReferencia());
+  556:  
+  557:          log.info("Reserva pendiente de pago: {}", r.getReferencia());
+  558:  
+  559:          return toPublic(r);
+  560:  
+  561:      }
+  562:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  603:  
+  604:              emitidos.add(boletoService.toResponse(b));
+  605:  
+  606:          }
+  607:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  564:  
+  565:      // +ó-ö-Ç+ó-ö-Ç Confirmaci+â-¦n de pago (caja/admin) +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö
+  566:  -Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-
+  567:  Ç+ó-ö-Ç+ó-ö-Ç
+  568:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  609:  
+  610:          r.setEstado(EstadoRetencion.CONFIRMADO);
+  611:  
+  612:          r.setConfirmadaEn(ahora);
+  613:  
+  614:          r.setConfirmadaPor(cajero);
+  615:  
+  616:          r.setPago(pago);
+  617:  
+  618:          retencionRepository.save(r);
+  619:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  570:  
+  571:      @Override
+  572:  
+  573:      @Transactional
+  574:  
+  575:      public List<BoletoResponse> confirmarPago(String referencia, ConfirmarReservaRequest request, String username) {
+  576:  
+  577:          Retencion r = retencionRepository.findByReferenciaForUpdate(referencia)
+  578:  
+  579:                  .orElseThrow(() -> new RecursoNoEncontradoException("Reserva no encontrada"));
+  580:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  621:  
+  622:          registrarAuditoria("CONFIRMAR_RESERVA", r.getId(), r.getReferencia());
+  623:  
+  624:          log.info("Reserva confirmada: {} | boletos={} | cajero={}", r.getReferencia(),
+  625:  
+  626:                  emitidos.size(), username);
+  627:  
+  628:          return emitidos;
+  629:  
+  630:      }
+  631:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  582:  
+  583:          // Idempotencia: si ya est+â-í confirmada, devolver los boletos ya emitidos.
+  584:  
+  585:          if (r.getEstado() == EstadoRetencion.CONFIRMADO) {
+  586:  
+  587:              return boletosDe(r);
+  588:  
+  589:          }
+  590:  
+  591:          if (r.getEstado() == EstadoRetencion.VENCIDO || r.getEstado() == EstadoRetencion.CANCELADO) {
+  592:  
+  593:              throw new ConflictoException("La reserva ya no est+â-í vigente y no puede confirmarse");
+  594:  
+  595:          }
+  596:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  633:  
+  634:      // +ó-ö-Ç+ó-ö-Ç Liberaci+â-¦n expl+â-¡cita +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó
+  635:  -ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-
+  636:  ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç
+  637:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  598:  
+  599:          LocalDateTime ahora = LocalDateTime.now();
+  600:  
+  601:          if (r.getExpiraEn().isBefore(ahora)) {
+  602:  
+  603:              expirar(r, ahora);
+  604:  
+  605:              throw new ConflictoException("La reserva venci+â-¦; los asientos fueron liberados");
+  606:  
+  607:          }
+  608:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  639:  
+  640:      @Override
+  641:  
+  642:      @Transactional
+  643:  
+  644:      public RetencionResponse liberar(String referencia, String motivo, String username) {
+  645:  
+  646:          Retencion r = retencionRepository.findByReferenciaForUpdate(referencia)
+  647:  
+  648:                  .orElseThrow(() -> new RecursoNoEncontradoException("Reserva no encontrada"));
+  649:  
+  650:          if (r.getEstado() == EstadoRetencion.CONFIRMADO) {
+  651:  
+  652:              throw new ConflictoException("No se puede liberar una reserva ya confirmada; cancele el boleto.");
+  653:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  610:  
+  611:          // Bloqueo f+â-¡sico de cada asiento y verificaci+â-¦n de que sigue retenido por esta reserva.
+  612:  
+  613:          List<Asiento> asientos = asientoRepository.findByRetencionId(r.getId());
+  614:  
+  615:          if (asientos.isEmpty()) {
+  616:  
+  617:              throw new ConflictoException("La reserva no tiene asientos vigentes");
+  618:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  655:  
+  656:          if (r.getEstado() == EstadoRetencion.VENCIDO || r.getEstado() == EstadoRetencion.CANCELADO) {
+  657:  
+  658:              return toPublic(r);
+  659:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  620:  
+  621:          for (Asiento a : asientos) {
+  622:  
+  623:              Asiento bloqueado = asientoRepository.findByIdForUpdate(a.getId())
+  624:  
+  625:                      .orElseThrow(() -> new RecursoNoEncontradoException("Asiento", a.getId()));
+  626:  
+  627:              if (bloqueado.getEstado() != EstadoAsiento.RESERVADO
+  628:  
+  629:                      || bloqueado.getRetencion() == null
+  630:  
+  631:                      || !bloqueado.getRetencion().getId().equals(r.getId())) {
+  632:  
+  633:                  throw new ConflictoException("El asiento " + bloqueado.getNumeroAsiento()
+  634:  
+  635:                          + " ya no est+â-í retenido por esta reserva");
+  636:  
+  637:              }
+  638:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  661:  
+  662:          LocalDateTime ahora = LocalDateTime.now();
+  663:  
+  664:          liberarAsientos(r, ahora);
+  665:  
+  666:          r.setEstado(EstadoRetencion.CANCELADO);
+  667:  
+  668:          r.setLiberadaEn(ahora);
+  669:  
+  670:          r.setMotivoLiberacion(motivo);
+  671:  
+  672:          retencionRepository.save(r);
+  673:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  640:  
+  641:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  674:  
+  675:  
+  676:          registrarAuditoria("LIBERAR_RETENCION", r.getId(), r.getReferencia());
+  677:  
+  678:          log.info("Reserva liberada: {} | por={} | motivo={}", r.getReferencia(), username, motivo);
+  679:  
+  680:          return toPublic(r);
+  681:  
+  682:      }
+  683:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  642:  
+  643:          Cliente cliente = resolverCliente(r);
+  644:  
+  645:          Usuario cajero = usuarioRepository.findByUsername(username).orElse(null);
+  646:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  685:  
+  686:      // +ó-ö-Ç+ó-ö-Ç Listados y recuperaci+â-¦n +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó
+  687:  -ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-
+  688:  ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç
+  689:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  648:  
+  649:          Pago pago = pagoRepository.save(Pago.builder()
+  650:  
+  651:                  .monto(r.getTotal())
+  652:  
+  653:                  .fechaPago(ahora)
+  654:  
+  655:                  .metodo(request.getMetodoPago())
+  656:  
+  657:                  .estado(EstadoPago.COMPLETADO)
+  658:  
+  659:                  .referencia(request.getReferenciaPago())
+  660:  
+  661:                  .observacion(request.getObservaciones())
+  662:  
+  663:                  .cliente(cliente)
+  664:  
+  665:                  .cajero(cajero)
+  666:  
+  667:                  .activo(true)
+  668:  
+  669:                  .build());
+  670:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  691:  
+  692:      @Override
+  693:  
+  694:      @Transactional(readOnly = true)
+  695:  
+  696:      public List<RetencionResponse> listarReservas(List<EstadoRetencion> estados) {
+  697:  
+  698:          List<EstadoRetencion> filtro = (estados == null || estados.isEmpty())
+  699:  
+  700:                  ? List.of(EstadoRetencion.RETENIDO, EstadoRetencion.PENDIENTE_PAGO)
+  701:  
+  702:                  : estados;
+  703:  
+  704:          return retencionRepository
+  705:  
+  706:                  .findByEstadoIn(filtro, org.springframework.data.domain.Pageable.unpaged())
+  707:  
+  708:                  .getContent().stream()
+  709:  
+  710:                  .map(this::toPublic)
+  711:  
+  712:                  .toList();
+  713:  
+  714:      }
+  715:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  672:  
+  673:          List<BoletoResponse> emitidos = new ArrayList<>();
+  674:  
+  675:          for (Asiento a : asientos) {
+  676:  
+  677:              Boleto b = boletoRepository.save(Boleto.builder()
+  678:  
+  679:                      .numeroBoleto("TMP-" + java.util.UUID.randomUUID().toString().substring(0, 26))
+  680:  
+  681:                      .viaje(r.getViaje())
+  682:  
+  683:                      .asiento(a)
+  684:  
+  685:                      .cliente(cliente)
+  686:  
+  687:                      .precioPagado(r.getPrecioUnitario())
+  688:  
+  689:                      .estado(EstadoBoleto.ACTIVO)
+  690:  
+  691:                      .pago(pago)
+  692:  
+  693:                      .cajero(cajero)
+  694:  
+  695:                      .observaciones(request.getObservaciones())
+  696:  
+  697:                      .activo(true)
+  698:  
+  699:                      .build());
+  700:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  717:  
+  718:      @Override
+  719:  
+  720:      @Transactional
+  721:  
+  722:      public RecuperacionResponse recuperar(String documento, String referencia) {
+  723:  
+  724:          if (documento == null || documento.isBlank()) {
+  725:  
+  726:              throw new NegocioException("Debe indicar el documento del comprador");
+  727:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  702:  
+  703:              String numero = generadorDocumentos.generarNumeroBoleto(b.getId());
+  704:  
+  705:              b.setNumeroBoleto(numero);
+  706:  
+  707:              b.setCodigoQr(numero);
+  708:  
+  709:              b.setQrImagenUrl(generadorDocumentos.generarQrBase64(numero));
+  710:  
+  711:              b = boletoRepository.save(b);
+  712:  
+  713:  
+  714:  
+  715:              a.setEstado(EstadoAsiento.VENDIDO);
+  716:  
+  717:              a.setRetencion(null);
+  718:  
+  719:              a.setRetenidoHasta(null);
+  720:  
+  721:              asientoRepository.save(a);
+  722:  
+  723:  
+  724:  
+  725:              emitidos.add(boletoService.toResponse(b));
+  726:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  729:  
+  730:          String doc = documento.trim();
+  731:  
+  732:          List<RetencionResponse> reservas = retencionRepository
+  733:  
+  734:                  .findByCompradorDocumentoOrderByCreatedAtDesc(doc).stream()
+  735:  
+  736:                  .filter(r -> referencia == null || referencia.isBlank()
+  737:  
+  738:                          || r.getReferencia().equalsIgnoreCase(referencia.trim()))
+  739:  
+  740:                  .map(this::toPublic)
+  741:  
+  742:                  .toList();
+  743:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  728:  
+  729:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  744:  
+  745:  
+  746:          List<BoletoResponse> boletos = boletoRepository.findVigentesPorDocumento(doc).stream()
+  747:  
+  748:                  .map(boletoService::toResponse)
+  749:  
+  750:                  .toList();
+  751:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  730:  
+  731:          r.setEstado(EstadoRetencion.CONFIRMADO);
+  732:  
+  733:          r.setConfirmadaEn(ahora);
+  734:  
+  735:          r.setConfirmadaPor(cajero);
+  736:  
+  737:          r.setPago(pago);
+  738:  
+  739:          retencionRepository.save(r);
+  740:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  753:  
+  754:          registrarAuditoria("RECUPERAR_RESERVA", null, "documento solicitado");
+  755:  
+  756:          return RecuperacionResponse.builder().reservas(reservas).boletos(boletos).build();
+  757:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  742:  
+  743:          registrarAuditoria("CONFIRMAR_RESERVA", r.getId(), r.getReferencia());
+  744:  
+  745:          log.info("Reserva confirmada: {} | boletos={} | cajero={}", r.getReferencia(),
+  746:  
+  747:                  emitidos.size(), username);
+  748:  
+  749:          return emitidos;
+  750:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  761:  
+  762:      // +ó-ö-Ç+ó-ö-Ç PDFs +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç
+  763:  +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+
+  764:  ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó
+  765:  -ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç
+  766:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  754:  
+  755:      // +ó-ö-Ç+ó-ö-Ç Liberaci+â-¦n expl+â-¡cita +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó
+  756:  -ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-
+  757:  ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç
+  758:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  772:  
+  773:      public byte[] constanciaPdf(String referencia, String documento) {
+  774:  
+  775:          Retencion r = retencionRepository.findByReferencia(referencia)
+  776:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  764:  
+  765:      public RetencionResponse liberar(String referencia, String motivo, String username) {
+  766:  
+  767:          Retencion r = retencionRepository.findByReferenciaForUpdate(referencia)
+  768:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  778:  
+  779:          verificarPropietario(r, documento);
+  780:  
+  781:          if (r.getEstado() == EstadoRetencion.CONFIRMADO) {
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  770:  
+  771:          if (r.getEstado() == EstadoRetencion.CONFIRMADO) {
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  782:  
+  783:              throw new NegocioException("La reserva ya est+â-í confirmada; descargue el boleto de viaje");
+  784:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  772:  
+  773:              throw new ConflictoException("No se puede liberar una reserva ya confirmada; cancele el boleto.");
+  774:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  786:  
+  787:          List<Asiento> asientos = asientoRepository.findByRetencionId(r.getId());
+  788:  
+  789:          return pdfVentaService.generarConstancia(r, asientos);
+  790:  
+  791:      }
+  792:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  776:  
+  777:          if (r.getEstado() == EstadoRetencion.VENCIDO || r.getEstado() == EstadoRetencion.CANCELADO) {
+  778:  
+  779:              return toPublic(r);
+  780:  
+  781:          }
+  782:  
+  783:          LocalDateTime ahora = LocalDateTime.now();
+  784:  
+  785:          liberarAsientos(r, ahora);
+  786:  
+  787:          r.setEstado(EstadoRetencion.CANCELADO);
+  788:  
+  789:          r.setLiberadaEn(ahora);
+  790:  
+  791:          r.setMotivoLiberacion(motivo);
+  792:  
+  793:          retencionRepository.save(r);
+  794:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  794:  
+  795:      @Override
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  796:  
+  797:          registrarAuditoria("LIBERAR_RETENCION", r.getId(), r.getReferencia());
+  798:  
+  799:          log.info("Reserva liberada: {} | por={} | motivo={}", r.getReferencia(), username, motivo);
+  800:  
+  801:          return toPublic(r);
+  802:  
+  803:      }
+  804:  
+  805:  
+  806:  
+  807:      // +ó-ö-Ç+ó-ö-Ç Listados y recuperaci+â-¦n +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó
+  808:  -ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-
+  809:  ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç
+  810:  
+  811:  
+  812:  
+  813:      @Override
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  796:  
+  797:      @Transactional
+  798:  
+  799:      public byte[] boletoPdf(String numeroBoleto, String documento) {
+  800:  
+  801:          Boleto b = boletoRepository.findByNumeroBoleto(numeroBoleto)
+  802:  
+  803:                  .orElseThrow(() -> new RecursoNoEncontradoException("Boleto no encontrado"));
+  804:  
+  805:          if (documento == null || !documento.trim().equals(b.getCliente().getDniRuc())) {
+  806:  
+  807:              throw new RecursoNoEncontradoException("Boleto no encontrado");
+  808:  
+  809:          }
+  810:  
+  811:          if (b.getEstado() != EstadoBoleto.ACTIVO && b.getEstado() != EstadoBoleto.USADO) {
+  812:  
+  813:              throw new NegocioException("El boleto no est+â-í vigente");
+  814:  
+  815:          }
+  816:  
+  817:          return pdfVentaService.generarBoleto(b);
+  818:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  814:  
+  815:      @Transactional(readOnly = true)
+  816:  
+  817:      public List<RetencionResponse> listarReservas(List<EstadoRetencion> estados) {
+  818:  
+  819:          List<EstadoRetencion> filtro = (estados == null || estados.isEmpty())
+  820:  
+  821:                  ? List.of(EstadoRetencion.RETENIDO, EstadoRetencion.PENDIENTE_PAGO)
+  822:  
+  823:                  : estados;
+  824:  
+  825:          return retencionRepository
+  826:  
+  827:                  .findByEstadoIn(filtro, org.springframework.data.domain.Pageable.unpaged())
+  828:  
+  829:                  .getContent().stream()
+  830:  
+  831:                  .map(this::toPublic)
+  832:  
+  833:                  .toList();
+  834:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  822:  
+  823:      // +ó-ö-Ç+ó-ö-Ç Mantenimiento +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-
+  824:  ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö
+  825:  -Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç
+  826:  
+  827:  
+  828:  
+  829:      @Override
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  838:  
+  839:      @Override
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  832:  
+  833:      public int liberarVencidas() {
+  834:  
+  835:          LocalDateTime ahora = LocalDateTime.now();
+  836:  
+  837:          List<Retencion> vencidas = retencionRepository.findVencidas(
+  838:  
+  839:                  List.of(EstadoRetencion.RETENIDO, EstadoRetencion.PENDIENTE_PAGO), ahora);
+  840:  
+  841:          for (Retencion r : vencidas) {
+  842:  
+  843:              expirar(r, ahora);
+  844:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  842:  
+  843:      public RecuperacionResponse recuperar(String documento, String referencia) {
+  844:  
+  845:          if (documento == null || documento.isBlank()) {
+  846:  
+  847:              throw new NegocioException("Debe indicar el documento del comprador");
+  848:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  846:  
+  847:          if (!vencidas.isEmpty()) {
+  848:  
+  849:              log.info("Barrido de reservas vencidas: {} liberadas", vencidas.size());
+  850:  
+  851:          }
+  852:  
+  853:          return vencidas.size();
+  854:  
+  855:      }
+  856:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  850:  
+  851:          String doc = documento.trim();
+  852:  
+  853:          List<RetencionResponse> reservas = retencionRepository
+  854:  
+  855:                  .findByCompradorDocumentoOrderByCreatedAtDesc(doc).stream()
+  856:  
+  857:                  .filter(r -> referencia == null || referencia.isBlank()
+  858:  
+  859:                          || r.getReferencia().equalsIgnoreCase(referencia.trim()))
+  860:  
+  861:                  .map(this::toPublic)
+  862:  
+  863:                  .toList();
+  864:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  858:  
+  859:      // +ó-ö-Ç+ó-ö-Ç Helpers internos +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç
+  860:  +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+
+  861:  ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç
+  862:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  866:  
+  867:          List<BoletoResponse> boletos = boletoRepository.findVigentesPorDocumento(doc).stream()
+  868:  
+  869:                  .map(boletoService::toResponse)
+  870:  
+  871:                  .toList();
+  872:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  864:  
+  865:      private static final List<EstadoRetencion> ACTIVAS =
+  866:  
+  867:              List.of(EstadoRetencion.RETENIDO, EstadoRetencion.PENDIENTE_PAGO);
+  868:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  874:  
+  875:          registrarAuditoria("RECUPERAR_RESERVA", null, "documento solicitado");
+  876:  
+  877:          return RecuperacionResponse.builder().reservas(reservas).boletos(boletos).build();
+  878:  
+  879:      }
+  880:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  870:  
+  871:      private Retencion expirarSiNecesario(Retencion r) {
+  872:  
+  873:          if (ACTIVAS.contains(r.getEstado()) && r.getExpiraEn().isBefore(LocalDateTime.now())) {
+  874:  
+  875:              expirar(r, LocalDateTime.now());
+  876:  
+  877:          }
+  878:  
+  879:          return r;
+  880:  
+  881:      }
+  882:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  882:  
+  883:      // +ó-ö-Ç+ó-ö-Ç PDFs +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç
+  884:  +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+
+  885:  ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó
+  886:  -ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç
+  887:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  884:  
+  885:      private void expirar(Retencion r, LocalDateTime ahora) {
+  886:  
+  887:          if (!ACTIVAS.contains(r.getEstado())) {
+  888:  
+  889:              return;
+  890:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  889:  
+  890:      @Override
+  891:  
+  892:      @Transactional
+  893:  
+  894:      public byte[] constanciaPdf(String referencia, String documento) {
+  895:  
+  896:          Retencion r = retencionRepository.findByReferencia(referencia)
+  897:  
+  898:                  .orElseThrow(() -> new RecursoNoEncontradoException("Reserva no encontrada"));
+  899:  
+  900:          verificarPropietario(r, documento);
+  901:  
+  902:          if (r.getEstado() == EstadoRetencion.CONFIRMADO) {
+  903:  
+  904:              throw new NegocioException("La reserva ya est+â-í confirmada; descargue el boleto de viaje");
+  905:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  892:  
+  893:          liberarAsientos(r, ahora);
+  894:  
+  895:          r.setEstado(EstadoRetencion.VENCIDO);
+  896:  
+  897:          r.setLiberadaEn(ahora);
+  898:  
+  899:          r.setMotivoLiberacion("Vencimiento autom+â-ítico");
+  900:  
+  901:          retencionRepository.save(r);
+  902:  
+  903:          registrarAuditoria("VENCER_RETENCION", r.getId(), r.getReferencia());
+  904:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  907:  
+  908:          List<Asiento> asientos = asientoRepository.findByRetencionId(r.getId());
+  909:  
+  910:          return pdfVentaService.generarConstancia(r, asientos);
+  911:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  908:  
+  909:      private void liberarAsientos(Retencion r, LocalDateTime ahora) {
+  910:  
+  911:          for (Asiento a : asientoRepository.findByRetencionId(r.getId())) {
+  912:  
+  913:              a.setEstado(EstadoAsiento.DISPONIBLE);
+  914:  
+  915:              a.setRetencion(null);
+  916:  
+  917:              a.setRetenidoHasta(null);
+  918:  
+  919:              asientoRepository.save(a);
+  920:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  915:  
+  916:      @Override
+  917:  
+  918:      @Transactional
+  919:  
+  920:      public byte[] boletoPdf(String numeroBoleto, String documento) {
+  921:  
+  922:          Boleto b = boletoRepository.findByNumeroBoleto(numeroBoleto)
+  923:  
+  924:                  .orElseThrow(() -> new RecursoNoEncontradoException("Boleto no encontrado"));
+  925:  
+  926:          if (documento == null || !documento.trim().equals(b.getCliente().getDniRuc())) {
+  927:  
+  928:              throw new RecursoNoEncontradoException("Boleto no encontrado");
+  929:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  922:  
+  923:      }
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  931:  
+  932:          if (b.getEstado() != EstadoBoleto.ACTIVO && b.getEstado() != EstadoBoleto.USADO) {
+  933:  
+  934:              throw new NegocioException("El boleto no est+â-í vigente");
+  935:  
+  936:          }
+  937:  
+  938:          return pdfVentaService.generarBoleto(b);
+  939:  
+  940:      }
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  926:  
+  927:      private void extenderAsientos(Retencion r, LocalDateTime nuevaExpira) {
+  928:  
+  929:          for (Asiento a : asientoRepository.findByRetencionId(r.getId())) {
+  930:  
+  931:              a.setRetenidoHasta(nuevaExpira);
+  932:  
+  933:              asientoRepository.save(a);
+  934:  
+  935:          }
+  936:  
+  937:      }
+  938:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  943:  
+  944:      // +ó-ö-Ç+ó-ö-Ç Mantenimiento +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-
+  945:  ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö
+  946:  -Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç
+  947:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  940:  
+  941:      private boolean estaDisponible(Asiento a, LocalDateTime ahora) {
+  942:  
+  943:          if (a.getEstado() == EstadoAsiento.DISPONIBLE) {
+  944:  
+  945:              return true;
+  946:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  949:  
+  950:      @Override
+  951:  
+  952:      @Transactional
+  953:  
+  954:      public int liberarVencidas() {
+  955:  
+  956:          LocalDateTime ahora = LocalDateTime.now();
+  957:  
+  958:          List<Retencion> vencidas = retencionRepository.findVencidas(
+  959:  
+  960:                  List.of(EstadoRetencion.RETENIDO, EstadoRetencion.PENDIENTE_PAGO), ahora);
+  961:  
+  962:          for (Retencion r : vencidas) {
+  963:  
+  964:              expirar(r, ahora);
+  965:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  948:  
+  949:          return a.getEstado() == EstadoAsiento.RESERVADO
+  950:  
+  951:                  && (a.getRetenidoHasta() == null || !a.getRetenidoHasta().isAfter(ahora));
+  952:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  967:  
+  968:          if (!vencidas.isEmpty()) {
+  969:  
+  970:              log.info("Barrido de reservas vencidas: {} liberadas", vencidas.size());
+  971:  
+  972:          }
+  973:  
+  974:          return vencidas.size();
+  975:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  956:  
+  957:      private void liberarSiVencio(Asiento a, LocalDateTime ahora) {
+  958:  
+  959:          if (estaDisponible(a, ahora) && a.getEstado() != EstadoAsiento.DISPONIBLE) {
+  960:  
+  961:              a.setEstado(EstadoAsiento.DISPONIBLE);
+  962:  
+  963:              a.setRetencion(null);
+  964:  
+  965:              a.setRetenidoHasta(null);
+  966:  
+  967:              asientoRepository.save(a);
+  968:  
+  969:          }
+  970:  
+  971:      }
+  972:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  979:  
+  980:      // +ó-ö-Ç+ó-ö-Ç Helpers internos +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç
+  981:  +ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+
+  982:  ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç+ó-ö-Ç
+  983:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+  974:  
+  975:      private Cliente resolverCliente(Retencion r) {
+  976:  
+  977:          return clienteRepository.findByDniRuc(r.getCompradorDocumento())
+  978:  
+  979:                  .orElseGet(() -> clienteRepository.save(Cliente.builder()
+  980:  
+  981:                          .dniRuc(r.getCompradorDocumento())
+  982:  
+  983:                          .nombres(r.getCompradorNombres())
+  984:  
+  985:                          .apellidos(r.getCompradorApellidos())
+  986:  
+  987:                          .telefono(r.getCompradorTelefono())
+  988:  
+  989:                          .email(r.getCompradorEmail())
+  990:  
+  991:                          .tipoCliente(TipoCliente.PERSONA)
+  992:  
+  993:                          .activo(true)
+  994:  
+  995:                          .build()));
+  996:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+  985:  
+  986:      private static final List<EstadoRetencion> ACTIVAS =
+  987:  
+  988:              List.of(EstadoRetencion.RETENIDO, EstadoRetencion.PENDIENTE_PAGO);
+  989:  
+  990:  
+  991:  
+  992:      private Retencion expirarSiNecesario(Retencion r) {
+  993:  
+  994:          if (ACTIVAS.contains(r.getEstado()) && r.getExpiraEn().isBefore(LocalDateTime.now())) {
+  995:  
+  996:              expirar(r, LocalDateTime.now());
+  997:  
+  998:          }
+  999:  
+ 1000:          return r;
+ 1001:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+ 1000:  
+ 1001:      private List<BoletoResponse> boletosDe(Retencion r) {
+ 1002:  
+ 1003:          if (r.getPago() == null) {
+ 1004:  
+ 1005:              return List.of();
+ 1006:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+ 1005:  
+ 1006:      private void expirar(Retencion r, LocalDateTime ahora) {
+ 1007:  
+ 1008:          if (!ACTIVAS.contains(r.getEstado())) {
+ 1009:  
+ 1010:              return;
+ 1011:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+ 1008:  
+ 1009:          return boletoRepository.findAllByPagoId(r.getPago().getId()).stream()
+ 1010:  
+ 1011:                  .map(boletoService::toResponse)
+ 1012:  
+ 1013:                  .toList();
+ 1014:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+ 1013:  
+ 1014:          liberarAsientos(r, ahora);
+ 1015:  
+ 1016:          r.setEstado(EstadoRetencion.VENCIDO);
+ 1017:  
+ 1018:          r.setLiberadaEn(ahora);
+ 1019:  
+ 1020:          r.setMotivoLiberacion("Vencimiento autom+â-ítico");
+ 1021:  
+ 1022:          retencionRepository.save(r);
+ 1023:  
+ 1024:          registrarAuditoria("VENCER_RETENCION", r.getId(), r.getReferencia());
+ 1025:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+ 1018:  
+ 1019:      private void verificarPropietario(Retencion r, String documento) {
+ 1020:  
+ 1021:          if (documento == null || !documento.trim().equals(r.getCompradorDocumento())) {
+ 1022:  
+ 1023:              // Mensaje intencionalmente gen+â-®rico: no se revela la existencia de datos ajenos.
+ 1024:  
+ 1025:              throw new RecursoNoEncontradoException("Reserva no encontrada con la referencia indicada");
+ 1026:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+ 1029:  
+ 1030:      private void liberarAsientos(Retencion r, LocalDateTime ahora) {
+ 1031:  
+ 1032:          for (Asiento a : asientoRepository.findByRetencionId(r.getId())) {
+ 1033:  
+ 1034:              a.setEstado(EstadoAsiento.DISPONIBLE);
+ 1035:  
+ 1036:              a.setRetencion(null);
+ 1037:  
+ 1038:              a.setRetenidoHasta(null);
+ 1039:  
+ 1040:              asientoRepository.save(a);
+ 1041:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+ 1032:  
+ 1033:      private String generarReferencia() {
+ 1034:  
+ 1035:          return "RET-" + UUID.randomUUID().toString().replace("-", "").substring(0, 16).toUpperCase();
+ 1036:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+ 1047:  
+ 1048:      private void extenderAsientos(Retencion r, LocalDateTime nuevaExpira) {
+ 1049:  
+ 1050:          for (Asiento a : asientoRepository.findByRetencionId(r.getId())) {
+ 1051:  
+ 1052:              a.setRetenidoHasta(nuevaExpira);
+ 1053:  
+ 1054:              asientoRepository.save(a);
+ 1055:  
+ 1056:          }
+ 1057:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+ 1040:  
+ 1041:      private String normalizarKey(String key) {
+ 1042:  
+ 1043:          return (key == null || key.isBlank()) ? null : key.trim();
+ 1044:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+ 1061:  
+ 1062:      private boolean estaDisponible(Asiento a, LocalDateTime ahora) {
+ 1063:  
+ 1064:          if (a.getEstado() == EstadoAsiento.DISPONIBLE) {
+ 1065:  
+ 1066:              return true;
+ 1067:  
+ 1068:          }
+ 1069:  
+ 1070:          return a.getEstado() == EstadoAsiento.RESERVADO
+ 1071:  
+ 1072:                  && (a.getRetenidoHasta() == null || !a.getRetenidoHasta().isAfter(ahora));
+ 1073:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+ 1048:  
+ 1049:      private void registrarAuditoria(String accion, Long entidadId, String detalle) {
+ 1050:  
+ 1051:          Usuario u = usuarioActual();
+ 1052:  
+ 1053:          auditoriaService.registrar(u != null ? u.getId() : null,
+ 1054:  
+ 1055:                  u != null ? u.getUsername() : "sistema",
+ 1056:  
+ 1057:                  u != null && u.getRol() != null ? u.getRol().getNombre().name() : null,
+ 1058:  
+ 1059:                  accion, "Retencion", entidadId, detalle);
+ 1060:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+ 1077:  
+ 1078:      private void liberarSiVencio(Asiento a, LocalDateTime ahora) {
+ 1079:  
+ 1080:          if (estaDisponible(a, ahora) && a.getEstado() != EstadoAsiento.DISPONIBLE) {
+ 1081:  
+ 1082:              a.setEstado(EstadoAsiento.DISPONIBLE);
+ 1083:  
+ 1084:              a.setRetencion(null);
+ 1085:  
+ 1086:              a.setRetenidoHasta(null);
+ 1087:  
+ 1088:              asientoRepository.save(a);
+ 1089:  
+ 1090:          }
+ 1091:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+ 1064:  
+ 1065:      private Usuario usuarioActual() {
+ 1066:  
+ 1067:          try {
+ 1068:  
+ 1069:              Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+ 1070:  
+ 1071:              if (auth == null || !auth.isAuthenticated()) {
+ 1072:  
+ 1073:                  return null;
+ 1074:  
+ 1075:              }
+ 1076:  
+ 1077:              return usuarioRepository.findByUsername(auth.getName()).orElse(null);
+ 1078:  
+ 1079:          } catch (Exception e) {
+ 1080:  
+ 1081:              return null;
+ 1082:  
+ 1083:          }
+ 1084:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+ 1095:  
+ 1096:      private Cliente resolverCliente(Retencion r) {
+ 1097:  
+ 1098:          return clienteRepository.findByDniRuc(r.getCompradorDocumento())
+ 1099:  
+ 1100:                  .orElseGet(() -> clienteRepository.save(Cliente.builder()
+ 1101:  
+ 1102:                          .dniRuc(r.getCompradorDocumento())
+ 1103:  
+ 1104:                          .nombres(r.getCompradorNombres())
+ 1105:  
+ 1106:                          .apellidos(r.getCompradorApellidos())
+ 1107:  
+ 1108:                          .telefono(r.getCompradorTelefono())
+ 1109:  
+ 1110:                          .email(r.getCompradorEmail())
+ 1111:  
+ 1112:                          .tipoCliente(TipoCliente.PERSONA)
+ 1113:  
+ 1114:                          .activo(true)
+ 1115:  
+ 1116:                          .build()));
+ 1117:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+ 1088:  
+ 1089:      private RetencionResponse toPublic(Retencion r) {
+ 1090:  
+ 1091:          Viaje v = r.getViaje();
+ 1092:  
+ 1093:          LocalDateTime ahora = LocalDateTime.now();
+ 1094:  
+ 1095:          long segundos = r.getExpiraEn() == null ? 0
+ 1096:  
+ 1097:                  : Math.max(0, Duration.between(ahora, r.getExpiraEn()).getSeconds());
+ 1098:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+ 1121:  
+ 1122:      private List<BoletoResponse> boletosDe(Retencion r) {
+ 1123:  
+ 1124:          if (r.getPago() == null) {
+ 1125:  
+ 1126:              return List.of();
+ 1127:  
+ 1128:          }
+ 1129:  
+ 1130:          return boletoRepository.findAllByPagoId(r.getPago().getId()).stream()
+ 1131:  
+ 1132:                  .map(boletoService::toResponse)
+ 1133:  
+ 1134:                  .toList();
+ 1135:  
+ 1136:      }
+ 1137:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+ 1100:  
+ 1101:          List<Asiento> seats = asientoRepository.findByRetencionId(r.getId());
+ 1102:  
+ 1103:          List<AsientoReservaResponse> asientos;
+ 1104:  
+ 1105:          if (!seats.isEmpty()) {
+ 1106:  
+ 1107:              asientos = seats.stream()
+ 1108:  
+ 1109:                      .map(a -> AsientoReservaResponse.builder()
+ 1110:  
+ 1111:                              .id(a.getId())
+ 1112:  
+ 1113:                              .numeroAsiento(a.getNumeroAsiento())
+ 1114:  
+ 1115:                              .precio(r.getPrecioUnitario())
+ 1116:  
+ 1117:                              .build())
+ 1118:  
+ 1119:                      .toList();
+ 1120:  
+ 1121:          } else {
+ 1122:  
+ 1123:              asientos = parsearAsientos(r.getAsientosNumeros(), r.getPrecioUnitario());
+ 1124:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+ 1139:  
+ 1140:      private void verificarPropietario(Retencion r, String documento) {
+ 1141:  
+ 1142:          if (documento == null || !documento.trim().equals(r.getCompradorDocumento())) {
+ 1143:  
+ 1144:              // Mensaje intencionalmente gen+â-®rico: no se revela la existencia de datos ajenos.
+ 1145:  
+ 1146:              throw new RecursoNoEncontradoException("Reserva no encontrada con la referencia indicada");
+ 1147:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+ 1126:  
+ 1127:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+ 1149:  
+ 1150:      }
+ 1151:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+ 1128:  
+ 1129:          boolean confirmado = r.getEstado() == EstadoRetencion.CONFIRMADO;
+ 1130:  
+ 1131:          return RetencionResponse.builder()
+ 1132:  
+ 1133:                  .referencia(r.getReferencia())
+ 1134:  
+ 1135:                  .estado(r.getEstado())
+ 1136:  
+ 1137:                  .canal(r.getCanal())
+ 1138:  
+ 1139:                  .viajeId(v.getId())
+ 1140:  
+ 1141:                  .origen(v.getRuta().getOrigen().getCiudad())
+ 1142:  
+ 1143:                  .destino(v.getRuta().getDestino().getCiudad())
+ 1144:  
+ 1145:                  .busPlaca(v.getBus().getPlaca())
+ 1146:  
+ 1147:                  .fechaHoraSalida(v.getFechaHoraSalida())
+ 1148:  
+ 1149:                  .cantidadAsientos(r.getCantidadAsientos())
+ 1150:  
+ 1151:                  .precioUnitario(r.getPrecioUnitario())
+ 1152:  
+ 1153:                  .total(r.getTotal())
+ 1154:  
+ 1155:                  .asientos(asientos)
+ 1156:  
+ 1157:                  .expiraEn(r.getExpiraEn())
+ 1158:  
+ 1159:                  .segundosRestantes(segundos)
+ 1160:  
+ 1161:                  .validoParaEmbarque(confirmado)
+ 1162:  
+ 1163:                  .requierePago(!confirmado)
+ 1164:  
+ 1165:                  .metodoPagoPreferido(r.getMetodoPagoPreferido())
+ 1166:  
+ 1167:                  .confirmadaEn(r.getConfirmadaEn())
+ 1168:  
+ 1169:                  .compradorNombre((r.getCompradorNombres() + " " + r.getCompradorApellidos()).trim())
+ 1170:  
+ 1171:                  .mensaje(confirmado
+ 1172:  
+ 1173:                          ? "Pago confirmado. Boleto v+â-ílido para embarque."
+ 1174:  
+ 1175:                          : "Reserva registrada. Falta confirmar el pago en caja para emitir el boleto.")
+ 1176:  
+ 1177:                  .boletos(confirmado ? boletosDe(r) : null)
+ 1178:  
+ 1179:                  .build();
+ 1180:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+ 1152:  
+ 1153:  
+ 1154:      private String generarReferencia() {
+ 1155:  
+ 1156:          return "RET-" + UUID.randomUUID().toString().replace("-", "").substring(0, 16).toUpperCase();
+ 1157:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+ 1184:  
+ 1185:      private List<AsientoReservaResponse> parsearAsientos(String numeros, BigDecimal precio) {
+ 1186:  
+ 1187:          if (numeros == null || numeros.isBlank()) {
+ 1188:  
+ 1189:              return List.of();
+ 1190:  
+ 1191:          }
+ 1192:  
+ 1193:          return java.util.Arrays.stream(numeros.split(","))
+ 1194:  
+ 1195:                  .map(String::trim)
+ 1196:  
+ 1197:                  .filter(s -> !s.isEmpty())
+ 1198:  
+ 1199:                  .map(n -> AsientoReservaResponse.builder().numeroAsiento(n).precio(precio).build())
+ 1200:  
+ 1201:                  .toList();
+ 1202:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+ 1161:  
+ 1162:      private String normalizarKey(String key) {
+ 1163:  
+ 1164:          return (key == null || key.isBlank()) ? null : key.trim();
+ 1165:  
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+ 1204:  
+ 1205:  }
+ 1206:  
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+ 1167:  
+ 1168:  
+*****
+
+Error al volver a sincronizar. Los archivos son demasiado diferentes
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaServiceImpl.java.bak
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\IMPL\VENTASERVICEIMPL.JAVA
+ 1169:  
+ 1170:      private void registrarAuditoria(String accion, Long entidadId, String detalle) {
+ 1171:  
+ 1172:          Usuario u = usuarioActual();
+ 1173:  
+ 1174:          auditoriaService.registrar(u != null ? u.getId() : null,
+ 1175:  
+ 1176:                  u != null ? u.getUsername() : "sistema",
+ 1177:  
+ 1178:                  u != null && u.getRol() != null ? u.getRol().getNombre().name() : null,
+ 1179:  
+ 1180:                  accion, "Retencion", entidadId, detalle);
+ 1181:  
+ 1182:      }
+ 1183:  
+ 1184:  
+ 1185:  
+ 1186:      private Usuario usuarioActual() {
+ 1187:  
+ 1188:          try {
+ 1189:  
+ 1190:              Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+ 1191:  
+ 1192:              if (auth == null || !auth.isAuthenticated()) {
+ 1193:  
+ 1194:                  return null;
+ 1195:  
+ 1196:              }
+ 1197:  
+ 1198:              return usuarioRepository.findByUsername(auth.getName()).orElse(null);
+ 1199:  
+ 1200:          } catch (Exception e) {
+ 1201:  
+ 1202:              return null;
+ 1203:  
+ 1204:          }
+ 1205:  
+ 1206:      }
+ 1207:  
+ 1208:  
+ 1209:  
+ 1210:      private RetencionResponse toPublic(Retencion r) {
+ 1211:  
+ 1212:          Viaje v = r.getViaje();
+ 1213:  
+ 1214:          LocalDateTime ahora = LocalDateTime.now();
+ 1215:  
+ 1216:          long segundos = r.getExpiraEn() == null ? 0
+ 1217:  
+ 1218:                  : Math.max(0, Duration.between(ahora, r.getExpiraEn()).getSeconds());
+ 1219:  
+ 1220:  
+ 1221:  
+ 1222:          List<Asiento> seats = asientoRepository.findByRetencionId(r.getId());
+ 1223:  
+ 1224:          List<AsientoReservaResponse> asientos;
+ 1225:  
+ 1226:          if (!seats.isEmpty()) {
+ 1227:  
+ 1228:              asientos = seats.stream()
+ 1229:  
+ 1230:                      .map(a -> AsientoReservaResponse.builder()
+ 1231:  
+ 1232:                              .id(a.getId())
+ 1233:  
+ 1234:                              .numeroAsiento(a.getNumeroAsiento())
+ 1235:  
+ 1236:                              .precio(r.getPrecioUnitario())
+ 1237:  
+ 1238:                              .build())
+ 1239:  
+ 1240:                      .toList();
+ 1241:  
+ 1242:          } else {
+ 1243:  
+ 1244:              asientos = parsearAsientos(r.getAsientosNumeros(), r.getPrecioUnitario());
+ 1245:  
+ 1246:          }
+ 1247:  
+ 1248:  
+ 1249:  
+ 1250:          boolean confirmado = r.getEstado() == EstadoRetencion.CONFIRMADO;
+ 1251:  
+ 1252:          return RetencionResponse.builder()
+ 1253:  
+ 1254:                  .referencia(r.getReferencia())
+ 1255:  
+ 1256:                  .estado(r.getEstado())
+ 1257:  
+ 1258:                  .canal(r.getCanal())
+ 1259:  
+ 1260:                  .viajeId(v.getId())
+ 1261:  
+ 1262:                  .origen(v.getRuta().getOrigen().getCiudad())
+ 1263:  
+ 1264:                  .destino(v.getRuta().getDestino().getCiudad())
+ 1265:  
+ 1266:                  .busPlaca(v.getBus().getPlaca())
+ 1267:  
+ 1268:                  .fechaHoraSalida(v.getFechaHoraSalida())
+*****
+

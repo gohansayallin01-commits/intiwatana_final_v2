@@ -1,0 +1,52 @@
+Comparando archivos REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaController.java.bak y BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\CONTROLLER\VENTACONTROLLER.JAVA
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaController.java.bak
+    4:  import com.transporte.sistema.dto.request.CrearRetencionRequest;
+    5:  import com.transporte.sistema.dto.response.BoletoResponse;
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\CONTROLLER\VENTACONTROLLER.JAVA
+    4:  import com.transporte.sistema.dto.request.CrearRetencionRequest;
+    5:  import com.transporte.sistema.dto.request.VentaPresencialRequest;
+    6:  import com.transporte.sistema.dto.response.BoletoResponse;
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaController.java.bak
+  113:  
+  114:      /** Libera (cancela) una reserva no confirmada. */
+  115:      @PostMapping("/reservas/{referencia}/liberar")
+  116:      @PreAuthorize("hasAnyRole('ADMIN','CAJERO','VENDEDOR')")
+  117:      public ResponseEntity<RetencionResponse> liberar(
+  118:              @PathVariable String referencia,
+  119:              @RequestParam(required = false) String motivo,
+  120:              Authentication auth) {
+  121:          return ResponseEntity.ok(ventaService.liberar(referencia, motivo, auth.getName()));
+  122:      }
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\CONTROLLER\VENTACONTROLLER.JAVA
+  114:  
+  115:      /** Venta presencial de caja: bloquea asiento(s), cobra en efectivo y emite boleto(s) + QR. */
+  116:      @PostMapping("/presencial")
+  117:      @PreAuthorize("hasAnyRole('ADMIN','CAJERO','VENDEDOR')")
+  118:      public ResponseEntity<List<BoletoResponse>> ventaPresencial(
+  119:              @Valid @RequestBody VentaPresencialRequest request,
+  120:              Authentication auth) {
+  121:          return ResponseEntity.status(HttpStatus.CREATED)
+  122:                  .body(ventaService.ventaPresencial(request, auth.getName()));
+  123:      }
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaController.java.bak
+  123:  
+  124:      private ResponseEntity<byte[]> pdf(String nombre, byte[] contenido) {
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\CONTROLLER\VENTACONTROLLER.JAVA
+  124:  
+  125:      /** Libera (cancela) una reserva no confirmada. */
+  126:      @PostMapping("/reservas/{referencia}/liberar")
+  127:      @PreAuthorize("hasAnyRole('ADMIN','CAJERO','VENDEDOR')")
+  128:      public ResponseEntity<RetencionResponse> liberar(
+  129:              @PathVariable String referencia,
+  130:              @RequestParam(required = false) String motivo,
+  131:              Authentication auth) {
+  132:          return ResponseEntity.ok(ventaService.liberar(referencia, motivo, auth.getName()));
+  133:      }
+  134:  
+  135:      private ResponseEntity<byte[]> pdf(String nombre, byte[] contenido) {
+*****
+

@@ -5,9 +5,9 @@ import {
 } from "lucide-react";
 
 const C = {
-  verde: "#127369", oscuro: "#0d3330", amarillo: "#F5C518",
-  medio: "#7a9e9b", gris: "#4C5958", grisClaro: "#8AA6A3",
-  fondo: "#f0f4f3", blanco: "#ffffff", rojo: "#e05252", naranja: "#e67e22",
+  verde: "#127369", oscuro: "#0B3D38", amarillo: "#F5C518",
+  medio: "#667875", gris: "#17312E", grisClaro: "#DDE7E4",
+  fondo: "#F4F7F6", blanco: "#ffffff", rojo: "#C84C4C", naranja: "#D58B15",
 };
 
 const SOLES = new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN", minimumFractionDigits: 2 });

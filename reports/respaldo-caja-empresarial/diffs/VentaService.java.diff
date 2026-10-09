@@ -1,0 +1,25 @@
+Comparando archivos REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaService.java.bak y BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\VENTASERVICE.JAVA
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaService.java.bak
+    4:  import com.transporte.sistema.dto.request.CrearRetencionRequest;
+    5:  import com.transporte.sistema.dto.response.BoletoResponse;
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\VENTASERVICE.JAVA
+    4:  import com.transporte.sistema.dto.request.CrearRetencionRequest;
+    5:  import com.transporte.sistema.dto.request.VentaPresencialRequest;
+    6:  import com.transporte.sistema.dto.response.BoletoResponse;
+*****
+
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\VentaService.java.bak
+   22:  
+   23:      /** Consulta segura de una reserva (requiere el documento del comprador). */
+***** BACKEND\BUS-SYSTEM\SRC\MAIN\JAVA\COM\TRANSPORTE\SISTEMA\SERVICE\VENTASERVICE.JAVA
+   23:  
+   24:      /**
+   25:       * Venta presencial de caja (ADMIN/CAJERO): bloquea los asientos, registra el
+   26:       * pago en efectivo y emite los boletos con QR en una +¦nica transacci+¦n.
+   27:       * Reutiliza la misma disponibilidad (viaje + asiento) que la web. Idempotente.
+   28:       */
+   29:      List<BoletoResponse> ventaPresencial(VentaPresencialRequest request, String username);
+   30:  
+   31:      /** Consulta segura de una reserva (requiere el documento del comprador). */
+*****
+

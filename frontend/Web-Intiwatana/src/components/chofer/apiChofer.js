@@ -7,6 +7,8 @@
  * GlobalExceptionHandler ({ mensaje, status, path }).
  */
 
+import { marcarSesionVencida } from "../../context/sesionVencida";
+
 export class ApiError extends Error {
   constructor(mensaje, status) {
     super(mensaje);
@@ -40,6 +42,11 @@ async function request(token, path, options = {}) {
   }
 
   if (!res.ok) {
+    if (res.status === 401) {
+      // La sesión fue revocada o su token expiró: se señaliza para que la
+      // pantalla de login comunique el motivo exacto al redirigir.
+      marcarSesionVencida();
+    }
     const mensaje =
       cuerpo?.mensaje ||
       cuerpo?.message ||

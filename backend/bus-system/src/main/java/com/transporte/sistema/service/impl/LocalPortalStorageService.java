@@ -31,6 +31,14 @@ public class LocalPortalStorageService implements PortalStorageService {
         this.tipo = tipo;
         this.mediaPrefix = mediaPrefix;
         this.baseDir = Paths.get(directorio).toAbsolutePath().normalize();
+        // El directorio debe existir desde el arranque para que el resource
+        // handler /media/portal/** resuelva los archivos; si no, Spring lo
+        // cachea como ausente mientras el proceso está vivo.
+        try {
+            Files.createDirectories(this.baseDir);
+        } catch (IOException e) {
+            log.warn("No se pudo crear el directorio de almacenamiento del portal: {}", e.getMessage());
+        }
     }
 
     @Override

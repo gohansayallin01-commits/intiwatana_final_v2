@@ -1,0 +1,107 @@
+{
+  "casos": [
+    {
+      "id": "P01",
+      "v": "OK",
+      "detalle": "GET /api/v1/portal/publico anónimo → 200, LOGIN presente"
+    },
+    {
+      "id": "P02",
+      "v": "OK",
+      "detalle": "el público expone el contenido publicado: \"INTIWATANA QA PREMIUM\""
+    },
+    {
+      "id": "P03",
+      "v": "OK",
+      "detalle": "frase publicada intacta (versión restaurada): \"MÁS QUE UN DESTINO, ES TU HISTORIA\""
+    },
+    {
+      "id": "P04",
+      "v": "OK",
+      "detalle": "imagen pública: /media/portal/73ffd04960a140dc9439b3942e51971f.png"
+    },
+    {
+      "id": "P05",
+      "v": "OK",
+      "detalle": "Login renderiza título y frase publicados: titulo=true, frase=true"
+    },
+    {
+      "id": "P06",
+      "v": "OK",
+      "detalle": "Login renderiza la imagen publicada de fondo: url(\"http://localhost:5173/media/portal/73ffd04960a140dc9439b3942e51971f.png\")"
+    },
+    {
+      "id": "P07",
+      "v": "FAIL",
+      "detalle": "sin errores de consola durante la carga del Login (1): Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    }
+  ],
+  "fallidos": [
+    "P07"
+  ],
+  "info": {
+    "loginPublico": {
+      "imagenUrl": "/media/portal/73ffd04960a140dc9439b3942e51971f.png",
+      "imagenMobileUrl": "",
+      "imagenAlt": "Imagen QA de Transportes INTIWATANA",
+      "tituloInstitucional": "INTIWATANA QA PREMIUM",
+      "frasePrincipal": "MÁS QUE UN DESTINO,\nES TU HISTORIA",
+      "textoComplementario": "Reservas, pasajes y encomiendas en un solo lugar. Viaja con seguridad, comodidad y confianza.",
+      "autor": "",
+      "fuente": "",
+      "licencia": "",
+      "atribucion": "",
+      "focoX": 50,
+      "focoY": 35,
+      "overlay": 0.55,
+      "serviciosVisible": true,
+      "servicios": [
+        {
+          "titulo": "Pasajes y reservas",
+          "subtitulo": "Compra, elige y reserva tu asiento en línea.",
+          "icono": "ticket",
+          "visible": true
+        },
+        {
+          "titulo": "Selección de asientos",
+          "subtitulo": "Elige tu asiento y viaja con comodidad.",
+          "icono": "bus",
+          "visible": true
+        },
+        {
+          "titulo": "Encomiendas y tracking",
+          "subtitulo": "Registra tu envío y sigue tu guía.",
+          "icono": "package",
+          "visible": true
+        },
+        {
+          "titulo": "Destinos y horarios",
+          "subtitulo": "Horarios, rutas y destinos con atención cercana.",
+          "icono": "mappin",
+          "visible": true
+        }
+      ]
+    },
+    "consoleErrs": [
+      "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    ],
+    "failedResp": [
+      {
+        "s": 500,
+        "url": "http://localhost:5173/media/portal/73ffd04960a140dc9439b3942e51971f.png"
+      }
+    ],
+    "dom": {
+      "tieneTitulo": true,
+      "tieneFrase": true,
+      "fondo": "url(\"http://localhost:5173/media/portal/73ffd04960a140dc9439b3942e51971f.png\")"
+    }
+  },
+  "resumen": {
+    "total": 7,
+    "ok": 6,
+    "fallidos": [
+      "P07"
+    ]
+  }
+}

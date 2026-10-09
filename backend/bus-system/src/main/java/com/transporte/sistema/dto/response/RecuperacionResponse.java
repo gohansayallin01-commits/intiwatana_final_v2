@@ -12,4 +12,7 @@ import java.util.List;
 public class RecuperacionResponse {
     private List<RetencionResponse> reservas;
     private List<BoletoResponse> boletos;
+
+    /** Configuración del QR oficial Yape activo (número enmascarado), si existe. */
+    private ConfiguracionYapePublicaResponse yapeConfiguracion;
 }

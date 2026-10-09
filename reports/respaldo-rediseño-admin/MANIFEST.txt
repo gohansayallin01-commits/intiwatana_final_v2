@@ -1,0 +1,15 @@
+﻿FILE=frontend\Web-Intiwatana\src\components\AdminDashboard.jsx
+SIZE=181059
+SHA256=30BEC8714E8E6BE9419B16B9DB18BF548F86CCF11FA823353374024EF92C2A0A
+BACKUP=reports\respaldo-rediseno-admin\AdminDashboard.jsx.30BEC871.bak
+---
+FILE=frontend\Web-Intiwatana\src\components\ReportesPage.jsx
+SIZE=24434
+SHA256=06FFCE88A7794C05CB0FDFA257ED8860B65CBFAF7F5BC2DED0E7CB97EDE41C32
+BACKUP=reports\respaldo-rediseno-admin\ReportesPage.jsx.06FFCE88.bak
+---
+FILE=frontend\Web-Intiwatana\src\components\PortalGestion.jsx
+SIZE=37615
+SHA256=B3E84E1504C9AFB9B4864102B0819D7C3D91CB0368EE80EE76C4ED752D2443D8
+BACKUP=reports\respaldo-rediseno-admin\PortalGestion.jsx.B3E84E15.bak
+---

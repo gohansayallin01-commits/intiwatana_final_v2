@@ -1,0 +1,19 @@
+{
+  "prueba": "Replay idempotente - misma idempotencyKey y mismo payload que la venta original (asiento 1A, viaje 33)",
+  "metodo": "POST /api/v1/ventas/presencial",
+  "idempotencyKeyUsada": "qa-itinerario-f8e425ae8e174447b7ee9f1babd7ccc5",
+  "http": 201,
+  "respuesta": [
+    {
+      "id": 54,
+      "numeroBoleto": "BOL-20261009-000054",
+      "asiento": { "id": 849, "numeroAsiento": "1A", "estado": "VENDIDO" },
+      "cliente": { "id": 1, "dniRuc": "12345678", "nombreCompleto": "Ana García" },
+      "precioPagado": 20.00,
+      "estado": "ACTIVO",
+      "codigoQr": "BOL-20261009-000054",
+      "qrImagenUrl": "data:image/png;base64,...."
+    }
+  ],
+  "interpretacion": "El replay NO crea un boleto nuevo: devuelve el mismo BOL-20261009-000054 (id 54) ya emitido. VentaServiceImpl.confirmarPago retorna los boletos existentes cuando la retencion ya esta CONFIRMADO."
+}

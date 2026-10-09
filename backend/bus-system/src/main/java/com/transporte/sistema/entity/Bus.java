@@ -53,6 +53,12 @@ public class Bus extends BaseEntity {
 
     @Column(name = "observaciones", length = 500)
     private String observaciones;
-    
-    
+
+    /**
+     * Configuracion de asientos del vehiculo (JSON). La cantidad de asientos
+     * derivada debe coincidir con {@link #capacidadAsientos}. Se define por
+     * vehiculo concreto, no por modelo.
+     */
+    @Column(name = "configuracion_asientos", columnDefinition = "TEXT")
+    private String configuracionAsientos;
 }

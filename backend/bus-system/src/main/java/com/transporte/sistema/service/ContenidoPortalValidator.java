@@ -37,7 +37,10 @@ public class ContenidoPortalValidator {
             "NOSOTROS", Set.of("titulo", "descripcion", "imagenUrl", "imagenAlt",
                     "autor", "fuente", "licencia"),
             "CONTACTO", Set.of("telefono", "correo", "direccion", "horario", "redes", "visible"),
-            "FOOTER", Set.of("descripcion", "enlaces", "infoLegal", "creditosFotograficos")
+            "FOOTER", Set.of("descripcion", "enlaces", "infoLegal", "creditosFotograficos"),
+            "LOGIN", Set.of("imagenUrl", "imagenMobileUrl", "imagenAlt", "tituloInstitucional",
+                    "frasePrincipal", "textoComplementario", "servicios", "serviciosVisible",
+                    "focoX", "focoY", "overlay", "autor", "fuente", "licencia", "atribucion")
     );
 
     private static final Set<String> SECCIONES = CLAVES.keySet();
@@ -68,6 +71,7 @@ public class ContenidoPortalValidator {
             case "NOSOTROS" -> validarNosotros(root);
             case "CONTACTO" -> validarContacto(root);
             case "FOOTER" -> validarFooter(root);
+            case "LOGIN" -> validarLogin(root);
             default -> throw new NegocioException("Sección editorial inválida");
         }
     }
@@ -176,6 +180,39 @@ public class ContenidoPortalValidator {
         }
     }
 
+    private void validarLogin(JsonNode r) {
+        textoObligatorio(r, "tituloInstitucional", 80);
+        textoObligatorio(r, "frasePrincipal", 200);
+        textoOpcional(r, "textoComplementario", 500);
+        urlOpcional(r, "imagenUrl", 500);
+        urlOpcional(r, "imagenMobileUrl", 500);
+        textoOpcional(r, "imagenAlt", 200);
+        textoOpcional(r, "autor", 150);
+        textoOpcional(r, "fuente", 200);
+        textoOpcional(r, "licencia", 100);
+        textoOpcional(r, "atribucion", 300);
+        booleanoOpcional(r, "serviciosVisible");
+        numeroRango(r, "focoX", 0, 100);
+        numeroRango(r, "focoY", 0, 100);
+        numeroRango(r, "overlay", 0, 1);
+        JsonNode servicios = r.get("servicios");
+        if (servicios != null) {
+            if (!servicios.isArray()) throw new NegocioException("'servicios' debe ser una lista");
+            if (servicios.size() > 8) throw new NegocioException("Máximo 8 servicios en el Login");
+            for (JsonNode s : servicios) {
+                if (!s.isObject()) throw new NegocioException("Cada servicio debe ser un objeto");
+                verificarClaves("SERVICIO", s, Set.of("titulo", "subtitulo", "icono", "visible"));
+                textoObligatorio(s, "titulo", 60);
+                textoOpcional(s, "subtitulo", 120);
+                String icono = textoOpcional(s, "icono", 30);
+                if (icono != null && !icono.isBlank() && !ICONOS_PERMITIDOS.contains(icono.toLowerCase())) {
+                    throw new NegocioException("Icono no permitido: " + icono);
+                }
+                booleanoOpcional(s, "visible");
+            }
+        }
+    }
+
     // ── Helpers ─────────────────────────────────────────────────────────────
 
     private void verificarClaves(String contexto, JsonNode obj, Set<String> permitidas) {
@@ -260,6 +297,18 @@ public class ContenidoPortalValidator {
         JsonNode n = r.get(campo);
         if (n != null && !n.isNull() && !n.isInt() && !n.isLong()) {
             throw new NegocioException("El campo '" + campo + "' debe ser un entero");
+        }
+    }
+
+    private void numeroRango(JsonNode r, String campo, double min, double max) {
+        JsonNode n = r.get(campo);
+        if (n == null || n.isNull()) return;
+        if (!n.isNumber()) {
+            throw new NegocioException("El campo '" + campo + "' debe ser un número");
+        }
+        double v = n.asDouble();
+        if (v < min || v > max) {
+            throw new NegocioException("El campo '" + campo + "' debe estar entre " + min + " y " + max);
         }
     }
 }

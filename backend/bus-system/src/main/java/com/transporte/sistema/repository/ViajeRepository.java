@@ -30,7 +30,7 @@ public interface ViajeRepository extends JpaRepository<Viaje, Long> {
     @Query("SELECT v FROM Viaje v WHERE v.ruta.origen.id = :origenId " +
            "AND v.ruta.destino.id = :destinoId " +
            "AND v.estado = 'PROGRAMADO' " +
-           "AND (CAST(:desde AS java.time.LocalDateTime) IS NULL OR v.fechaHoraSalida >= :desde) " +
+           "AND ((CAST(:desde AS java.time.LocalDateTime) IS NOT NULL AND v.fechaHoraSalida >= :desde) OR (CAST(:desde AS java.time.LocalDateTime) IS NULL AND v.fechaHoraSalida >= CURRENT_TIMESTAMP)) " +
            "AND (CAST(:hasta AS java.time.LocalDateTime) IS NULL OR v.fechaHoraSalida <= :hasta) " +
            "AND (v.activo IS NULL OR v.activo = true)")
     Page<Viaje> buscarDisponibles(

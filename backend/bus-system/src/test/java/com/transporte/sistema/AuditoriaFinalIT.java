@@ -521,21 +521,43 @@ class AuditoriaFinalIT {
     @Order(6)
     @DisplayName("IDOR: un chofer no puede cambiar el estado de un viaje que no conduce")
     void idorEstadoDeViajeAjeno() throws Exception {
-        List<Long> ajenos = jdbc.queryForList(
-                "SELECT id FROM viajes WHERE chofer_id <> (SELECT id FROM usuarios WHERE username='chofer1') AND activo=true",
-                Long.class);
-        ver("viajes activos que NO conduce chofer1", ajenos);
-        if (ajenos.isEmpty()) { ver("sin viajes ajenos para la prueba", true); return; }
-        Long viaje = ajenos.get(0);
+        List<Long> viajes = jdbc.queryForList(
+                "SELECT id FROM viajes WHERE activo=true ORDER BY id", Long.class);
+        ver("viajes activos", viajes);
+        if (viajes.isEmpty()) { ver("sin viajes para la prueba", true); return; }
+        Long viaje = viajes.get(0);
+        Long choferAsignado = jdbc.queryForObject("SELECT chofer_id FROM viajes WHERE id=?", Long.class, viaje);
+        Long idChofer1 = jdbc.queryForObject("SELECT id FROM usuarios WHERE username='chofer1'", Long.class);
+        Long idChofer2 = jdbc.queryForObject("SELECT id FROM usuarios WHERE username='chofer2'", Long.class);
+        ver("viaje " + viaje + " asignado al usuario " + choferAsignado, choferAsignado);
+
+        String usuarioAjeno = idChofer1.equals(choferAsignado) ? "chofer2" : "chofer1";
+        String tokenAjeno = token.get(usuarioAjeno);
+        if (tokenAjeno == null) tokenAjeno = login(usuarioAjeno, "chofer123");
+
         String estadoAntes = jdbc.queryForObject("SELECT estado FROM viajes WHERE id=?", String.class, viaje);
-        ResponseEntity<JsonNode> r = patch("/api/v1/viajes/" + viaje + "/estado", token.get("CHOFER2"), m("estado", "FINALIZADO"));
+        ResponseEntity<JsonNode> r = patch("/api/v1/viajes/" + viaje + "/estado?estado=CANCELADO", tokenAjeno, null);
         String estadoDespues = jdbc.queryForObject("SELECT estado FROM viajes WHERE id=?", String.class, viaje);
         ok("chofer ajeno NO cambia el estado (HTTP " + r.getStatusCodeValue() + ", " + estadoAntes + " -> " + estadoDespues + ")",
                 r.getStatusCode() == HttpStatus.FORBIDDEN && estadoAntes.equals(estadoDespues));
 
-        List<Long> propios = jdbc.queryForList(
-                "SELECT id FROM viajes WHERE chofer_id=(SELECT id FROM usuarios WHERE username='chofer1') AND activo=true", Long.class);
-        ver("viajes de chofer1 (control positivo)", propios);
+        // Control positivo: el chofer ASIGNADO si puede cambiar el estado con una
+        // transicion valida. Se restaura el estado original para no alterar los
+        // viajes que usan las demas pruebas de la auditoria.
+        String usuarioPropio = (choferAsignado != null && choferAsignado.equals(idChofer1)) ? "chofer1"
+                : (choferAsignado != null && choferAsignado.equals(idChofer2)) ? "chofer2" : null;
+        if (usuarioPropio != null) {
+            String tokenPropio = token.get(usuarioPropio);
+            if (tokenPropio == null) tokenPropio = login(usuarioPropio, "chofer123");
+            try {
+                ResponseEntity<JsonNode> propio = patch(
+                        "/api/v1/viajes/" + viaje + "/estado?estado=EN_CURSO", tokenPropio, null);
+                ok("el chofer ASIGNADO (" + usuarioPropio + ") si cambia el estado de su viaje (HTTP "
+                        + propio.getStatusCodeValue() + ")", propio.getStatusCode() == HttpStatus.OK);
+            } finally {
+                jdbc.update("UPDATE viajes SET estado=? WHERE id=?", estadoAntes, viaje);
+            }
+        }
     }
 
     // â”€â”€ 7. IDOR: movimientos de encomienda ajena â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -593,10 +615,37 @@ class AuditoriaFinalIT {
     @Test
     @Order(8)
     @DisplayName("BOLA: los endpoints publicos de venta exigen el documento del comprador")
-    void bolaEndpointsPublicos() throws Exception {
-        String ref = jdbc.queryForObject("SELECT referencia FROM retenciones WHERE estado='CONFIRMADO' ORDER BY id DESC LIMIT 1", String.class);
+void bolaEndpointsPublicos() throws Exception {
+        // FIXTURE AUTONOMO: la prueba crea su propia reserva CONFIRMADA con boleto
+        // en lugar de depender de una fila semilla o de los datos que otra prueba
+        // (orden) haya podido dejar. Asi es repetible e independiente del orden.
+        String documento = dni();  // 906xxxxx: limpiar() elimina lo creado
+        List<Long> libre = jdbc.queryForList(
+                "SELECT id FROM asientos WHERE viaje_id=1 AND estado='DISPONIBLE' ORDER BY id LIMIT 1", Long.class);
+        assertEquals(1, libre.size(), "Se requiere 1 asiento libre en el viaje 1");
+        asientosQA.addAll(libre);
+
+        ResponseEntity<JsonNode> ret = post("/api/v1/ventas/retencion", null, m(
+                "viajeId", 1, "asientoIds", libre, "idempotencyKey", "aud-bola-" + UUID.randomUUID(),
+                "comprador", m("nombres", "QA", "apellidos", "BOLA", "documento", documento,
+                        "telefono", "900000107", "email", "qa.bola@intiwatana.test"),
+                "metodoPagoPreferido", "EFECTIVO"));
+        assertEquals(HttpStatus.CREATED, ret.getStatusCode(), "Retencion BOLA: " + ret.getBody());
+        String ref = txt(ret.getBody(), "referencia");
+
+        ResponseEntity<JsonNode> reserva = post(
+                "/api/v1/ventas/retencion/" + ref + "/reservar?metodoPago=EFECTIVO", null, null);
+        assertEquals(HttpStatus.OK, reserva.getStatusCode(), "Reserva BOLA: " + reserva.getBody());
+
+        String cajero = token.get("CAJERO");
+        if (cajero == null) cajero = login("cajero1", "cajero123");
+        ResponseEntity<JsonNode> conf = post("/api/v1/ventas/reservas/" + ref + "/confirmar", cajero,
+                m("metodoPago", "EFECTIVO", "referenciaPago", "OPQA" + sufijo(), "documento", documento));
+        assertEquals(HttpStatus.OK, conf.getStatusCode(), "Confirmacion BOLA: " + conf.getBody());
+        String num = conf.getBody().get(0).get("numeroBoleto").asText();
+        boletosQA.add(num);
+
         String doc = jdbc.queryForObject("SELECT comprador_documento FROM retenciones WHERE referencia=?", String.class, ref);
-        String num = jdbc.queryForObject("SELECT numero_boleto FROM boletos WHERE estado <> 'CANCELADO' ORDER BY id DESC LIMIT 1", String.class);
         String docBoleto = jdbc.queryForObject("SELECT c.dni_ruc FROM boletos b JOIN clientes c ON c.id=b.cliente_id WHERE b.numero_boleto=?", String.class, num);
         ver("boleto de prueba para el PDF", num + " / documento " + docBoleto);
 

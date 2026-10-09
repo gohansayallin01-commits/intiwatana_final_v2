@@ -1,0 +1,11 @@
+Comparando archivos REPORTS\RESPALDO-CAJA-EMPRESARIAL\PasajesPage.jsx.bak y FRONTEND\WEB-INTIWATANA\SRC\COMPONENTS\PASAJESPAGE.JSX
+***** REPORTS\RESPALDO-CAJA-EMPRESARIAL\PasajesPage.jsx.bak
+  240:  
+  241:  function MapaAsientos({ asientos, seleccionados, onSeleccionar, configuracion }) {
+  242:    const lista = Array.isArray(asientos) ? asientos : [];
+***** FRONTEND\WEB-INTIWATANA\SRC\COMPONENTS\PASAJESPAGE.JSX
+  240:  
+  241:  export function MapaAsientos({ asientos, seleccionados, onSeleccionar, configuracion }) {
+  242:    const lista = Array.isArray(asientos) ? asientos : [];
+*****
+

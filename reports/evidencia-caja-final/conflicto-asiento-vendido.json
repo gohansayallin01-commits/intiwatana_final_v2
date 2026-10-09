@@ -1,0 +1,21 @@
+{
+  "prueba": "Reventa de asiento ya vendido - se intenta comprar el 2A (asiento 853) que ya tiene su boleto ACTIVO (BOL-20261009-000055)",
+  "metodo": "POST /api/v1/ventas/presencial",
+  "payload": {
+    "viajeId": 33,
+    "asientoIds": [853],
+    "clienteId": 1,
+    "metodoPago": "EFECTIVO",
+    "montoRecibido": 20,
+    "idempotencyKey": "caja-final-409-7f31a2c4d95e4b8a9c0d1e2f3a4b5c6"
+  },
+  "http": 409,
+  "respuesta": {
+    "status": 409,
+    "error": "Conflict",
+    "mensaje": "El asiento 2A ya no está disponible",
+    "path": "/api/v1/ventas/presencial",
+    "timestamp": "2026-10-09T04:04:03"
+  },
+  "interpretacion": "El flujo de caja bloquea la reventa de un asiento ya vendido sin excepciones 500. Protegido ademas por el indice unico parcial uk_boletos_asiento_activo (1 boleto vigente por asiento)."
+}

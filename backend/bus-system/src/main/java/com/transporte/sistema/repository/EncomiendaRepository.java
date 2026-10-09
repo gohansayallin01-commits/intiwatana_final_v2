@@ -80,7 +80,7 @@ public interface EncomiendaRepository extends JpaRepository<Encomienda, Long> {
             LEFT JOIN e.destinatario d
             WHERE e.estado = :estado
               AND (e.activo IS NULL OR e.activo = true)
-              AND ( :q IS NULL
+              AND ( :q = ''
                     OR LOWER(COALESCE(e.referenciaSolicitud, ''))  LIKE LOWER(CONCAT('%', :q, '%'))
                     OR LOWER(COALESCE(r.nombres, ''))              LIKE LOWER(CONCAT('%', :q, '%'))
                     OR LOWER(COALESCE(r.apellidos, ''))            LIKE LOWER(CONCAT('%', :q, '%'))
@@ -94,10 +94,10 @@ public interface EncomiendaRepository extends JpaRepository<Encomienda, Long> {
                     OR LOWER(COALESCE(d.dniRuc, ''))               LIKE LOWER(CONCAT('%', :q, '%'))
                     OR LOWER(COALESCE(e.sucursalOrigen.nombre, ''))  LIKE LOWER(CONCAT('%', :q, '%'))
                     OR LOWER(COALESCE(e.sucursalDestino.nombre, '')) LIKE LOWER(CONCAT('%', :q, '%')) )
-              AND ( :sucursalOrigenId IS NULL  OR e.sucursalOrigen.id  = :sucursalOrigenId )
-              AND ( :sucursalDestinoId IS NULL OR e.sucursalDestino.id = :sucursalDestinoId )
-              AND ( :desde IS NULL OR e.createdAt >= :desde )
-              AND ( :hasta IS NULL OR e.createdAt <= :hasta )
+              AND ( CAST(:sucursalOrigenId AS java.lang.Long) IS NULL  OR e.sucursalOrigen.id  = :sucursalOrigenId )
+              AND ( CAST(:sucursalDestinoId AS java.lang.Long) IS NULL OR e.sucursalDestino.id = :sucursalDestinoId )
+              AND ( CAST(:desde AS java.time.LocalDateTime) IS NULL OR e.createdAt >= :desde )
+              AND ( CAST(:hasta AS java.time.LocalDateTime) IS NULL OR e.createdAt <= :hasta )
             """)
     Page<Encomienda> buscarSolicitudesPendientes(@Param("estado") EstadoEncomienda estado,
                                                  @Param("q") String q,

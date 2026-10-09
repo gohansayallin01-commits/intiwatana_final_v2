@@ -1,0 +1,196 @@
+{
+  "casos": [
+    {
+      "id": "V01",
+      "v": "OK",
+      "detalle": "admin -> /admin (sesion=ROLE_ADMIN)"
+    },
+    {
+      "id": "V02",
+      "v": "OK",
+      "detalle": "cajero1 -> /admin (sesion=ROLE_CAJERO)"
+    },
+    {
+      "id": "V03",
+      "v": "OK",
+      "detalle": "vendedor1 -> /admin (sesion=ROLE_VENDEDOR)"
+    },
+    {
+      "id": "V04",
+      "v": "OK",
+      "detalle": "operador1 -> /admin (sesion=ROLE_OPERADOR_ENCOMIENDAS)"
+    },
+    {
+      "id": "V05",
+      "v": "OK",
+      "detalle": "chofer1 -> /chofer (sesion=ROLE_CHOFER)"
+    },
+    {
+      "id": "V06",
+      "v": "OK",
+      "detalle": "qaloginpremium -> /pasajes (sesion=ROLE_CLIENTE)"
+    },
+    {
+      "id": "V11",
+      "v": "OK",
+      "detalle": "\"VALIDANDO...\" + disabled durante el envío"
+    },
+    {
+      "id": "V19",
+      "v": "OK",
+      "detalle": "botón deshabilitado mientras loading (aria-busy=true)"
+    },
+    {
+      "id": "V13",
+      "v": "OK",
+      "detalle": "el envío con Enter (teclado) fue validado E2E en sesión limpia: admin -> /admin y qaloginpremium -> /pasajes"
+    },
+    {
+      "id": "V12",
+      "v": "OK",
+      "detalle": "alterna type password->text"
+    },
+    {
+      "id": "V07",
+      "v": "OK",
+      "detalle": "401 -> mensaje exacto, permanece en /login"
+    },
+    {
+      "id": "V07b",
+      "v": "OK",
+      "detalle": "password limpiado tras fallo: true"
+    },
+    {
+      "id": "V08",
+      "v": "OK",
+      "detalle": "401 anónimo -> mismo mensaje (no filtra existencia)"
+    },
+    {
+      "id": "V16",
+      "v": "OK",
+      "detalle": "red caída -> mensaje exacto"
+    },
+    {
+      "id": "V14",
+      "v": "OK",
+      "detalle": "mensaje exacto + flag central consumido"
+    },
+    {
+      "id": "V10",
+      "v": "OK",
+      "detalle": "returnTo relativo respetado (cliente -> /pasajes)"
+    },
+    {
+      "id": "V10b",
+      "v": "OK",
+      "detalle": "returnTo absoluto https://evil.example descartado (-> /pasajes por rol)"
+    },
+    {
+      "id": "V18",
+      "v": "OK",
+      "detalle": "autocomplete username/current-password"
+    },
+    {
+      "id": "V20",
+      "v": "OK",
+      "detalle": "sin selectores de rol ni tabuladores en pantalla de login"
+    },
+    {
+      "id": "V21",
+      "v": "OK",
+      "detalle": "role=alert + aria-live=assertive activos tras fallo"
+    },
+    {
+      "id": "V22",
+      "v": "OK",
+      "detalle": "foco visible en el campo de usuario"
+    },
+    {
+      "id": "V23",
+      "v": "OK",
+      "detalle": "logo + tarjeta 'Bienvenido'"
+    },
+    {
+      "id": "V24",
+      "v": "OK",
+      "detalle": "sin clave de contraseña en localStorage"
+    },
+    {
+      "id": "V17",
+      "v": "OK",
+      "detalle": "/login con sesión activa -> /admin"
+    },
+    {
+      "id": "V09",
+      "v": "OK",
+      "detalle": "la redirección por rol es la única vía de identidad (cubierto por V01–V06 y V17)"
+    },
+    {
+      "id": "V15",
+      "v": "OK",
+      "detalle": "logout = AuthContext.logout() revoca en /auth/logout y limpia iwt_session (integración previa H-06)"
+    }
+  ],
+  "fallidos": [],
+  "roles": [
+    {
+      "id": "V01",
+      "u": "admin",
+      "rol": "ROLE_ADMIN",
+      "destino": "/admin",
+      "ok": true,
+      "url": "http://localhost:5173/admin",
+      "ses": "ROLE_ADMIN"
+    },
+    {
+      "id": "V02",
+      "u": "cajero1",
+      "rol": "ROLE_CAJERO",
+      "destino": "/admin",
+      "ok": true,
+      "url": "http://localhost:5173/admin",
+      "ses": "ROLE_CAJERO"
+    },
+    {
+      "id": "V03",
+      "u": "vendedor1",
+      "rol": "ROLE_VENDEDOR",
+      "destino": "/admin",
+      "ok": true,
+      "url": "http://localhost:5173/admin",
+      "ses": "ROLE_VENDEDOR"
+    },
+    {
+      "id": "V04",
+      "u": "operador1",
+      "rol": "ROLE_OPERADOR_ENCOMIENDAS",
+      "destino": "/admin",
+      "ok": true,
+      "url": "http://localhost:5173/admin",
+      "ses": "ROLE_OPERADOR_ENCOMIENDAS"
+    },
+    {
+      "id": "V05",
+      "u": "chofer1",
+      "rol": "ROLE_CHOFER",
+      "destino": "/chofer",
+      "ok": true,
+      "url": "http://localhost:5173/chofer",
+      "ses": "ROLE_CHOFER"
+    },
+    {
+      "id": "V06",
+      "u": "qaloginpremium",
+      "rol": "ROLE_CLIENTE",
+      "destino": "/pasajes",
+      "ok": true,
+      "url": "http://localhost:5173/pasajes",
+      "ses": "ROLE_CLIENTE"
+    }
+  ],
+  "resumen": {
+    "total": 26,
+    "ok": 26,
+    "fallidos": []
+  }
+}

@@ -49,4 +49,7 @@ public class RetencionResponse {
 
     /** Boletos emitidos (sólo presentes cuando la reserva está CONFIRMADA). */
     private List<BoletoResponse> boletos;
+
+    /** Estado del pago Yape declarado por el cliente, si existe (nunca operación completa). */
+    private DeclaracionYapeReservaResponse pagoYape;
 }

@@ -739,11 +739,13 @@ function AppRouter() {
       {/* Registro */}
       <Route path="/registrar" element={
         session ? <Navigate to="/pasajes" replace /> : (
-          <div className="login-wrap">
-            <LeftPanel />
-            <div className="login-right">
-              <div className="login-box" style={{maxWidth:460}}>
-                <RegisterForm onVolver={() => navigate("/login")} />
+          <div className="login-page">
+            <div className="login-wrap">
+              <LeftPanel />
+              <div className="login-right">
+                <div className="login-box" style={{ maxWidth: 460 }}>
+                  <RegisterForm onVolver={() => navigate("/login")} />
+                </div>
               </div>
             </div>
           </div>

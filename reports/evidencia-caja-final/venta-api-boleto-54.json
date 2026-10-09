@@ -1,0 +1,26 @@
+{
+  "prueba": "Venta presencial por API - canal directo (misma logica transaccional que la UI)",
+  "metodo": "POST /api/v1/ventas/presencial con token CAJERO (cajero1)",
+  "payload": {
+    "viajeId": 33,
+    "asientoIds": [849],
+    "clienteId": 1,
+    "metodoPago": "EFECTIVO",
+    "montoRecibido": 20,
+    "idempotencyKey": "qa-itinerario-f8e425ae8e174447b7ee9f1babd7ccc5"
+  },
+  "http": 201,
+  "respuesta": [
+    {
+      "id": 54,
+      "numeroBoleto": "BOL-20261009-000054",
+      "viaje": { "id": 33, "fechaHoraSalida": "2026-10-09T20:00:00", "precioAdulto": 20.00, "estado": "PROGRAMADO" },
+      "asiento": { "id": 849, "numeroAsiento": "1A", "tipo": "VENTANA", "estado": "VENDIDO" },
+      "cliente": { "id": 1, "dniRuc": "12345678", "nombreCompleto": "Ana García" },
+      "precioPagado": 20.00,
+      "estado": "ACTIVO",
+      "codigoQr": "BOL-20261009-000054"
+    }
+  ],
+  "interpretacion": "Se emite el boleto BOL-20261009-000054 con QR y el asiento 1A pasa a VENDIDO. la misma peticion reenviada no duplica (ver idempotencia-replay.json)."
+}

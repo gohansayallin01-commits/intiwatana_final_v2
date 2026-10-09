@@ -1,0 +1,1 @@
+ENTREGA PARCIAL COMPLETADA. UI ampliada (menu+caja), backend endpoint /api/v1/ventas/presencial, build OK, lint OK, tests 110/110. Veredicto NO CERRADA (pendiente QA transaccional en _qa).

@@ -28,12 +28,16 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import LogoSVG from "./LogoSVG";
 import { DESTINOS } from "../data/destinos";
+import "./reserva-premium.css";
+import Vilcas from "../assets/Vilcas.jpeg";
 import {
   MapPin, Flag, Bus, ShoppingCart, User, Ticket, Package, X,
   Clock, CreditCard, Building2, Smartphone, AlertTriangle, CheckCircle,
   Search, Calendar, ChevronRight, Armchair, Loader2, Frown,
   ArrowRight, FileText, Zap, Info, Navigation,
   LogIn, LayoutDashboard, Check, Lock, Compass,
+  Menu, Copy, Wallet, ShieldCheck, Home, ChevronLeft,
+  Upload, RefreshCw, Image as ImageIcon,
 } from "lucide-react";
 
 function fmtFecha(iso) {
@@ -75,165 +79,154 @@ function etiquetaEstadoReserva(estado) {
   }
 }
 
-const MODELO_METODOS = [
-  { value: "EFECTIVO", label: "Efectivo en terminal", desc: "Paga al llegar", icon: <CreditCard size={18} /> },
-  { value: "YAPE", label: "Yape", desc: "Coordina en caja", icon: <Smartphone size={18} /> },
-  { value: "PLIN", label: "Plin", desc: "Coordina en caja", icon: <Smartphone size={18} /> },
-  { value: "TRANSFERENCIA", label: "Transferencia", desc: "Coordina en caja", icon: <Building2 size={18} /> },
-  { value: "TARJETA_CREDITO", label: "Tarjeta de crédito", desc: "Coordina en caja", icon: <CreditCard size={18} /> },
-  { value: "TARJETA_DEBITO", label: "Tarjeta de débito", desc: "Coordina en caja", icon: <CreditCard size={18} /> },
-];
-
 // ── VISTA TOP-DOWN: Asiento desde arriba — igual a foto real Toyota Hiace ──
-const TopDownSeatSVG = ({ numero, estado, esSelec, compact = false }) => {
-  const isOcc = estado !== "DISPONIBLE";
+// Colores y símbolos por estado de asiento (tema claro premium).
+const SEAT_PALETTE = {
+  DISPONIBLE:   { bg: "#FFFFFF", hd: "#EDF4F2", bd: "#127369", tc: "#17312E", glyph: null },
+  SELECCIONADO: { bg: "#F5C518", hd: "#E0AB06", bd: "#B8860B", tc: "#0B3D38", glyph: "check" },
+  RESERVADO:    { bg: "#FFF1DC", hd: "#FBE3BD", bd: "#E08A00", tc: "#8A5600", glyph: "lock" },
+  VENDIDO:      { bg: "#E6EAE8", hd: "#DAE0DE", bd: "#9FB0AB", tc: "#5C6B66", glyph: "x" },
+  BLOQUEADO:    { bg: "#FBEAEA", hd: "#F6D8D8", bd: "#D96F6F", tc: "#92201F", glyph: "lock" },
+};
 
-  // Colores por estado
-  let bg, hd, bd, tc;
-  if (esSelec) {
-    bg = "#7c3405"; hd = "#5c2803"; bd = "#f59e0b"; tc = "#fef3c7";
-  } else if (isOcc) {
-    bg = "#161f2e"; hd = "#0d1520"; bd = "#1e2d3d"; tc = "#253345";
-  } else {
-    bg = "#1e2d3d"; hd = "#111e2d"; bd = "#2d4462"; tc = "#d4e8ff";
+const SeatStateGlyph = ({ glyph, tc, compact }) => {
+  if (glyph === "check") {
+    return <path d={compact ? "M31 20 L34 23 L38 18" : "M41 23 L45 27 L50 19"} stroke={tc} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />;
   }
+  if (glyph === "x") {
+    return compact ? (
+      <>
+        <line x1="31" y1="19" x2="38" y2="24" stroke={tc} strokeWidth="2" strokeLinecap="round" />
+        <line x1="38" y1="19" x2="31" y2="24" stroke={tc} strokeWidth="2" strokeLinecap="round" />
+      </>
+    ) : (
+      <>
+        <line x1="41" y1="18" x2="49" y2="26" stroke={tc} strokeWidth="2" strokeLinecap="round" />
+        <line x1="49" y1="18" x2="41" y2="26" stroke={tc} strokeWidth="2" strokeLinecap="round" />
+      </>
+    );
+  }
+  if (glyph === "lock") {
+    return compact ? (
+      <>
+        <rect x="31" y="18" width="8" height="6" rx="1.5" fill={tc} />
+        <path d="M33 18 v-1.6 a3 3 0 0 1 6 0 v1.6" fill="none" stroke={tc} strokeWidth="1.6" />
+      </>
+    ) : (
+      <>
+        <rect x="40" y="18" width="10" height="7" rx="1.5" fill={tc} />
+        <path d="M43 18 v-2.2 a4 4 0 0 1 8 0 v2.2" fill="none" stroke={tc} strokeWidth="1.8" />
+      </>
+    );
+  }
+  return null;
+};
+
+const TopDownSeatSVG = ({ numero, estado, esSelec, compact = false }) => {
+  const st = esSelec ? "SELECCIONADO" : (estado || "DISPONIBLE");
+  const { bg, hd, bd, tc, glyph } = SEAT_PALETTE[st] || SEAT_PALETTE.DISPONIBLE;
+  const ocupadoDash = st !== "DISPONIBLE" && st !== "SELECCIONADO" ? "3 2" : "0";
+  const num = compact ? [7, 22, 12, 6] : [10, 30, 16, 9];
+  const numCx = num[0] + num[2] / 2;
+  const numCy = num[1] + num[3] + 6;
 
   if (compact) {
     return (
-      <svg width="42" height="54" viewBox="0 0 42 54" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Headrest */}
-        <rect x="5" y="1" width="32" height="11" rx="4" fill={hd} stroke={bd} strokeWidth="1.5"/>
-        <rect x="9" y="3" width="24" height="5" rx="2" fill="white" fillOpacity="0.07"/>
-        {/* Seat Back */}
-        <rect x="1" y="10" width="40" height="27" rx="6" fill={bg} stroke={bd} strokeWidth="1.5"/>
-        <rect x="5" y="12" width="32" height="6" rx="2" fill="white" fillOpacity="0.07"/>
-        <line x1="12" y1="11" x2="12" y2="36" stroke={bd} strokeWidth="0.7" strokeDasharray="2 3"/>
-        <line x1="30" y1="11" x2="30" y2="36" stroke={bd} strokeWidth="0.7" strokeDasharray="2 3"/>
-        {/* Cushion */}
-        <rect x="1" y="35" width="40" height="15" rx="6" fill={bg} stroke={bd} strokeWidth="1.5"/>
-        <rect x="5" y="37" width="32" height="5" rx="2" fill="white" fillOpacity="0.05"/>
-        {/* Armrests */}
-        <rect x="0" y="36" width="3" height="10" rx="1.5" fill={hd} stroke={bd} strokeWidth="1"/>
-        <rect x="39" y="36" width="3" height="10" rx="1.5" fill={hd} stroke={bd} strokeWidth="1"/>
-        {/* State icon */}
-        {esSelec ? (
-          <path d="M13 27 L18 33 L29 20" stroke={tc} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-        ) : isOcc ? (
-          <>
-            <rect x="14" y="23" width="14" height="10" rx="2" fill={tc}/>
-            <path d="M16 23 V20 C16 17 26 17 26 20 V23" stroke={tc} strokeWidth="1.5" fill="none"/>
-          </>
-        ) : (
-          <text x="21" y="30" textAnchor="middle" fill={tc} fontSize="14" fontWeight="800" fontFamily="system-ui,sans-serif">{numero}</text>
-        )}
+      <svg width="44" height="56" viewBox="0 0 42 54" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">
+        <rect x="5" y="1" width="32" height="11" rx="4" fill={hd} stroke={bd} strokeWidth="1.3" strokeDasharray={ocupadoDash} />
+        <rect x="1" y="10" width="40" height="27" rx="6" fill={bg} stroke={bd} strokeWidth="1.3" />
+        <rect x="5" y="12" width="30" height="6" rx="2" fill="white" fillOpacity={st === "DISPONIBLE" ? 0.4 : 0.2} />
+        <rect x="1" y="35" width="40" height="15" rx="6" fill={bg} stroke={bd} strokeWidth="1.3" strokeDasharray={ocupadoDash} />
+        <rect x="0" y="36" width="3" height="10" rx="1.5" fill={hd} stroke={bd} strokeWidth="1" />
+        <rect x="39" y="36" width="3" height="10" rx="1.5" fill={hd} stroke={bd} strokeWidth="1" />
+        <rect x={num[0]} y={num[1]} width={num[2]} height={num[3]} rx="2" fill="white" fillOpacity={st === "DISPONIBLE" ? 0.45 : 0.2} />
+        <text x={numCx} y={numCy} textAnchor="middle" fill={tc} fontSize="12" fontWeight="800" fontFamily="system-ui,sans-serif">{numero}</text>
+        <SeatStateGlyph glyph={glyph} tc={tc} compact />
       </svg>
     );
   }
 
   return (
-    <svg width="54" height="68" viewBox="0 0 54 68" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Headrest */}
-      <rect x="6" y="1" width="42" height="14" rx="5" fill={hd} stroke={bd} strokeWidth="1.5"/>
-      <rect x="10" y="3" width="34" height="7" rx="2" fill="white" fillOpacity="0.08"/>
-      {/* Seat Back */}
-      <rect x="1" y="13" width="52" height="34" rx="7" fill={bg} stroke={bd} strokeWidth="1.5"/>
-      <rect x="5" y="15" width="44" height="8" rx="3" fill="white" fillOpacity="0.08"/>
-      <line x1="16" y1="14" x2="16" y2="46" stroke={bd} strokeWidth="0.8" strokeDasharray="2 3"/>
-      <line x1="38" y1="14" x2="38" y2="46" stroke={bd} strokeWidth="0.8" strokeDasharray="2 3"/>
-      {/* Seat Cushion */}
-      <rect x="1" y="45" width="52" height="20" rx="7" fill={bg} stroke={bd} strokeWidth="1.5"/>
-      <rect x="5" y="47" width="44" height="7" rx="2" fill="white" fillOpacity="0.06"/>
-      {/* Armrests */}
-      <rect x="0" y="46" width="3" height="14" rx="1.5" fill={hd} stroke={bd} strokeWidth="1"/>
-      <rect x="51" y="46" width="3" height="14" rx="1.5" fill={hd} stroke={bd} strokeWidth="1"/>
-      {/* State icon */}
-      {esSelec ? (
-        <path d="M18 39 L24 46 L36 30" stroke={tc} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-      ) : isOcc ? (
-        <>
-          <rect x="19" y="28" width="16" height="12" rx="2" fill={tc}/>
-          <path d="M21 28 V24 C21 20 33 20 33 24 V28" stroke={tc} strokeWidth="1.5" fill="none"/>
-        </>
-      ) : (
-        <text x="27" y="41" textAnchor="middle" fill={tc} fontSize="19" fontWeight="800" fontFamily="system-ui,sans-serif">{numero}</text>
-      )}
+    <svg width="56" height="70" viewBox="0 0 54 68" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">
+      <rect x="6" y="1" width="42" height="14" rx="5" fill={hd} stroke={bd} strokeWidth="1.3" strokeDasharray={ocupadoDash} />
+      <rect x="1" y="13" width="52" height="34" rx="7" fill={bg} stroke={bd} strokeWidth="1.3" />
+      <rect x="5" y="15" width="44" height="8" rx="3" fill="white" fillOpacity={st === "DISPONIBLE" ? 0.4 : 0.2} />
+      <line x1="16" y1="14" x2="16" y2="46" stroke={bd} strokeWidth="0.8" strokeDasharray="2 3" />
+      <line x1="38" y1="14" x2="38" y2="46" stroke={bd} strokeWidth="0.8" strokeDasharray="2 3" />
+      <rect x="1" y="45" width="52" height="20" rx="7" fill={bg} stroke={bd} strokeWidth="1.3" strokeDasharray={ocupadoDash} />
+      <rect x="5" y="47" width="44" height="7" rx="2" fill="white" fillOpacity={st === "DISPONIBLE" ? 0.35 : 0.15} />
+      <rect x="0" y="46" width="3" height="14" rx="1.5" fill={hd} stroke={bd} strokeWidth="1" />
+      <rect x="51" y="46" width="3" height="14" rx="1.5" fill={hd} stroke={bd} strokeWidth="1" />
+      <rect x={num[0]} y={num[1]} width={num[2]} height={num[3]} rx="2" fill="white" fillOpacity={st === "DISPONIBLE" ? 0.45 : 0.2} />
+      <text x={numCx} y={numCy} textAnchor="middle" fill={tc} fontSize="16" fontWeight="800" fontFamily="system-ui,sans-serif">{numero}</text>
+      <SeatStateGlyph glyph={glyph} tc={tc} compact />
     </svg>
   );
 };
 
 // Asiento del chofer — estático, sin interacción
 const DriverSeatSVG = () => (
-  <svg width="54" height="68" viewBox="0 0 54 68" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="6" y="1" width="42" height="14" rx="5" fill="#0d1520" stroke="#1e2d3d" strokeWidth="1.5"/>
-    <rect x="10" y="3" width="34" height="7" rx="2" fill="white" fillOpacity="0.04"/>
-    <rect x="1" y="13" width="52" height="34" rx="7" fill="#111e2e" stroke="#1e2d3d" strokeWidth="1.5"/>
-    <rect x="5" y="15" width="44" height="8" rx="3" fill="white" fillOpacity="0.04"/>
-    <line x1="16" y1="14" x2="16" y2="46" stroke="#1e2d3d" strokeWidth="0.8" strokeDasharray="2 3"/>
-    <line x1="38" y1="14" x2="38" y2="46" stroke="#1e2d3d" strokeWidth="0.8" strokeDasharray="2 3"/>
-    <rect x="1" y="45" width="52" height="20" rx="7" fill="#111e2e" stroke="#1e2d3d" strokeWidth="1.5"/>
-    <rect x="5" y="47" width="44" height="7" rx="2" fill="white" fillOpacity="0.04"/>
-    <rect x="0" y="46" width="3" height="14" rx="1.5" fill="#0d1520" stroke="#1e2d3d" strokeWidth="1"/>
-    <rect x="51" y="46" width="3" height="14" rx="1.5" fill="#0d1520" stroke="#1e2d3d" strokeWidth="1"/>
-    <text x="27" y="33" textAnchor="middle" fill="#2d4059" fontSize="6.5" fontWeight="900" fontFamily="system-ui" letterSpacing="0.08em">CHOFER</text>
+  <svg width="56" height="70" viewBox="0 0 54 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="6" y="1" width="42" height="14" rx="5" fill="#E7EFED" stroke="#9FB0AB" strokeWidth="1.3"/>
+    <rect x="1" y="13" width="52" height="34" rx="7" fill="#EFF4F2" stroke="#9FB0AB" strokeWidth="1.3"/>
+    <line x1="16" y1="14" x2="16" y2="46" stroke="#B9C9C5" strokeWidth="0.8" strokeDasharray="2 3"/>
+    <line x1="38" y1="14" x2="38" y2="46" stroke="#B9C9C5" strokeWidth="0.8" strokeDasharray="2 3"/>
+    <rect x="1" y="45" width="52" height="20" rx="7" fill="#E7EFED" stroke="#9FB0AB" strokeWidth="1.3"/>
+    <rect x="0" y="46" width="3" height="14" rx="1.5" fill="#D4E0DC" stroke="#9FB0AB" strokeWidth="1"/>
+    <rect x="51" y="46" width="3" height="14" rx="1.5" fill="#D4E0DC" stroke="#9FB0AB" strokeWidth="1"/>
+    <text x="27" y="36" textAnchor="middle" fill="#6E827D" fontSize="7" fontWeight="900" fontFamily="system-ui" letterSpacing="0.08em">CHOFER</text>
   </svg>
 );
 
 const AsientoBtn = ({ asiento, ocupado, esSelec, onSeleccionar, compact = false }) => {
   const [hovered, setHovered] = useState(false);
+  const st = esSelec ? "SELECCIONADO" : (asiento.estado || "DISPONIBLE");
+  const etiqueta = {
+    DISPONIBLE: "Disponible", SELECCIONADO: "Seleccionado",
+    RESERVADO: "Reservado", VENDIDO: "Vendido", BLOQUEADO: "Bloqueado",
+  }[st] || "Ocupado";
+  const estadoColor = {
+    DISPONIBLE: "#127369", SELECCIONADO: "#B8860B", RESERVADO: "#E08A00",
+    VENDIDO: "#667875", BLOQUEADO: "#D96F6F",
+  }[st] || "#667875";
   const handleClick = (e) => {
     e.preventDefault(); e.stopPropagation();
     if (!ocupado) onSeleccionar(asiento);
   };
   return (
-    <div style={{ position: "relative", display: "inline-block" }}>
+    <div style={{ position: "relative", display: "inline-block", margin: 1 }}>
       <button
         type="button"
         tabIndex={ocupado ? -1 : 0}
-        aria-label={`Asiento ${asiento.numeroAsiento} - ${ocupado ? "Ocupado" : esSelec ? "Seleccionado" : "Disponible"}`}
+        aria-label={`Asiento ${asiento.numeroAsiento} - ${ocupado ? etiqueta : esSelec ? "Seleccionado" : "Disponible"}`}
         aria-pressed={esSelec}
         aria-disabled={ocupado}
+        className={`iwr-btn-asiento ${esSelec ? "iwr-btn-asiento--sel" : ""}`}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         onClick={handleClick}
         style={{
           display: "inline-flex", background: "transparent", border: "none", padding: 0,
-          minWidth: 44, minHeight: 44, justifyContent: "center", alignItems: "center",
+          minWidth: 46, minHeight: 46, justifyContent: "center", alignItems: "center",
           cursor: ocupado ? "not-allowed" : "pointer",
-          transition: "transform 0.18s cubic-bezier(0.34,1.56,0.64,1), filter 0.2s",
-          transform: esSelec ? "translateY(-5px) scale(1.07)" : "none",
-          filter: esSelec ? "drop-shadow(0 0 10px rgba(245,158,11,0.8))" : "none",
+          transition: "transform 0.2s cubic-bezier(0.34,1.56,0.64,1)",
+          transform: esSelec ? "translateY(-4px) scale(1.08)" : "none",
           outline: "none", userSelect: "none",
         }}
       >
         <TopDownSeatSVG numero={asiento.numeroAsiento} estado={asiento.estado} esSelec={esSelec} compact={compact} />
       </button>
       {hovered && (
-        <div style={{
-          position: "absolute", bottom: "calc(100% + 8px)", left: "50%",
-          transform: "translateX(-50%)",
-          background: "#060e1c",
-          border: `1.5px solid ${esSelec ? "#f59e0b" : ocupado ? "rgba(71,85,105,0.5)" : "rgba(45,100,195,0.6)"}`,
-          borderRadius: 10, padding: "6px 12px", whiteSpace: "nowrap",
-          pointerEvents: "none", zIndex: 300,
-          boxShadow: "0 8px 30px rgba(0,0,0,0.9)", textAlign: "center",
-        }}>
-          <div style={{ color: "white", fontWeight: 700, fontSize: 11, marginBottom: 3 }}>
-            Asiento N° {asiento.numeroAsiento}
-          </div>
-          <div style={{
-            fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 4, display: "inline-block",
-            background: ocupado ? "rgba(220,38,38,0.15)" : esSelec ? "rgba(245,158,11,0.15)" : "rgba(37,99,195,0.15)",
-            color: ocupado ? "#fca5a5" : esSelec ? "#fbbf24" : "#93c5fd",
-          }}>
-            {ocupado ? "🔒 Ocupado" : esSelec ? "✓ Seleccionado" : "● Disponible"}
-          </div>
+        <div className="iwr-seat-tip" style={{ "--stColor": estadoColor }}>
+          <div className="iwr-seat-tip-num">Asiento N° {asiento.numeroAsiento}</div>
+          <div className="iwr-seat-tip-state">{etiqueta}</div>
         </div>
       )}
     </div>
   );
 };
 
-function MapaAsientos({ asientos, seleccionados, onSeleccionar }) {
+export function MapaAsientos({ asientos, seleccionados, onSeleccionar, configuracion }) {
   const lista = Array.isArray(asientos) ? asientos : [];
   const sel = Array.isArray(seleccionados) ? seleccionados : [];
 
@@ -243,164 +236,120 @@ function MapaAsientos({ asientos, seleccionados, onSeleccionar }) {
     </div>
   );
 
-  const disponibles = lista.filter(a => a.estado === "DISPONIBLE");
-  const ocupados   = lista.filter(a => a.estado !== "DISPONIBLE");
+  const columnaDe = (a) => Number(a.columna || 0);
+  const filaDe = (a) => Number(a.fila || 0);
+  const pisoDe = (a) => Number(a.piso || 1);
 
-  // ── Ordenar asientos: por fila, luego columna, luego numeroAsiento
-  // Esto garantiza compatibilidad con cualquier numeración del backend
-  const sorted = [...lista].sort((a, b) => {
-    const fa = a.fila || 0,        fb = b.fila || 0;
-    const ca = a.columna || 0,     cb = b.columna || 0;
-    const na = a.numeroAsiento || 0, nb = b.numeroAsiento || 0;
-    if (fa !== fb) return fa - fb;
-    if (ca !== cb) return ca - cb;
-    return na - nb;
-  });
+  const reservados  = lista.filter(a => a.estado === "RESERVADO").length;
+  const vendidos    = lista.filter(a => a.estado === "VENDIDO").length;
+  const bloqueados  = lista.filter(a => a.estado === "BLOQUEADO").length;
 
-  // Obtener asiento por posición (0-indexed)
-  const get = (pos) => sorted[pos] || null;
+  // Contadores coherentes: disponibles + seleccionados + reservados + vendidos
+  // + bloqueados == total. Un asiento seleccionado sigue en estado DISPONIBLE,
+  // por eso se descuenta de "disponibles" y no se cuenta dos veces.
+  const seleccionadosCount = sel.length;
+  const disponibles = Math.max(0, lista.length - reservados - vendidos - bloqueados - seleccionadosCount);
 
-  // Render de un asiento por posición
-  const renderSeat = (pos, compact = false) => {
-    const a = get(pos);
-    if (!a) return <div key={`empty-p${pos}`} style={{ width: compact ? 42 : 54, height: compact ? 54 : 68, flexShrink: 0 }} />;
-    const ocupado = a.estado !== "DISPONIBLE";
-    const esSelec = sel.some(s => s.id === a.id);
-    return (
-      <AsientoBtn
-        key={`seat-${a.id}`}
-        asiento={a}
-        ocupado={ocupado}
-        esSelec={esSelec}
-        onSeleccionar={onSeleccionar}
-        compact={compact}
-      />
-    );
+  // Columnas y pasillo reales: se derivan de los asientos recibidos y de la
+  // configuración del vehículo, nunca de un layout fijo.
+  const columnas = Math.max(1, ...lista.map(columnaDe));
+  let pasillo = (configuracion && Number.isFinite(Number(configuracion.pasillo)))
+    ? Number(configuracion.pasillo)
+    : (columnas >= 4 ? 2 : 0);
+  if (pasillo < 0 || pasillo > columnas - 1) pasillo = 0;
+
+  const pisos = [...new Set(lista.map(pisoDe))].sort((a, b) => a - b);
+
+  const esSelec = (a) => sel.some(s => s.id === a.id);
+  const seleccionar = (a) => onSeleccionar(a);
+
+  const quickSeleccion = (predicado) => {
+    const found = lista.find(a => a.estado === "DISPONIBLE" && !esSelec(a) && predicado(a));
+    if (found) seleccionar(found);
   };
+  const limpiarSeleccion = () => sel.forEach(a => seleccionar(a));
 
-  const limpiarSeleccion = () => sel.forEach(a => onSeleccionar(a));
-
-  // Selección rápida por posición en el layout Hiace
-  // Ventana: posiciones laterales — Pasillo: posiciones centrales — Fondo: banco trasero
-  const selAuto = (posiciones) => {
-    const found = posiciones
-      .map(p => get(p))
-      .filter(Boolean)
-      .find(a => a.estado === "DISPONIBLE" && !sel.some(s => s.id === a.id));
-    if (found) onSeleccionar(found);
-  };
+  const maxFilaGlobal = Math.max(0, ...lista.map(filaDe));
 
   return (
     <div className="mapa-asientos">
-      {/* Leyenda */}
-      <div className="mapa-leyenda">
-        <div style={{ display:"flex", alignItems:"center", gap:6, fontSize:11, color:"#93c5fd", fontWeight:700 }}>
-          <div style={{ width:9, height:9, borderRadius:"50%", background:"#2563eb", boxShadow:"0 0 7px rgba(37,99,235,0.8)" }} />
-          Disponible ({disponibles.length})
-        </div>
-        <div style={{ display:"flex", alignItems:"center", gap:6, fontSize:11, color:"#fbbf24", fontWeight:700 }}>
-          <div style={{ width:9, height:9, borderRadius:"50%", background:"#f59e0b", boxShadow:"0 0 7px rgba(245,158,11,0.8)" }} />
-          Seleccionado ({sel.length})
-        </div>
-        <div style={{ display:"flex", alignItems:"center", gap:6, fontSize:11, color:"#334155", fontWeight:700 }}>
-          <div style={{ width:9, height:9, borderRadius:"50%", background:"#1e2d3d" }} />
-          Ocupado ({ocupados.length})
-        </div>
-      </div>
+      <SeatLegend
+        disponibles={disponibles}
+        seleccionados={seleccionadosCount}
+        reservados={reservados}
+        vendidos={vendidos}
+        bloqueados={bloqueados}
+      />
 
-      {/* Botones de selección rápida (por posición en el layout) */}
-      <div style={{ display:"flex", gap:6, justifyContent:"center", flexWrap:"wrap", marginBottom:14 }}>
-        <button type="button" onClick={() => selAuto([1, 4, 7, 10, 11, 14])}
-          style={{ background:"rgba(37,99,235,0.1)", border:"1px solid rgba(37,99,235,0.35)", borderRadius:20, color:"#93c5fd", padding:"3px 10px", fontSize:11, fontWeight:700, cursor:"pointer", display:"flex", alignItems:"center", gap:4 }}>
+      {/* Selección rápida por tipo real de asiento */}
+      <div className="iwr-quick-seats">
+        <button type="button" className="iwr-chip" onClick={() => quickSeleccion(a => a.tipo === "VENTANA")}>
           🪟 Ventana
         </button>
-        <button type="button" onClick={() => selAuto([0, 2, 3, 5, 6, 8, 9, 12, 13])}
-          style={{ background:"rgba(37,99,235,0.1)", border:"1px solid rgba(37,99,235,0.35)", borderRadius:20, color:"#93c5fd", padding:"3px 10px", fontSize:11, fontWeight:700, cursor:"pointer", display:"flex", alignItems:"center", gap:4 }}>
+        <button type="button" className="iwr-chip" onClick={() => quickSeleccion(a => a.tipo === "PASILLO")}>
           🚶 Pasillo
         </button>
-        <button type="button" onClick={() => selAuto([11, 12, 13, 14])}
-          style={{ background:"rgba(37,99,235,0.1)", border:"1px solid rgba(37,99,235,0.35)", borderRadius:20, color:"#93c5fd", padding:"3px 10px", fontSize:11, fontWeight:700, cursor:"pointer", display:"flex", alignItems:"center", gap:4 }}>
+        <button type="button" className="iwr-chip" onClick={() => quickSeleccion(a => filaDe(a) === maxFilaGlobal)}>
           🛋️ Fondo
         </button>
         {sel.length > 0 && (
-          <button type="button" onClick={limpiarSeleccion}
-            style={{ background:"rgba(220,38,38,0.1)", border:"1px solid rgba(220,38,38,0.3)", borderRadius:20, color:"#fca5a5", padding:"3px 10px", fontSize:11, fontWeight:700, cursor:"pointer" }}>
+          <button type="button" className="iwr-chip danger" onClick={limpiarSeleccion}>
             ✕ Limpiar ({sel.length})
           </button>
         )}
       </div>
 
-      {/* ═══ TOYOTA HIACE 15P — VISTA DESDE ARRIBA ═══
-          Layout (posición → fila en combi):
-          Pos 0-1  → Fila delantera (copiloto + asiento 2)
-          Pos 2-4  → Fila 2 (3 asientos)
-          Pos 5-7  → Fila 3 (2 izq + fold + 1 der)
-          Pos 8-10 → Fila 4 (2 izq + fold + 1 der)
-          Pos 11-14→ Banco trasero (4 asientos)
-      */}
-      <div className="hiace-body">
-        <div className="hiace-window-strip left" />
-        <div className="hiace-window-strip right" />
+      {/* ═══ MAPA DINÁMICO: todos los asientos reales del vehículo ═══
+          Se renderiza piso → fila → columna desde los datos del backend,
+          respetando el pasillo configurado y con scroll interno vertical. */}
+      <div className="iwr-map-scroll">
+        {pisos.map((piso) => {
+          const delPiso = lista.filter(a => pisoDe(a) === piso);
+          const filas = [...new Set(delPiso.map(filaDe))].sort((a, b) => a - b);
 
-        <div className="hiace-interior">
-          {/* ── TABLERO ── */}
-          <div className="hiace-dashboard">
-            <div className="hiace-steering-wheel" />
-            <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:3 }}>
-              <div className="hiace-radio-unit" />
-              <div className="hiace-vent-grille" />
+          return (
+            <div className="iwr-map-piso" key={`piso-${piso}`}>
+              <div className="iwr-map-front">
+                <div className="iwr-map-driver"><DriverSeatSVG /></div>
+                <div className="iwr-map-front-label">
+                  <Navigation size={12} /> FRENTE{pisos.length > 1 ? ` · Piso ${piso}` : ""}
+                </div>
+              </div>
+              <div className="iwr-map-rows">
+                {filas.map((fila) => {
+                  const row = delPiso
+                    .filter(a => filaDe(a) === fila)
+                    .sort((a, b) => columnaDe(a) - columnaDe(b));
+                  const porCol = new Map(row.map(a => [columnaDe(a), a]));
+                  const cells = [];
+                  for (let c = 1; c <= columnas; c++) {
+                    const a = porCol.get(c);
+                    cells.push(a ? (
+                      <AsientoBtn
+                        key={`seat-${a.id}`}
+                        asiento={a}
+                        ocupado={a.estado !== "DISPONIBLE"}
+                        esSelec={esSelec(a)}
+                        onSeleccionar={seleccionar}
+                      />
+                    ) : (
+                      <div key={`empty-${fila}-${c}`} className="iwr-map-empty" />
+                    ));
+                    if (pasillo > 0 && c === pasillo) {
+                      cells.push(<div key={`aisle-${fila}-${c}`} className="iwr-map-aisle" />);
+                    }
+                  }
+                  return (
+                    <div className="iwr-map-row" key={`fila-${piso}-${fila}`}>
+                      <span className="iwr-map-fila-num">{fila}</span>
+                      {cells}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <div className="hiace-dash-right" />
-          </div>
-
-          {/* ── FILA 1: CHOFER + pos[0] + pos[1] ── */}
-          <div className="hiace-row">
-            <div className="hiace-driver-seat"><DriverSeatSVG /></div>
-            {renderSeat(0)}
-            {renderSeat(1)}
-          </div>
-
-          <div className="hiace-cabin-divider" />
-
-          {/* ── FILA 2: pos[2] + pos[3] + pos[4] + [DOBLEABLE pared] ── */}
-          <div className="hiace-row">
-            {renderSeat(2)}
-            {renderSeat(3)}
-            {renderSeat(4)}
-            <div className="hiace-dobleable-label">DOBLEABLE</div>
-          </div>
-
-          {/* ── FILA 3: pos[5] + pos[6] + [DOB] + pos[7] ── */}
-          <div className="hiace-row">
-            {renderSeat(5)}
-            {renderSeat(6)}
-            <div className="hiace-fold-gap">DOBLEABLE</div>
-            {renderSeat(7)}
-          </div>
-
-          {/* ── FILA 4: pos[8] + pos[9] + [DOB] + pos[10] ── */}
-          <div className="hiace-row">
-            {renderSeat(8)}
-            {renderSeat(9)}
-            <div className="hiace-fold-gap">DOBLEABLE</div>
-            {renderSeat(10)}
-          </div>
-
-          {/* ── BANCO TRASERO: pos[11] + pos[12] + pos[13] + pos[14] ── */}
-          <div className="hiace-row hiace-rear-bench">
-            {renderSeat(11, true)}
-            {renderSeat(12, true)}
-            {renderSeat(13, true)}
-            {renderSeat(14, true)}
-          </div>
-        </div>
-
-        {/* Parachoques + luces traseras */}
-        <div className="hiace-rear-bumper">
-          <div className="hiace-taillight" />
-          <div style={{ fontSize:7, color:"rgba(148,163,184,0.35)", fontWeight:900, letterSpacing:"0.1em" }}>INTIWATANA</div>
-          <div className="hiace-taillight" />
-        </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -418,7 +367,7 @@ function CarritoSidebar({ items, onRemove, onCheckout, open, onClose }) {
 
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <ShoppingCart size={22} color="var(--amarillo)" />
-            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: "white", fontWeight: 700 }}>Mi Carrito</span>
+            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: "white", fontWeight: 700 }}>Resumen de la reserva</span>
             {items.length > 0 && <span style={{ background: "var(--amarillo)", color: "var(--verde-oscuro)", borderRadius: 50, fontSize: 11, fontWeight: 800, padding: "1px 7px", minWidth: 20, textAlign: "center" }}>{items.length}</span>}
           </div>
           <button onClick={onClose} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(138,166,163,0.2)", borderRadius: 8, color: "var(--verde-medio)", cursor: "pointer", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center" }}><X size={16} /></button>
@@ -427,8 +376,8 @@ function CarritoSidebar({ items, onRemove, onCheckout, open, onClose }) {
           {items.length === 0 ? (
             <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--verde-medio)" }}>
               <ShoppingCart size={48} style={{ marginBottom: 12, opacity: 0.4 }} />
-              <p style={{ fontWeight: 600, marginBottom: 6 }}>Carrito vacío</p>
-              <p style={{ fontSize: 13 }}>Agrega un pasaje para continuar con tu compra.</p>
+              <p style={{ fontWeight: 600, marginBottom: 6 }}>Sin asientos seleccionados</p>
+              <p style={{ fontSize: 13 }}>Selecciona tus asientos para continuar con tu reserva.</p>
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -455,7 +404,7 @@ function CarritoSidebar({ items, onRemove, onCheckout, open, onClose }) {
               <span style={{ fontWeight: 800, fontSize: 22, color: "var(--amarillo)" }}>S/ {total.toFixed(2)}</span>
             </div>
             <button onClick={onCheckout} style={{ width: "100%", background: "linear-gradient(135deg, var(--amarillo), #e6b800)", color: "var(--verde-oscuro)", border: "none", borderRadius: 12, padding: "0.9rem", fontSize: 15, fontWeight: 800, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.04em", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 4px 16px rgba(245,197,24,0.3)" }}>
-              <CreditCard size={18} /> Proceder al pago
+              <CreditCard size={18} /> Confirmar reserva y pagar en caja
             </button>
           </div>
         )}
@@ -1028,24 +977,249 @@ function TimerReserva({ expiraEn, onExpirar }) {
   const s = restante % 60;
   const urgente = restante <= 120;
   return (
-    <span aria-live="polite" aria-label={`Tiempo restante ${h} horas ${m} minutos ${s} segundos`}
-      style={{ fontVariantNumeric: "tabular-nums", fontWeight: 800, color: urgente ? "#fca5a5" : "var(--amarillo)" }}>
+    <span aria-live="polite" aria-label={`Tiempo restante ${h} horas ${m} minutos ${s} segundos`} className="iwr-rsv-timer"
+      style={{ fontVariantNumeric: "tabular-nums", fontWeight: 800, color: urgente ? "var(--iwr-error)" : "var(--iwr-verde)" }}>
       {h > 0 ? `${String(h).padStart(2, "0")}:` : ""}{String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}
     </span>
+  );
+}
+
+// ── YapeInfoPanel ─────────────────────────────────────────────────────────────
+// Datos OBTENIDOS vía /configurar/yape/publica (número oficial enmascarado:
+// el backend nunca expone la subcuenta completa al comprador).
+function YapeInfoPanel({ configuracion, total, compact = false }) {
+  if (!configuracion || configuracion.activa !== true) return null;
+  const txtStyle = compact
+    ? { fontSize: 12, color: "var(--iwr-texto)", marginTop: 4 }
+    : { fontSize: 13.5, color: "var(--iwr-texto)", marginTop: 6, lineHeight: 1.55 };
+  return (
+    <div className="iwr-yape-info" aria-label="Datos oficiales para tu pago Yape">
+      {!compact && (
+        <div className="iwr-yape-head">
+          <span className="iwr-yape-icon"><Smartphone size={18} /></span>
+          <span><strong>{configuracion.receptorNombre || "E.T. INTIWATANA S.R.L."}</strong></span>
+        </div>
+      )}
+      <div className="iwr-yape-line">
+        <span>Número oficial</span>
+        <strong style={{ fontVariantNumeric: "tabular-nums" }}>
+          {configuracion.numeroEnmascarado || "—"}
+        </strong>
+      </div>
+      {configuracion.sucursalNombre && (
+        <div className="iwr-yape-line"><span>Sucursal</span><strong>{configuracion.sucursalNombre}</strong></div>
+      )}
+      {configuracion.imagenUrl && (
+        <img
+          src={configuracion.imagenUrl}
+          alt="Código QR Yape oficial"
+          style={{ width: compact ? 92 : 120, height: "auto", borderRadius: 10, border: "1px solid var(--iwr-borde)", marginTop: 10 }}
+          loading="lazy"
+        />
+      )}
+      {total != null && (
+        <div className="iwr-yape-line">
+          <span>Importe a enviar</span>
+          <strong style={{ color: "var(--iwr-verde)" }}>S/ {Number(total).toFixed(2)}</strong>
+        </div>
+      )}
+      {(configuracion.instrucciones || configuracion.descripcion) && (
+        <div style={txtStyle}>
+          {configuracion.instrucciones || configuracion.descripcion}
+        </div>
+      )}
+      <div style={compact ? { ...txtStyle, fontSize: 11, color: "var(--iwr-secundario)" } : txtStyle}>
+        Tras enviar el pago, DEBES declarar tu operación: la reserva recién se confirma cuando caja la verifica.
+      </div>
+    </div>
+  );
+}
+
+// ── ModalDeclararYape ─────────────────────────────────────────────────────────
+// Declaración del cliente tras pagar por Yape (n° de operación + captura del
+// comprobante OPCIONAL). NO aprueba ni emite boleto: lo hace caja al verificar.
+export function ModalDeclararYape({ referencia, documento, totalEsperado, onCerrar, onDeclarada }) {
+  const [operacion, setOperacion] = useState("");
+  const [importe, setImporte] = useState(totalEsperado != null ? String(Number(totalEsperado).toFixed(2)) : "");
+  const [cuenta, setCuenta] = useState("");
+  const [fecha, setFecha] = useState("");
+  const [obs, setObs] = useState("");
+  const [archivo, setArchivo] = useState(null);
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState("");
+  const [ok, setOk] = useState(null);
+
+  const enviar = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (!operacion.trim()) { setError("Ingresa el número de operación Yape."); return; }
+    const monto = Number(importe);
+    if (!(monto > 0)) { setError("Ingresa el importe que enviaste."); return; }
+    setEnviando(true);
+    try {
+      const fd = new FormData();
+      fd.append("datos", JSON.stringify({
+        operacion: operacion.trim(),
+        importe: monto,
+        fechaPagada: fecha ? new Date(fecha).toISOString() : null,
+        cuentaPagada: cuenta.trim() || null,
+        observaciones: obs.trim() || null,
+      }));
+      if (archivo) fd.append("comprobante", archivo);
+      const res = await fetch(
+        `/api/v1/ventas/retencion/${encodeURIComponent(referencia)}/pago-yape?documento=${encodeURIComponent(documento)}`,
+        { method: "POST", body: fd }
+      );
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.mensaje || d.message || "No se pudo registrar la declaración.");
+      setOk(d);
+      onDeclarada?.(d);
+    } catch (err) {
+      setError(err.message || "No se pudo registrar la declaración.");
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  const inputStyle = { width: "100%", background: "rgba(255,255,255,0.06)", border: "1.5px solid rgba(138,166,163,0.3)", borderRadius: 8, padding: "10px 12px", color: "white", fontSize: 13, fontFamily: "inherit", boxSizing: "border-box", minHeight: 42 };
+  const labelStyle = { color: "var(--verde-medio)", fontSize: 11.5, display: "block", marginBottom: 5 };
+
+  return (
+    <div className="iwr-modal-overlay" onClick={onCerrar} role="presentation">
+      <div className="iwr-modal datos-modal" role="dialog" aria-modal="true" aria-labelledby="yape-decl-title" onClick={(e) => e.stopPropagation()}>
+        <div className="iwr-modal-head">
+          <div className="iwr-modal-badge"><Smartphone size={22} /></div>
+          <div>
+            <div id="yape-decl-title" className="iwr-modal-title">{ok ? "Declaración registrada" : "Declarar pago Yape"}</div>
+            <div className="iwr-modal-sub">{referencia}</div>
+          </div>
+          <button className="iwr-modal-close" onClick={onCerrar} aria-label="Cerrar"><X size={18} /></button>
+        </div>
+        <div className="iwr-modal-body">
+          {ok ? (
+            <div className="iwr-success">
+              <div className="iwr-success-hero">
+                <span className="iwr-success-icon"><Check size={34} /></span>
+                <h2 className="iwr-success-title">Pago declarado correctamente</h2>
+                <p className="iwr-success-sub">Caja verificará tu movimiento Yape. Cuando esté aprobado recibirás el boleto con QR de embarque.</p>
+              </div>
+              <div className="iwr-alert iwr-alert-warning iwr-alert-big" role="status">
+                <span className="iwr-alert-icon"><AlertTriangle size={18} /></span>
+                <span><strong>PENDIENTE DE VERIFICACIÓN.</strong> La operación N° <strong style={{ fontVariantNumeric: "tabular-nums" }}>{ok.operacion}</strong> por <strong>S/ {Number(ok.importeDeclarado || importe).toFixed(2)}</strong> quedó registrada. Esta declaración NO es un boleto ni genera vía de embarque hasta ser aprobada.</span>
+              </div>
+              <div className="iwr-success-actions">
+                <button type="button" className="iwr-btn iwr-btn-primary" onClick={onCerrar}>Entendido</button>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={enviar}>
+              {error && <div className="iwr-alert iwr-alert-danger" role="alert" style={{ marginBottom: 12 }}><AlertTriangle size={15} /> {error}</div>}
+              <p style={{ color: "var(--iwr-secundario)", fontSize: 12.5, lineHeight: 1.55, marginBottom: 14 }}>
+                Registra el número de operación que el aplicativo Yape te mostró al transferir. En caja se verificará que el importe y el emisor coincidan antes de aprobar tu reserva.
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                <div>
+                  <label htmlFor="yape-op" style={labelStyle}>N° de operación *</label>
+                  <input id="yape-op" value={operacion} onChange={(e) => setOperacion(e.target.value)} placeholder="Ej: 123456789" inputMode="numeric" style={inputStyle} />
+                </div>
+                <div>
+                  <label htmlFor="yape-importe" style={labelStyle}>Importe pagado (S/) *</label>
+                  <input id="yape-importe" value={importe} onChange={(e) => setImporte(e.target.value)} placeholder="0.00" inputMode="decimal" style={inputStyle} />
+                </div>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                <div>
+                  <label htmlFor="yape-fecha" style={labelStyle}>Fecha del pago</label>
+                  <input id="yape-fecha" type="datetime-local" value={fecha} onChange={(e) => setFecha(e.target.value)} style={inputStyle} />
+                </div>
+                <div>
+                  <label htmlFor="yape-cuenta" style={labelStyle}>Yape/cuenta emisora (opcional)</label>
+                  <input id="yape-cuenta" value={cuenta} onChange={(e) => setCuenta(e.target.value)} placeholder="Tu número o nombre" style={inputStyle} />
+                </div>
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <label htmlFor="yape-obs" style={labelStyle}>Observaciones (opcional)</label>
+                <textarea id="yape-obs" value={obs} onChange={(e) => setObs(e.target.value)} rows={2} maxLength={300} placeholder="Indica dónde tiendiste la reserva, etc." style={{ ...inputStyle, resize: "vertical" }} />
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <label htmlFor="yape-file" style={labelStyle}>Captura del comprobante (opcional)</label>
+                <label className="iwr-yape-file" htmlFor="yape-file">
+                  <Upload size={16} />
+                  <span>{archivo ? archivo.name : "Adjuntar imagen (jpg/png, máx 2 MB)"}</span>
+                </label>
+                <input id="yape-file" type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => setArchivo(e.target.files?.[0] || null)} />
+                {archivo && (
+                  <button type="button" className="iwr-btn iwr-btn-ghost" style={{ marginTop: 6, fontSize: 12, padding: "4px 10px" }} onClick={() => setArchivo(null)}>
+                    <X size={13} /> Quitar captura
+                  </button>
+                )}
+              </div>
+              <div style={{ display: "flex", gap: 10 }}>
+                <button type="button" className="iwr-btn iwr-btn-ghost" onClick={onCerrar} style={{ flex: 1 }}>Cancelar</button>
+                <button type="submit" className="iwr-btn iwr-btn-primary" disabled={enviando} style={{ flex: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                  {enviando ? <><span className="spin-icon"><Loader2 size={16} /></span> REGISTRANDO…</> : <><ShieldCheck size={16} /> DECLARAR PAGO YAPE</>}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
 // ── ModalReserva ──────────────────────────────────────────────────────────────
 // Flujo invitado: datos del comprador → retención backend → reserva pendiente
 // de pago → constancia PDF. NO emite boleto ni QR de embarque.
-function ModalReserva({ viaje, asientosSeleccionados, session, onCerrar, onReservaCreada, onVencida }) {
+function ModalReserva({ viaje, asientosSeleccionados, session, onCerrar, onVolver, onReservaCreada, onVencida, onIrMisReservas, onVolverInicio }) {
   const [paso, setPaso] = useState(1);
-  const [metodo, setMetodo] = useState("EFECTIVO");
+  const [modoPago, setModoPago] = useState("CAJA");
+  const [yapeCfg, setYapeCfg] = useState(null);
+  const [abrirDeclarar, setAbrirDeclarar] = useState(false);
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState("");
+  const [errores, setErrores] = useState({});
   const [reserva, setReserva] = useState(null);
   const [expirada, setExpirada] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const dialogRef = useRef(null);
   const idemRef = useRef(`web-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`);
+
+  // QR oficial Yape activo (número enmascarado). Si no hay configuración activa,
+  // el único canal de pago visible es la caja presencial.
+  useEffect(() => {
+    let vigente = true;
+    fetch("/api/v1/ventas/configurar/yape/publica")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (vigente) setYapeCfg(d); })
+      .catch(() => { if (vigente) setYapeCfg({ activa: false }); });
+    return () => { vigente = false; };
+  }, []);
+
+  const metodoPagoEnum = modoPago === "YAPE" ? "YAPE" : "EFECTIVO";
+  const yapeHabilitado = yapeCfg && yapeCfg.activa === true;
+  const py = reserva?.pagoYape;
+
+  // Foco inicial accesible por etapa (un solo diálogo activo por vez).
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (paso === 1) document.getElementById("rsv-nombres")?.focus();
+      else dialogRef.current?.focus();
+    }, 60);
+    return () => clearTimeout(t);
+  }, [paso]);
+
+  const setFormP = (k, v) => {
+    setForm((p) => ({ ...p, [k]: v }));
+    if (errores[k]) setErrores((p) => ({ ...p, [k]: "" }));
+  };
+
+  const copiar = () => {
+    if (!reserva?.referencia) return;
+    navigator.clipboard?.writeText(reserva.referencia)
+      .then(() => { setCopied(true); setTimeout(() => setCopied(false), 1800); })
+      .catch(() => {});
+  };
   const [form, setForm] = useState(() => {
     const partes = (session?.nombreCompleto || "").trim().split(/\s+/);
     return {
@@ -1059,15 +1233,16 @@ function ModalReserva({ viaje, asientosSeleccionados, session, onCerrar, onReser
 
   const precioUnit = parseFloat(viaje?.precioAdulto ?? viaje?.precioOficial ?? viaje?.precio ?? 0);
   const total = (asientosSeleccionados?.length || 0) * precioUnit;
-  const inputStyle = { width: "100%", background: "rgba(255,255,255,0.06)", border: "1.5px solid rgba(138,166,163,0.3)", borderRadius: 8, padding: "10px 13px", color: "white", fontSize: 14, fontFamily: "inherit", boxSizing: "border-box" };
 
   const enviar = async (e) => {
     e.preventDefault();
     setError("");
-    if (!form.nombres.trim() || !form.apellidos.trim() || !form.documento.trim() || !form.telefono.trim()) {
-      setError("Completa nombres, apellidos, documento y teléfono.");
-      return;
-    }
+    const nuevosErrores = {};
+    if (!form.nombres.trim()) nuevosErrores.nombres = "Ingresa tu nombre.";
+    if (!form.apellidos.trim()) nuevosErrores.apellidos = "Ingresa tus apellidos.";
+    if (!form.documento.trim()) nuevosErrores.documento = "Ingresa tu DNI o RUC.";
+    if (!form.telefono.trim()) nuevosErrores.telefono = "Ingresa tu teléfono.";
+    if (Object.keys(nuevosErrores).length) { setErrores(nuevosErrores); return; }
     setProcesando(true);
     try {
       const body = {
@@ -1081,7 +1256,7 @@ function ModalReserva({ viaje, asientosSeleccionados, session, onCerrar, onReser
           telefono: form.telefono.trim(),
           email: form.email.trim() || null,
         },
-        metodoPagoPreferido: metodo,
+        metodoPagoPreferido: metodoPagoEnum,
         observaciones: "Reserva web (invitado)",
       };
       const r1 = await fetch("/api/v1/ventas/retencion", {
@@ -1095,17 +1270,20 @@ function ModalReserva({ viaje, asientosSeleccionados, session, onCerrar, onReser
       }
       let data = await r1.json();
       // Deja la reserva como PENDIENTE_PAGO para generar la constancia en caja.
-      const r2 = await fetch(`/api/v1/ventas/retencion/${encodeURIComponent(data.referencia)}/reservar?metodoPago=${encodeURIComponent(metodo)}`, {
+      const r2 = await fetch(`/api/v1/ventas/retencion/${encodeURIComponent(data.referencia)}/reservar?metodoPago=${encodeURIComponent(metodoPagoEnum)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
-      if (r2.ok) data = await r2.json();
+      if (!r2.ok) {
+        const d = await r2.json().catch(() => ({}));
+        throw new Error(d.mensaje || d.message || "No se pudo registrar la reserva pendiente de pago.");
+      }
+      data = await r2.json();
       setReserva(data);
       setPaso(2);
       onReservaCreada?.(data);
     } catch (err) {
       setError(err.message || "No se pudo completar la reserva.");
-      onVencida?.();
     } finally {
       setProcesando(false);
     }
@@ -1121,145 +1299,254 @@ function ModalReserva({ viaje, asientosSeleccionados, session, onCerrar, onReser
     }
   };
 
+  const fmtSolo = (iso, opts) => {
+    try { const d = new Date(iso); return isNaN(d.getTime()) ? "—" : d.toLocaleString("es-PE", opts); }
+    catch { return "—"; }
+  };
+  const fechaSolo = fmtSolo(viaje?.fechaHoraSalida, { day: "2-digit", month: "short", year: "numeric" });
+  const horaSolo = fmtSolo(viaje?.fechaHoraSalida, { hour: "2-digit", minute: "2-digit" });
+  const venceSolo = fmtSolo(reserva?.expiraEn, { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+
   return (
-    <div className="modal-overlay" onClick={onCerrar}>
-      <div className="modal pago-modal" style={{ maxWidth: 560 }} onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <div className="modal-badge">{paso === 1 ? <Armchair size={22} /> : <Ticket size={22} />}</div>
+    <div className="iwr-modal-overlay" onClick={onCerrar}>
+      <div ref={dialogRef} tabIndex={-1} className={`iwr-modal ${paso === 2 ? "exito-modal" : "datos-modal"}`} role="dialog" aria-modal="true" aria-labelledby="modal-rsv-title" onClick={(e) => e.stopPropagation()}>
+        <div className="iwr-modal-head">
+          <div className="iwr-modal-badge">{paso === 1 ? <Armchair size={22} /> : <Check size={22} />}</div>
           <div>
-            <div className="modal-title">{paso === 1 ? "Datos del comprador" : "Reserva registrada"}</div>
-            <div className="modal-subtitle">{viaje?.ruta?.origen?.ciudad} → {viaje?.ruta?.destino?.ciudad}</div>
+            <div id="modal-rsv-title" className="iwr-modal-title">{paso === 1 ? "Datos del pasajero" : "Reserva registrada correctamente"}</div>
+            <div className="iwr-modal-sub">{viaje?.ruta?.origen?.ciudad} → {viaje?.ruta?.destino?.ciudad} · {paso === 1 ? fmtFecha(viaje?.fechaHoraSalida) : `${fechaSolo} · ${horaSolo}`}</div>
           </div>
-          <button className="modal-close" onClick={onCerrar} aria-label="Cerrar"><X size={18} /></button>
+          <button className="iwr-modal-close" onClick={onCerrar} aria-label="Cerrar"><X size={18} /></button>
         </div>
-        <div className="modal-body">
+        <div className="iwr-modal-body">
           {error && (
-            <div role="alert" style={{ background: "rgba(220,38,38,0.12)", border: "1px solid rgba(220,38,38,0.35)", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#fca5a5", display: "flex", alignItems: "center", gap: 8 }}>
-              <AlertTriangle size={15} /> {error}
+            <div className="iwr-alert iwr-alert-danger" role="alert" aria-live="polite">
+              <AlertTriangle size={16} />
+              <span>{error}</span>
             </div>
           )}
 
           {paso === 1 && (
             <>
-              <div style={{ background: "rgba(18,115,105,0.12)", border: "1px solid rgba(18,115,105,0.25)", borderRadius: 12, padding: "0.9rem 1.1rem", marginBottom: 14 }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 13 }}>
-                  <div>
-                    <div style={{ color: "var(--verde-medio)", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><Armchair size={11} /> Asientos ({asientosSeleccionados?.length})</div>
-                    <div style={{ color: "white", fontWeight: 700 }}>{asientosSeleccionados?.map((a) => `N°${a.numeroAsiento}`).join(", ")}</div>
-                  </div>
-                  <div>
-                    <div style={{ color: "var(--verde-medio)", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><Clock size={11} /> Salida</div>
-                    <div style={{ color: "white", fontWeight: 700 }}>{fmtFecha(viaje?.fechaHoraSalida)}</div>
-                  </div>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10, paddingTop: 10, borderTop: "1px solid rgba(138,166,163,0.2)" }}>
-                  <span style={{ color: "var(--verde-medio)", fontSize: 13 }}>Total a pagar</span>
-                  <span style={{ fontSize: 22, fontWeight: 800, color: "var(--amarillo)" }}>S/ {total.toFixed(2)}</span>
-                </div>
-              </div>
-
-              <div style={{ background: "rgba(245,197,24,0.08)", border: "1px solid rgba(245,197,24,0.25)", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 12.5, color: "var(--amarillo)", display: "flex", alignItems: "center", gap: 8 }}>
-                <Info size={15} /> Puedes reservar como <strong style={{ color: "white" }}>invitado</strong>. No necesitas crear una cuenta.
-              </div>
-
-              <form onSubmit={enviar}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <div>
-                    <label htmlFor="rsv-nombres" style={{ color: "var(--verde-medio)", fontSize: 12, display: "block", marginBottom: 5 }}>Nombres *</label>
-                    <input id="rsv-nombres" value={form.nombres} onChange={(e) => setForm((p) => ({ ...p, nombres: e.target.value }))} style={inputStyle} autoComplete="given-name" />
-                  </div>
-                  <div>
-                    <label htmlFor="rsv-apellidos" style={{ color: "var(--verde-medio)", fontSize: 12, display: "block", marginBottom: 5 }}>Apellidos *</label>
-                    <input id="rsv-apellidos" value={form.apellidos} onChange={(e) => setForm((p) => ({ ...p, apellidos: e.target.value }))} style={inputStyle} autoComplete="family-name" />
-                  </div>
-                  <div>
-                    <label htmlFor="rsv-documento" style={{ color: "var(--verde-medio)", fontSize: 12, display: "block", marginBottom: 5 }}>DNI / RUC *</label>
-                    <input id="rsv-documento" value={form.documento} onChange={(e) => setForm((p) => ({ ...p, documento: e.target.value }))} style={inputStyle} inputMode="numeric" />
-                  </div>
-                  <div>
-                    <label htmlFor="rsv-telefono" style={{ color: "var(--verde-medio)", fontSize: 12, display: "block", marginBottom: 5 }}>Teléfono *</label>
-                    <input id="rsv-telefono" value={form.telefono} onChange={(e) => setForm((p) => ({ ...p, telefono: e.target.value }))} style={inputStyle} inputMode="tel" />
-                  </div>
-                </div>
-                <div style={{ marginTop: 12 }}>
-                  <label htmlFor="rsv-email" style={{ color: "var(--verde-medio)", fontSize: 12, display: "block", marginBottom: 5 }}>Correo (opcional)</label>
-                  <input id="rsv-email" type="email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} style={inputStyle} autoComplete="email" />
-                </div>
-
-                <p style={{ color: "var(--verde-medio)", fontSize: 12, margin: "16px 0 8px" }}>Método de pago preferido</p>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7, maxHeight: "30vh", overflowY: "auto" }}>
-                  {MODELO_METODOS.map((m) => (
-                    <label key={m.value} style={{ display: "flex", alignItems: "center", gap: 9, background: metodo === m.value ? "rgba(18,115,105,0.2)" : "rgba(255,255,255,0.04)", border: `1.5px solid ${metodo === m.value ? "var(--verde)" : "rgba(138,166,163,0.2)"}`, borderRadius: 10, padding: "9px 12px", cursor: "pointer" }}>
-                      <input type="radio" name="metodo-reserva" value={m.value} checked={metodo === m.value} onChange={() => setMetodo(m.value)} style={{ accentColor: "var(--verde)", width: 15, height: 15 }} />
-                      <span style={{ color: "var(--amarillo)" }}>{m.icon}</span>
-                      <div>
-                        <div style={{ fontSize: 12.5, fontWeight: 700, color: "white" }}>{m.label}</div>
-                        <div style={{ fontSize: 10.5, color: "var(--verde-medio)" }}>{m.desc}</div>
+              <div className="iwr-rsv-datos-grid">
+                <form id="iwr-rsv-form" className="iwr-rsv-form-col" onSubmit={enviar} aria-label="Formulario de datos del pasajero" noValidate>
+                  <div className="iwr-form-section">
+                    <h4 className="iwr-form-title">Datos del pasajero</h4>
+                    <div className="iwr-form-grid">
+                      <div className="iwr-form-row">
+                        <label htmlFor="rsv-nombres" className="iwr-label">Nombres *</label>
+                        <input id="rsv-nombres" className={`iwr-input ${errores.nombres ? "iwr-input-invalid" : ""}`} value={form.nombres} onChange={(e) => setFormP("nombres", e.target.value)} autoComplete="given-name" aria-invalid={!!errores.nombres} aria-describedby={errores.nombres ? "err-nombres" : undefined} />
+                        {errores.nombres && <span id="err-nombres" className="iwr-error-text">{errores.nombres}</span>}
                       </div>
-                    </label>
-                  ))}
-                </div>
+                      <div className="iwr-form-row">
+                        <label htmlFor="rsv-apellidos" className="iwr-label">Apellidos *</label>
+                        <input id="rsv-apellidos" className={`iwr-input ${errores.apellidos ? "iwr-input-invalid" : ""}`} value={form.apellidos} onChange={(e) => setFormP("apellidos", e.target.value)} autoComplete="family-name" aria-invalid={!!errores.apellidos} aria-describedby={errores.apellidos ? "err-apellidos" : undefined} />
+                        {errores.apellidos && <span id="err-apellidos" className="iwr-error-text">{errores.apellidos}</span>}
+                      </div>
+                      <div className="iwr-form-row">
+                        <label htmlFor="rsv-documento" className="iwr-label">DNI / RUC *</label>
+                        <input id="rsv-documento" className={`iwr-input ${errores.documento ? "iwr-input-invalid" : ""}`} value={form.documento} onChange={(e) => setFormP("documento", e.target.value)} inputMode="numeric" autoComplete="off" aria-invalid={!!errores.documento} aria-describedby={errores.documento ? "err-documento" : undefined} />
+                        {errores.documento && <span id="err-documento" className="iwr-error-text">{errores.documento}</span>}
+                      </div>
+                      <div className="iwr-form-row">
+                        <label htmlFor="rsv-telefono" className="iwr-label">Teléfono *</label>
+                        <input id="rsv-telefono" className={`iwr-input ${errores.telefono ? "iwr-input-invalid" : ""}`} value={form.telefono} onChange={(e) => setFormP("telefono", e.target.value)} inputMode="tel" autoComplete="tel" aria-invalid={!!errores.telefono} aria-describedby={errores.telefono ? "err-telefono" : undefined} />
+                        {errores.telefono && <span id="err-telefono" className="iwr-error-text">{errores.telefono}</span>}
+                      </div>
+                      <div className="iwr-form-row full">
+                        <label htmlFor="rsv-email" className="iwr-label">Correo (opcional)</label>
+                        <input id="rsv-email" className="iwr-input" type="email" value={form.email} onChange={(e) => setFormP("email", e.target.value)} autoComplete="email" />
+                      </div>
+                    </div>
+                  </div>
 
-                <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
-                  <button type="button" className="btn-cancelar" onClick={onCerrar} style={{ flex: 1 }}>Cancelar</button>
-                  <button type="submit" className="btn-reservar" disabled={procesando} style={{ flex: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: procesando ? 0.6 : 1 }}>
-                    {procesando ? <><Loader2 size={16} className="spin-icon" /> Reteniendo asientos...</> : <><CheckCircle size={16} /> Continuar con la reserva</>}
-                  </button>
+                  <div className="iwr-form-section">
+                    <h4 className="iwr-form-title">Forma de pago</h4>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      <label className={`iwr-pay-block ${modoPago === "CAJA" ? "iwr-pay-block--sel" : ""}`} style={{ cursor: "pointer" }}>
+                        <input type="radio" name="modoPago" value="CAJA" checked={modoPago === "CAJA"} onChange={() => setModoPago("CAJA")} style={{ display: "none" }} />
+                        <span className="iwr-pay-block-icon"><Wallet size={18} /></span>
+                        <span>
+                          <strong>Pago presencial en caja</strong>
+                          <small>El pago se realiza únicamente en las agencias INTIWATANA. El boleto con QR se emite al confirmar el pago.</small>
+                        </span>
+                      </label>
+                      <label className={`iwr-pay-block ${modoPago === "YAPE" ? "iwr-pay-block--sel" : ""}${yapeHabilitado ? "" : " iwr-pay-block--off"}`} style={{ cursor: yapeHabilitado ? "pointer" : "not-allowed" }} aria-disabled={!yapeHabilitado}>
+                        <input type="radio" name="modoPago" value="YAPE" checked={modoPago === "YAPE"} disabled={!yapeHabilitado} onChange={() => setModoPago("YAPE")} style={{ display: "none" }} />
+                        <span className="iwr-pay-block-icon"><Smartphone size={18} /></span>
+                        <span>
+                          <strong>Yape ahora</strong>
+                          <small>
+                            {yapeCfg == null
+                              ? "Consultando el QR oficial Yape…"
+                              : yapeHabilitado
+                                ? "Envía el importe al número oficial y declara tu operación. Caja la verifica y emite tu boleto."
+                                : "El pago Yape no está habilitado por la empresa en este momento. Realiza el pago en caja."}
+                          </small>
+                        </span>
+                        {yapeHabilitado && (
+                          <span className="iwr-pay-block-check"><Check size={14} /></span>
+                        )}
+                      </label>
+                    </div>
+                    {modoPago === "YAPE" && yapeHabilitado && (
+                      <div style={{ marginTop: 10 }}><YapeInfoPanel configuracion={yapeCfg} total={total} compact /></div>
+                    )}
+                  </div>
+
+                  <div className="iwr-form-actions">
+                    <button type="button" className="iwr-btn iwr-btn-ghost" onClick={onVolver}>
+                      <ChevronLeft size={17} /> Volver a asientos
+                    </button>
+                    <button type="submit" className="iwr-btn iwr-btn-primary" disabled={procesando || (modoPago === "YAPE" && !yapeHabilitado)}>
+                      {procesando ? <><span className="spin-icon"><Loader2 size={16} /></span> REGISTRANDO RESERVA…</> : <><ShieldCheck size={16} /> {modoPago === "YAPE" && yapeHabilitado ? "RESERVAR Y PAGAR CON YAPE" : "CONFIRMAR RESERVA PARA PAGAR EN CAJA"}</>}
+                    </button>
+                  </div>
+                </form>
+
+                <div className="iwr-rsv-side-col">
+                  <div className="iwr-rsv-side-card">
+                    <h4 className="iwr-form-title">Resumen</h4>
+                    <div className="iwr-rsv-side-lines">
+                      <div><span>Ruta</span><strong>{viaje?.ruta?.origen?.ciudad} → {viaje?.ruta?.destino?.ciudad}</strong></div>
+                      <div><span>Fecha</span><strong>{fechaSolo}</strong></div>
+                      <div><span>Hora</span><strong>{horaSolo}</strong></div>
+                      <div><span>Asiento</span><strong>{asientosSeleccionados?.map((a) => `N.º ${a.numeroAsiento}`).join(", ") || "—"}</strong></div>
+                      <div><span>Pasajeros</span><strong>{asientosSeleccionados?.length || 0}</strong></div>
+                    </div>
+                    <div className="iwr-rsv-side-total">
+                      <span>Total a pagar en caja</span>
+                      <strong>S/ {total.toFixed(2)}</strong>
+                    </div>
+                  </div>
                 </div>
-              </form>
+              </div>
             </>
           )}
 
           {paso === 2 && reserva && (
-            <>
-              <div style={{ background: "rgba(245,197,24,0.1)", border: "1px solid rgba(245,197,24,0.35)", borderRadius: 12, padding: "0.9rem 1.1rem", marginBottom: 14, display: "flex", alignItems: "center", gap: 10 }}>
-                <AlertTriangle size={20} color="var(--amarillo)" />
-                <div style={{ fontSize: 13, color: "var(--amarillo)", fontWeight: 700 }}>
-                  Reserva pendiente de pago — NO VÁLIDA PARA EMBARQUE hasta confirmar el pago en caja.
+            <div className="iwr-success">
+              <div className="iwr-success-hero">
+                <span className="iwr-success-icon"><Check size={34} /></span>
+                <h2 className="iwr-success-title">Reserva registrada correctamente</h2>
+                <p className="iwr-success-sub">
+                  {modoPago === "YAPE" && yapeHabilitado
+                    ? "Tu asiento fue reservado temporalmente. Envía el pago por Yape y declara tu operación antes del vencimiento."
+                    : "Tu asiento fue reservado temporalmente. Realiza el pago en Caja antes del vencimiento."}
+                </p>
+              </div>
+
+              <div className="iwr-ref-box">
+                <span className="iwr-ref-label">Referencia de reserva</span>
+                <div className="iwr-ref-value" role="text">{reserva.referencia}</div>
+                <div className="iwr-ref-actions">
+                  <button type="button" className="iwr-btn iwr-btn-outline" onClick={copiar}>
+                    <Copy size={15} /> {copied ? "Copiado" : "Copiar"}
+                  </button>
+                  <span aria-live="polite" className="iwr-ref-copied">{copied ? "Referencia copiada ✓" : ""}</span>
+                  {(() => { const e = etiquetaEstadoReserva(reserva.estado); return <span className="iwr-ref-estado" style={{ color: e.color, borderColor: e.color }}>{e.texto}</span>; })()}
                 </div>
               </div>
 
-              <div style={{ background: "rgba(18,115,105,0.12)", border: "1px solid rgba(18,115,105,0.25)", borderRadius: 12, padding: "1rem 1.2rem", marginBottom: 14 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                  <span style={{ color: "var(--verde-medio)", fontSize: 12 }}>Referencia de reserva</span>
-                  {(() => { const e = etiquetaEstadoReserva(reserva.estado); return <span style={{ color: e.color, fontWeight: 800, fontSize: 12 }}>{e.texto}</span>; })()}
+              {expirada ? (
+                <div className="iwr-alert iwr-alert-danger iwr-alert-big" role="alert">
+                  <span className="iwr-alert-icon"><AlertTriangle size={22} /></span>
+                  <span><strong>RESERVA VENCIDA.</strong> El tiempo para pagar en caja terminó. Los asientos fueron liberados; vuelve a intentarlo si aún deseas viajar.</span>
                 </div>
-                <div style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 800, color: "var(--amarillo)", letterSpacing: "0.05em", marginBottom: 12, wordBreak: "break-all" }}>{reserva.referencia}</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, fontSize: 13 }}>
-                  <div>
-                    <div style={{ color: "var(--verde-medio)", fontSize: 11 }}>Asientos</div>
-                    <div style={{ color: "white", fontWeight: 700 }}>{reserva.asientos?.map((a) => `N°${a.numeroAsiento}`).join(", ") || "—"}</div>
+              ) : (
+                <>
+                  <div className="iwr-alert iwr-alert-warning iwr-alert-big" role="alert">
+                    <span className="iwr-alert-icon"><AlertTriangle size={22} /></span>
+                    <span>
+                      <strong>FALTA PAGAR.</strong> La reserva se encuentra en PENDIENTE_PAGO.
+                      {modoPago === "YAPE" && yapeHabilitado
+                        ? " Envía el importe al número oficial Yape y declara tu operación antes del vencimiento."
+                        : " Realiza el pago presencial en Caja antes del vencimiento."}
+                    </span>
                   </div>
-                  <div>
-                    <div style={{ color: "var(--verde-medio)", fontSize: 11 }}>Salida</div>
-                    <div style={{ color: "white", fontWeight: 700 }}>{fmtFecha(reserva.fechaHoraSalida)}</div>
+                  <div className="iwr-alert iwr-alert-danger iwr-alert-big iwr-alert-embarque" role="alert">
+                    <span className="iwr-alert-icon"><Lock size={20} /></span>
+                    <span><strong>NO VÁLIDA PARA EMBARQUE.</strong> Esta constancia no reemplaza el boleto de viaje. El boleto con QR se emite solo cuando la caja confirma el pago.</span>
                   </div>
-                  <div>
-                    <div style={{ color: "var(--verde-medio)", fontSize: 11 }}>Total</div>
-                    <div style={{ color: "var(--amarillo)", fontWeight: 800 }}>S/ {Number(reserva.total || 0).toFixed(2)}</div>
+                </>
+              )}
+
+              {modoPago === "YAPE" && yapeHabilitado && !expirada && (
+                py && py.estado === "PENDIENTE_VERIFICACION" ? (
+                  <div className="iwr-alert iwr-alert-info iwr-alert-big" role="status">
+                    <span className="iwr-alert-icon"><Smartphone size={20} /></span>
+                    <span>
+                      <strong>DECLARACIÓN EN VERIFICACIÓN.</strong> Tu pago de{" "}
+                      <strong>S/ {Number(py.importeDeclarado || reserva.total || total || 0).toFixed(2)}</strong> ya está registrado.
+                      Caja lo está verificando; cuando sea aprobado se emitirá tu boleto con QR de embarque.
+                    </span>
                   </div>
-                  <div>
-                    <div style={{ color: "var(--verde-medio)", fontSize: 11 }}>Tiempo para pagar</div>
-                    <div>{expirada ? <span style={{ color: "#fca5a5", fontWeight: 800 }}>Vencida</span> : <TimerReserva expiraEn={reserva.expiraEn} onExpirar={() => { setExpirada(true); onVencida?.(); }} />}</div>
+                ) : py && py.estado === "RECHAZADO" ? (
+                  <div className="iwr-alert iwr-alert-danger iwr-alert-big" role="alert">
+                    <span className="iwr-alert-icon"><AlertTriangle size={20} /></span>
+                    <span>
+                      <strong>DECLARACIÓN RECHAZADA.</strong>{" "}
+                      {py.motivoRechazo || "La operación no pudo ser verificada en caja."}{" "}
+                      {py.exponeRenovar ? "Puedes re-declarar con los datos correctos mientras la reserva siga vigente." : ""}
+                    </span>
                   </div>
+                ) : (
+                  <YapeInfoPanel configuracion={yapeCfg} total={Number(reserva.total || total || 0)} compact />
+                )
+              )}
+
+              <div className="iwr-success-msg" role="status" aria-live="polite">
+                <Info size={16} />
+                <span>
+                  {modoPago === "YAPE" && yapeHabilitado
+                    ? "Presenta tu referencia y DNI, o espera la verificación de tu pago Yape en Caja. Recién con el pago confirmado se emite el boleto con QR de embarque."
+                    : "Presenta tu referencia y DNI en cualquier agencia INTIWATANA para pagar. Recién entonces se emite el boleto con QR de embarque."}
+                </span>
+              </div>
+
+              <div className="iwr-success-grid">
+                <div className="iwr-success-item"><span>Ruta</span><strong>{viaje?.ruta?.origen?.ciudad} → {viaje?.ruta?.destino?.ciudad}</strong></div>
+                <div className="iwr-success-item"><span>Fecha</span><strong>{fechaSolo}</strong></div>
+                <div className="iwr-success-item"><span>Hora</span><strong>{horaSolo}</strong></div>
+                <div className="iwr-success-item"><span>Pasajero</span><strong>{form.nombres.trim()} {form.apellidos.trim()}</strong></div>
+                <div className="iwr-success-item"><span>Asiento</span><strong>{reserva.asientos?.map((a) => `N.º ${a.numeroAsiento}`).join(", ") || "—"}</strong></div>
+                <div className="iwr-success-item"><span>Importe</span><strong>S/ {Number(reserva.total || total || 0).toFixed(2)}</strong></div>
+                <div className="iwr-success-item"><span>Vencimiento</span><strong>{venceSolo}</strong></div>
+                <div className="iwr-success-countdown">
+                  <span className="iwr-success-countdown-label">Tiempo restante para pagar en caja</span>
+                  {expirada ? <strong className="iwr-countdown-expirada">Vencida</strong> : <TimerReserva expiraEn={reserva.expiraEn} onExpirar={() => { setExpirada(true); onVencida?.(); }} />}
                 </div>
               </div>
 
-              <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(138,166,163,0.2)", borderRadius: 10, padding: "10px 14px", fontSize: 12.5, color: "var(--verde-medio)", lineHeight: 1.5, marginBottom: 14 }}>
-                <div style={{ display: "flex", gap: 8, marginBottom: 6 }}><Info size={15} color="var(--amarillo)" style={{ flexShrink: 0, marginTop: 1 }} /><span>Presenta tu referencia y DNI en cualquier agencia INTIWATANA para pagar. Recién entonces se emite el boleto con QR de embarque.</span></div>
-                {reserva.mensaje && <div style={{ color: "var(--verde-medio)" }}>{reserva.mensaje}</div>}
-              </div>
-
-              <div style={{ display: "flex", gap: 10 }}>
-                <button type="button" className="btn-reservar" style={{ flex: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: expirada ? 0.5 : 1 }} disabled={expirada} onClick={documentos}>
-                  <FileText size={16} /> Descargar constancia (PDF)
+              <div className="iwr-success-actions">
+                {modoPago === "YAPE" && yapeHabilitado && !expirada && !(py && py.estado === "PENDIENTE_VERIFICACION") && (
+                  <button type="button" className="iwr-btn iwr-btn-primary" onClick={() => setAbrirDeclarar(true)}>
+                    <Smartphone size={17} /> {py && py.estado === "RECHAZADO" ? "Re-declarar pago Yape" : "Declarar mi pago Yape"}
+                  </button>
+                )}
+                <button type="button" className={`iwr-btn ${modoPago === "YAPE" && yapeHabilitado ? "iwr-btn-outline" : "iwr-btn-primary"}`} disabled={expirada} onClick={documentos}>
+                  <FileText size={17} /> Descargar constancia PDF
                 </button>
-                <button type="button" className="btn-cancelar" onClick={onCerrar} style={{ flex: 1 }}>Cerrar</button>
+                <button type="button" className="iwr-btn iwr-btn-outline" onClick={onIrMisReservas}>
+                  <FileText size={16} /> Ir a Mis reservas
+                </button>
+                <button type="button" className="iwr-btn iwr-btn-ghost" onClick={onVolverInicio}>
+                  <Home size={16} /> Volver al inicio
+                </button>
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>
+      {abrirDeclarar && reserva && (
+        <ModalDeclararYape
+          referencia={reserva.referencia}
+          documento={form.documento.trim()}
+          totalEsperado={Number(reserva.total || total || 0)}
+          onCerrar={() => setAbrirDeclarar(false)}
+          onDeclarada={(d) => setReserva((p) => ({ ...p, pagoYape: d }))}
+        />
+      )}
     </div>
   );
 }
@@ -1271,7 +1558,7 @@ function ModalRecuperar({ onCerrar }) {
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState("");
   const [data, setData] = useState(null);
-  const inputStyle = { width: "100%", background: "rgba(255,255,255,0.06)", border: "1.5px solid rgba(138,166,163,0.3)", borderRadius: 8, padding: "10px 13px", color: "white", fontSize: 14, fontFamily: "inherit", boxSizing: "border-box" };
+  const [declararReserva, setDeclararReserva] = useState(null);
 
   const buscar = async (e) => {
     e.preventDefault();
@@ -1287,6 +1574,22 @@ function ModalRecuperar({ onCerrar }) {
 
   const doc = documento.trim();
 
+  const etiquetaYape = (estado) => {
+    const mapa = {
+      PENDIENTE_VERIFICACION: { texto: "Yape en verificación", color: "#C99B00" },
+      APROBADO: { texto: "Yape aprobado", color: "var(--iwr-verde)" },
+      RECHAZADO: { texto: "Yape rechazado", color: "var(--iwr-error)" },
+    };
+    return mapa[estado] || null;
+  };
+
+  const refrescarReserva = async () => {
+    try {
+      const res = await fetch(`/api/v1/ventas/recuperar?documento=${encodeURIComponent(doc)}`);
+      if (res.ok) setData(await res.json());
+    } catch { /* conserva el estado anterior */ }
+  };
+
   // El endpoint /ventas/recuperar devuelve el boleto con un resumen del viaje
   // (fechas y precio) pero sin la ruta anidada, por lo que el itinerary se toma
   // de la reserva que lo emitio. Si no hay reserva asociada no se inventa texto.
@@ -1296,72 +1599,104 @@ function ModalRecuperar({ onCerrar }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onCerrar}>
-      <div className="modal pago-modal" style={{ maxWidth: 560 }} onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <div className="modal-badge"><Search size={22} /></div>
+    <div className="iwr-modal-overlay" onClick={onCerrar}>
+      <div className="iwr-modal narrow" role="dialog" aria-modal="true" aria-label="Consultar mis reservas" onClick={(e) => e.stopPropagation()}>
+        <div className="iwr-modal-head">
+          <div className="iwr-modal-badge"><Search size={22} /></div>
           <div>
-            <div className="modal-title">Consultar mis reservas</div>
-            <div className="modal-subtitle">Recupera tus reservas y boletos con tu documento</div>
+            <div className="iwr-modal-title">Consultar mis reservas</div>
+            <div className="iwr-modal-sub">Recupera tus reservas y boletos con tu documento</div>
           </div>
-          <button className="modal-close" onClick={onCerrar} aria-label="Cerrar"><X size={18} /></button>
+          <button className="iwr-modal-close" onClick={onCerrar} aria-label="Cerrar"><X size={18} /></button>
         </div>
-        <div className="modal-body">
+        <div className="iwr-modal-body">
           <form onSubmit={buscar} style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-            <input value={documento} onChange={(e) => setDocumento(e.target.value)} placeholder="DNI / RUC" style={inputStyle} inputMode="numeric" aria-label="Documento" />
-            <button type="submit" className="btn-reservar" disabled={cargando} style={{ flexShrink: 0, padding: "0 18px", display: "flex", alignItems: "center", gap: 6 }}>
+            <input className="iwr-input" value={documento} onChange={(e) => setDocumento(e.target.value)} placeholder="DNI / RUC" inputMode="numeric" aria-label="Documento" />
+            <button type="submit" className="iwr-btn iwr-btn-primary" disabled={cargando} style={{ flexShrink: 0, padding: "0 18px", display: "flex", alignItems: "center", gap: 6 }}>
               {cargando ? <Loader2 size={15} className="spin-icon" /> : <Search size={15} />} Buscar
             </button>
           </form>
-          {error && <div role="alert" style={{ color: "#fca5a5", fontSize: 13, marginBottom: 12 }}>{error}</div>}
+          {error && <div className="iwr-alert iwr-alert-danger" role="alert" style={{ marginBottom: 12 }}><AlertTriangle size={15} /> {error}</div>}
           {data && (
             <>
-              <h4 style={{ color: "white", fontSize: 13, marginBottom: 8 }}>Reservas ({data.reservas?.length || 0})</h4>
+              {data.yapeConfiguracion && data.yapeConfiguracion.activa === true && (
+                <div style={{ marginBottom: 14 }}>
+                  <YapeInfoPanel
+                    configuracion={data.yapeConfiguracion}
+                    total={null}
+                  />
+                </div>
+              )}
+              <h4 style={{ color: "var(--iwr-verde-profundo)", fontSize: 13, marginBottom: 8 }}>Reservas ({data.reservas?.length || 0})</h4>
               {(!data.reservas || data.reservas.length === 0) ? (
-                <p style={{ color: "var(--verde-medio)", fontSize: 12.5, marginBottom: 14 }}>No hay reservas con ese documento.</p>
+                <p style={{ color: "var(--iwr-secundario)", fontSize: 12.5, marginBottom: 14 }}>No hay reservas con ese documento.</p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
                   {data.reservas.map((r) => {
                     const e = etiquetaEstadoReserva(r.estado);
+                    const ye = r.pagoYape ? etiquetaYape(r.pagoYape.estado) : null;
                     const puedeBoleto = r.validoParaEmbarque && r.boletos?.length;
                     const pdfUrl = puedeBoleto
                       ? `/api/v1/ventas/boleto/${encodeURIComponent(r.boletos[0].numeroBoleto)}/pdf?documento=${encodeURIComponent(doc)}`
                       : `/api/v1/ventas/retencion/${encodeURIComponent(r.referencia)}/constancia.pdf?documento=${encodeURIComponent(doc)}`;
+                    const admiteReDeclarar = r.pagoYape?.exponeRenovar === true;
                     return (
-                      <div key={r.referencia} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(138,166,163,0.2)", borderRadius: 10, padding: "10px 12px" }}>
+                      <div key={r.referencia} className="iwr-summary" style={{ padding: "0.8rem 0.9rem" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                          <span style={{ fontFamily: "monospace", color: "var(--amarillo)", fontWeight: 700, fontSize: 13 }}>{r.referencia}</span>
+                          <span style={{ fontFamily: "monospace", color: "var(--iwr-verde)", fontWeight: 700, fontSize: 13 }}>{r.referencia}</span>
                           <span style={{ color: e.color, fontWeight: 800, fontSize: 11 }}>{e.texto}</span>
                         </div>
-                        <div style={{ color: "white", fontSize: 12.5 }}>{r.origen} → {r.destino} · {fmtFecha(r.fechaHoraSalida)}</div>
-                        <div style={{ color: "var(--verde-medio)", fontSize: 11.5, marginTop: 2 }}>Asientos: {r.asientos?.map((a) => `N°${a.numeroAsiento}`).join(", ") || "—"} · S/ {Number(r.total || 0).toFixed(2)}</div>
-                        {!r.validoParaEmbarque && (
-                          <button type="button" onClick={() => abrirDocumento(pdfUrl)} style={{ marginTop: 8, background: "rgba(18,115,105,0.3)", border: "1px solid var(--verde)", borderRadius: 8, color: "white", fontWeight: 700, fontSize: 12, padding: "6px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontFamily: "inherit" }}>
-                            <FileText size={13} /> Constancia PDF
-                          </button>
+                        <div style={{ color: "var(--iwr-texto)", fontSize: 12.5 }}>{r.origen} → {r.destino} · {fmtFecha(r.fechaHoraSalida)}</div>
+                        <div style={{ color: "var(--iwr-secundario)", fontSize: 11.5, marginTop: 2 }}>Asientos: {r.asientos?.map((a) => `N°${a.numeroAsiento}`).join(", ") || "—"} · S/ {Number(r.total || 0).toFixed(2)}</div>
+                        {r.pagoYape && ye && (
+                          <div className="iwr-summary-yape" aria-label="Estado de tu pago Yape">
+                            <Smartphone size={13} style={{ flexShrink: 0 }} />
+                            <span>
+                              {ye.texto} · operación <strong style={{ fontVariantNumeric: "tabular-nums" }}>{r.pagoYape.operacionEnmascarada || "—"}</strong>
+                              {r.pagoYape.importeDeclarado != null && <> · S/ {Number(r.pagoYape.importeDeclarado).toFixed(2)}</>}
+                              {r.pagoYape.motivoRechazo && <span style={{ display: "block", color: "var(--iwr-error)", fontSize: 11, marginTop: 2 }}>{r.pagoYape.motivoRechazo}</span>}
+                            </span>
+                          </div>
                         )}
-                        {puedeBoleto && (
-                          <button type="button" onClick={() => abrirDocumento(pdfUrl)} style={{ marginTop: 8, background: "linear-gradient(135deg, var(--verde), #0f9183)", border: "none", borderRadius: 8, color: "white", fontWeight: 700, fontSize: 12, padding: "6px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontFamily: "inherit" }}>
-                            <Ticket size={13} /> Boleto PDF
-                          </button>
-                        )}
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+                          {!r.validoParaEmbarque && (
+                            <button type="button" className="iwr-btn iwr-btn-outline" onClick={() => abrirDocumento(pdfUrl)} style={{ fontSize: 12, padding: "6px 12px", display: "flex", alignItems: "center", gap: 6 }}>
+                              <FileText size={13} /> Constancia PDF
+                            </button>
+                          )}
+                          {puedeBoleto && (
+                            <button type="button" className="iwr-btn iwr-btn-primary" onClick={() => abrirDocumento(pdfUrl)} style={{ fontSize: 12, padding: "6px 12px", display: "flex", alignItems: "center", gap: 6 }}>
+                              <Ticket size={13} /> Boleto PDF
+                            </button>
+                          )}
+                          {r.requierePago !== false && !puedeBoleto && r.pagoYape?.estado !== "PENDIENTE_VERIFICACION" && (
+                            <button
+                              type="button"
+                              className="iwr-btn iwr-btn-gold"
+                              onClick={() => setDeclararReserva(r)}
+                              style={{ fontSize: 12, padding: "6px 12px", display: "flex", alignItems: "center", gap: 6 }}
+                            >
+                              <Smartphone size={13} /> {admiteReDeclarar ? "Re-declarar Yape" : "Declarar pago Yape"}
+                            </button>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
                 </div>
               )}
-              <h4 style={{ color: "white", fontSize: 13, marginBottom: 8 }}>Boletos ({data.boletos?.length || 0})</h4>
+              <h4 style={{ color: "var(--iwr-verde-profundo)", fontSize: 13, marginBottom: 8 }}>Boletos ({data.boletos?.length || 0})</h4>
               {(!data.boletos || data.boletos.length === 0) ? (
-                <p style={{ color: "var(--verde-medio)", fontSize: 12.5 }}>No hay boletos confirmados con ese documento.</p>
+                <p style={{ color: "var(--iwr-secundario)", fontSize: 12.5 }}>No hay boletos confirmados con ese documento.</p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {data.boletos.map((b) => (
-                    <div key={b.id || b.numeroBoleto} style={{ background: "rgba(18,115,105,0.12)", border: "1px solid rgba(18,115,105,0.3)", borderRadius: 10, padding: "10px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+                    <div key={b.id || b.numeroBoleto} className="iwr-summary" style={{ padding: "0.8rem 0.9rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
                       <div>
-                        <div style={{ fontFamily: "monospace", color: "var(--amarillo)", fontWeight: 700, fontSize: 12.5 }}>{b.numeroBoleto}</div>
-                        <div style={{ color: "var(--verde-medio)", fontSize: 11.5 }}>{rutaDeBoleto(b.numeroBoleto) ? `${rutaDeBoleto(b.numeroBoleto)} · ` : ""}Asiento N°{b.asiento?.numeroAsiento}</div>
+                        <div style={{ fontFamily: "monospace", color: "var(--iwr-verde)", fontWeight: 700, fontSize: 12.5 }}>{b.numeroBoleto}</div>
+                        <div style={{ color: "var(--iwr-secundario)", fontSize: 11.5 }}>{rutaDeBoleto(b.numeroBoleto) ? `${rutaDeBoleto(b.numeroBoleto)} · ` : ""}Asiento N°{b.asiento?.numeroAsiento}</div>
                       </div>
-                      <button type="button" onClick={() => abrirDocumento(`/api/v1/ventas/boleto/${encodeURIComponent(b.numeroBoleto)}/pdf?documento=${encodeURIComponent(doc)}`)} style={{ background: "var(--amarillo)", border: "none", borderRadius: 8, color: "var(--verde-oscuro)", fontWeight: 800, fontSize: 12, padding: "6px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontFamily: "inherit", flexShrink: 0 }}>
+                      <button type="button" className="iwr-btn iwr-btn-gold" onClick={() => abrirDocumento(`/api/v1/ventas/boleto/${encodeURIComponent(b.numeroBoleto)}/pdf?documento=${encodeURIComponent(doc)}`)} style={{ fontSize: 12, padding: "6px 12px", display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
                         <FileText size={13} /> PDF
                       </button>
                     </div>
@@ -1372,6 +1707,15 @@ function ModalRecuperar({ onCerrar }) {
           )}
         </div>
       </div>
+      {declararReserva && (
+        <ModalDeclararYape
+          referencia={declararReserva.referencia}
+          documento={doc}
+          totalEsperado={Number(declararReserva.total || 0)}
+          onCerrar={() => setDeclararReserva(null)}
+          onDeclarada={() => refrescarReserva(declararReserva.referencia)}
+        />
+      )}
     </div>
   );
 }
@@ -1383,71 +1727,182 @@ function ViajeCard({ viaje, seleccionado, onSeleccionar }) {
   const asientosLibres = viaje.asientosDisponibles ?? "—";
   const totalAsientos = viaje.totalAsientos ?? "—";
   const pctOcupado = totalAsientos && asientosLibres !== "—" ? (1 - asientosLibres / totalAsientos) : 0;
-  const colorAsientos = asientosLibres > 5 ? "var(--verde)" : asientosLibres > 0 ? "#e67e22" : "#e53e3e";
+  const colorAsientos = asientosLibres > 5 ? "var(--iwr-verde)" : asientosLibres > 0 ? "var(--iwr-advertencia)" : "var(--iwr-error)";
+  const precio = viaje.precioAdulto ?? viaje.precioOficial ?? viaje.precio ?? "—";
 
   return (
-    <div style={{
-      background: seleccionado ? "linear-gradient(135deg, rgba(18,115,105,0.25), rgba(16,64,59,0.35))" : "rgba(255,255,255,0.03)",
-      border: `1.5px solid ${seleccionado ? "var(--verde)" : "rgba(138,166,163,0.15)"}`,
-      borderRadius: 16, overflow: "hidden", transition: "all 0.25s",
-      boxShadow: seleccionado ? "0 0 0 2px rgba(18,115,105,0.4), 0 8px 24px rgba(0,0,0,0.3)" : "0 2px 8px rgba(0,0,0,0.2)",
-      display: "flex", flexDirection: "column",
-    }}>
+    <div className={`iwr-trip ${seleccionado ? "selected" : ""}`}>
       {imgDestino ? (
-        <div style={{ position: "relative", height: 110, overflow: "hidden" }}>
-          <img src={imgDestino} alt={destino} style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.7)", transition: "all 0.3s" }} />
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(16,64,59,0.95) 0%, rgba(16,64,59,0.2) 60%, transparent 100%)" }} />
-          <div style={{ position: "absolute", top: 10, right: 10, background: "var(--amarillo)", color: "var(--verde-oscuro)", borderRadius: 20, padding: "4px 12px", fontWeight: 900, fontSize: 15, boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>
-            S/ {viaje.precioAdulto}
-          </div>
-          <div style={{ position: "absolute", bottom: 10, left: 14, display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ color: "white", fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 15, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>{origen}</span>
-            <ArrowRight size={13} color="var(--amarillo)" />
-            <span style={{ color: "white", fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 15, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>{destino}</span>
+        <div className="iwr-trip-media">
+          <img src={imgDestino} alt={destino} loading="lazy" />
+          <div className="iwr-trip-price">S/ {precio}</div>
+          <div className="iwr-trip-route">
+            <span>{origen}</span>
+            <ArrowRight size={14} color="var(--iwr-dorado)" />
+            <span>{destino}</span>
           </div>
         </div>
       ) : (
-        <div style={{ background: seleccionado ? "rgba(18,115,105,0.3)" : "rgba(18,115,105,0.1)", padding: "0.8rem 1rem", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(138,166,163,0.1)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Navigation size={16} color="var(--amarillo)" />
-            <span style={{ color: "white", fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 14 }}>{origen} → {destino}</span>
-          </div>
-          <span style={{ background: "var(--amarillo)", color: "var(--verde-oscuro)", borderRadius: 20, padding: "3px 10px", fontWeight: 900, fontSize: 14 }}>S/ {viaje.precioAdulto}</span>
+        <div className="iwr-trip-head">
+          <span className="iwr-trip-route" style={{ display: "flex", alignItems: "center", gap: 7 }}>
+            <Navigation size={16} color="var(--iwr-verde)" /> {origen} → {destino}
+          </span>
+          <span className="iwr-trip-price-inline">S/ {precio}</span>
         </div>
       )}
-      <div style={{ padding: "0.9rem 1rem", flex: 1 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 7 }}>
-            <Clock size={14} color="var(--verde-medio)" style={{ marginTop: 2, flexShrink: 0 }} />
+      <div className="iwr-trip-body">
+        <div className="iwr-trip-facts">
+          <div className="iwr-fact">
+            <Clock size={15} color="var(--iwr-secundario)" style={{ marginTop: 2, flexShrink: 0 }} />
             <div>
-              <div style={{ color: "var(--verde-medio)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em" }}>Salida</div>
-              <div style={{ color: "white", fontWeight: 600, fontSize: 12 }}>{fmtFecha(viaje.fechaHoraSalida)}</div>
+              <div className="iwr-fact-label">Salida</div>
+              <div className="iwr-fact-value">{fmtFecha(viaje.fechaHoraSalida)}</div>
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 7 }}>
-            <Bus size={14} color="var(--verde-medio)" style={{ marginTop: 2, flexShrink: 0 }} />
+          <div className="iwr-fact">
+            <Bus size={15} color="var(--iwr-secundario)" style={{ marginTop: 2, flexShrink: 0 }} />
             <div>
-              <div style={{ color: "var(--verde-medio)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em" }}>Bus</div>
-              <div style={{ color: "white", fontWeight: 600, fontSize: 12 }}>{viaje.bus?.placa || "—"}</div>
-              {viaje.bus?.tipo && <div style={{ color: "var(--verde-medio)", fontSize: 11 }}>{viaje.bus.tipo}</div>}
+              <div className="iwr-fact-label">Bus</div>
+              <div className="iwr-fact-value">{viaje.bus?.placa || "—"}</div>
+              {viaje.bus?.tipo && <div style={{ color: "var(--iwr-secundario)", fontSize: 11 }}>{viaje.bus.tipo}</div>}
             </div>
           </div>
         </div>
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <Armchair size={13} color={colorAsientos} />
-              <span style={{ color: "var(--verde-medio)", fontSize: 12 }}>Asientos disponibles</span>
-            </div>
-            <span style={{ color: colorAsientos, fontWeight: 700, fontSize: 13 }}>{asientosLibres} / {totalAsientos}</span>
+        <div className="iwr-trip-seats">
+          <div className="iwr-trip-seats-top">
+            <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <Armchair size={13} color={colorAsientos} /> Asientos disponibles
+            </span>
+            <strong style={{ color: colorAsientos }}>{asientosLibres} / {totalAsientos}</strong>
           </div>
-          <div style={{ height: 5, borderRadius: 3, background: "rgba(138,166,163,0.15)", overflow: "hidden" }}>
-            <div style={{ height: "100%", borderRadius: 3, width: `${pctOcupado * 100}%`, background: colorAsientos, transition: "width 0.4s ease" }} />
+          <div className="iwr-bar">
+            <span style={{ width: `${pctOcupado * 100}%`, background: colorAsientos }} />
           </div>
         </div>
-        <button className="btn-reservar" style={{ width: "100%", padding: "9px 16px", fontSize: 13, display: "flex", gap: 7, alignItems: "center", justifyContent: "center", background: seleccionado ? "linear-gradient(135deg, var(--verde), #0f9183)" : "linear-gradient(135deg, var(--amarillo), #e6b800)", color: seleccionado ? "white" : "var(--verde-oscuro)" }} onClick={() => onSeleccionar(viaje)}>
-          <Armchair size={15} /> {seleccionado ? "Cambiar asiento" : "Elegir asiento"}
+        <button className="iwr-btn iwr-btn-block iwr-btn-primary" onClick={() => onSeleccionar(viaje)}>
+          <Armchair size={16} /> {seleccionado ? "Cambiar asiento" : "Elegir asiento"}
         </button>
+      </div>
+    </div>
+  );
+}
+
+// ── ReservaProgress ───────────────────────────────────────────────────────────
+// Barra de progreso del flujo de reserva. Solo presentación: el paso actual se
+// deriva del estado real del componente, sin inventar estados de negocio.
+const PASOS_RESERVA = ["Buscar viaje", "Elegir asiento", "Datos", "Confirmar", "Listo"];
+function ReservaProgress({ actual }) {
+  return (
+    <ol className="iwr-progress" aria-label="Progreso de la reserva">
+      {PASOS_RESERVA.map((label, i) => {
+        const n = i + 1;
+        const done = n < actual;
+        const active = n === actual;
+        return (
+          <li key={label} className={`iwr-step ${done ? "done" : ""} ${active ? "active" : ""}`} aria-current={active ? "step" : undefined}>
+            <div className="iwr-step-line" />
+            <div className="iwr-step-dot">{done ? <Check size={15} /> : n}</div>
+            <div className="iwr-step-label">{label}</div>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+// ── SeatLegend ────────────────────────────────────────────────────────────────
+function SeatLegend({ disponibles, seleccionados = 0, reservados = 0, vendidos = 0, bloqueados = 0 }) {
+  const estados = [
+    { key: "DISPONIBLE", label: "Disponible", count: disponibles, icon: null },
+    { key: "SELECCIONADO", label: "Seleccionado", count: seleccionados, icon: <Check size={13} /> },
+    { key: "RESERVADO", label: "Reservado", count: reservados, icon: <Lock size={12} /> },
+    { key: "VENDIDO", label: "Vendido", count: vendidos, icon: <X size={12} /> },
+    { key: "BLOQUEADO", label: "Bloqueado", count: bloqueados, icon: <Lock size={12} /> },
+  ];
+  return (
+    <div className="iwr-legend" role="list" aria-label="Leyenda de asientos">
+      {estados.map((e) => {
+        const c = SEAT_PALETTE[e.key];
+        return (
+          <span key={e.key} className="iwr-legend-item" role="listitem">
+            <span className="iwr-legend-swat" style={{ "--swBg": c.bg, "--swBd": c.bd, "--swTc": c.tc }} aria-hidden="true">
+              {e.icon || <span className="iwr-legend-seat-num" aria-hidden="true">A</span>}
+            </span>
+            <span className="iwr-legend-text">{e.label}</span>
+            <span className="iwr-legend-count">{e.count}</span>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── ReservationSkeleton / ReservationErrorState ───────────────────────────────
+function ReservationSkeleton() {
+  return (
+    <div className="iwr-skeleton-grid" role="status" aria-label="Buscando viajes">
+      {[0, 1, 2].map((i) => (
+        <div className="iwr-skeleton" key={i}>
+          <div className="bar" style={{ height: 90 }} />
+          <div className="bar" style={{ width: "70%" }} />
+          <div className="bar" style={{ width: "45%" }} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ReservationErrorState({ titulo, mensaje, onReintentar }) {
+  return (
+    <div className="iwr-empty" role="status">
+      <Frown size={48} style={{ marginBottom: 12, opacity: 0.5 }} />
+      <h3>{titulo}</h3>
+      <p style={{ fontSize: 13.5 }}>{mensaje}</p>
+      {onReintentar && (
+        <button className="iwr-btn iwr-btn-primary" style={{ marginTop: 14 }} onClick={onReintentar}>
+          <Search size={16} /> Buscar de nuevo
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ── SeatSelectionSummary ───────────────────────────────────────────────────────
+function SeatSelectionSummary({ asientos, viaje = null, precioUnit = 0 }) {
+  const total = asientos.reduce((s, a) => s + Number(a.precio || precioUnit || 0), 0);
+  const origen = viaje?.ruta?.origen?.ciudad || "—";
+  const destino = viaje?.ruta?.destino?.ciudad || "—";
+  return (
+    <div className="iwr-rsv-summary">
+      <h3 className="iwr-rsv-summary-title">Resumen de la reserva</h3>
+      {asientos.length === 0 ? (
+        <div className="iwr-rsv-summary-empty">
+          <span className="iwr-rsv-empty-title">Selecciona un asiento</span>
+          <span className="iwr-rsv-empty-sub">Elige un asiento disponible en el mapa.</span>
+        </div>
+      ) : (
+        <>
+          <div className="iwr-rsv-trip-line">
+            <span className="iwr-rsv-trip-route">{origen} → {destino}</span>
+            <span className="iwr-rsv-trip-date">{fmtFecha(viaje?.fechaHoraSalida)}</span>
+          </div>
+          <div className="iwr-rsv-seat-block">
+            <span className="iwr-rsv-seat-label">Asiento seleccionado</span>
+            <span className="iwr-rsv-seat-num">N.º {asientos.map((a) => a.numeroAsiento).join(" · ")}</span>
+          </div>
+          <div className="iwr-rsv-lines">
+            {asientos.map((a) => (
+              <div key={a.id} className="iwr-rsv-line">
+                <span>Pasajero {a.numeroAsiento}</span>
+                <strong>S/ {Number(a.precio || precioUnit || 0).toFixed(2)}</strong>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      <div className="iwr-rsv-total">
+        <span>Total ({asientos.length} asiento{asientos.length === 1 ? "" : "s"})</span>
+        <strong>S/ {total.toFixed(2)}</strong>
       </div>
     </div>
   );
@@ -1503,6 +1958,28 @@ function PasajesPage() {
   const [error, setError] = useState("");
   const [carrito, setCarrito] = useState([]);
   const [carritoAbierto, setCarritoAbierto] = useState(false);
+
+  // Accesibilidad: cierre con Escape de cada diálogo (un solo diálogo activo
+  // por etapa).
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key !== "Escape") return;
+      if (modalRecuperar) { setModalRecuperar(false); return; }
+      if (modalReserva) { setModalReserva(false); setAsientosSel([]); return; }
+      if (modalMapa) { setModalMapa(false); return; }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [modalMapa, modalReserva, modalRecuperar]);
+
+  // Foco inicial del diálogo de asientos al abrirse.
+  useEffect(() => {
+    if (modalMapa) {
+      const t = setTimeout(() => document.querySelector(".seat-modal .iwr-modal-close")?.focus(), 60);
+      return () => clearTimeout(t);
+    }
+    return undefined;
+  }, [modalMapa]);
   const [modalPagoCarrito, setModalPagoCarrito] = useState(false);
   const [procesandoCarrito, setProcesandoCarrito] = useState(false);
   const [pagoExitoso, setPagoExitoso] = useState(false);
@@ -1510,6 +1987,7 @@ function PasajesPage() {
   const [tabActivo, setTabActivo] = useState(tabParam === "encomiendas" ? "encomiendas" : "pasajes");
   const timerPagoExitoso = useRef(null);
   const intencionRef = useRef(null);
+  const [menuNavAbierto, setMenuNavAbierto] = useState(false);
 
   const cambiarTab = (key) => {
     setTabActivo(key);
@@ -1700,12 +2178,11 @@ function PasajesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viajes]);
 
-  const agregarPasajesAlCarrito = () => {
-    if (!viajeSelec || !asientosSel.length) return;
-    const precio = parseFloat(viajeSelec.precioAdulto || viajeSelec.precioOficial || viajeSelec.precio || 0);
-    const nuevos = asientosSel.map((a) => ({ id: `pas-${Date.now()}-${a.id}`, tipo: "pasaje", descripcion: `${viajeSelec.ruta?.origen?.ciudad} → ${viajeSelec.ruta?.destino?.ciudad} · Asiento N°${a.numeroAsiento} · ${fmtFecha(viajeSelec.fechaHoraSalida)}`, precio, datos: { viajeId: viajeSelec.id, asientoId: a.id } }));
-    setCarrito((prev) => [...prev, ...nuevos]);
-    setCarritoAbierto(true); setModalMapa(false);
+  const continuarReserva = () => {
+    // Un solo diálogo activo por etapa: se cierra el mapa al abrir los datos
+    // del pasajero, conservando el asiento seleccionado.
+    setModalMapa(false);
+    setModalReserva(true);
   };
 
   const confirmarPagoCarrito = async (metodoPago, datosExtra) => {
@@ -1738,119 +2215,108 @@ function PasajesPage() {
 
   const getPrecioViaje = (viaje) => parseFloat(viaje?.precioAdulto ?? viaje?.precioOficial ?? viaje?.precio ?? 0);
 
+  // Paso del flujo derivado del estado real (solo presentación).
+  const pasoActual = boletosOk ? 5 : modalReserva ? 3 : (modalMapa || viajeSelec) ? 2 : 1;
+  const irASeccion = (id) => { navigate("/"); setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 260); };
+  const irAMisReservas = () => { setMenuNavAbierto(false); setModalRecuperar(true); };
+  const irAEncomiendas = () => { setMenuNavAbierto(false); cambiarTab("encomiendas"); };
+
   return (
-    <div style={{ minHeight: "100vh", background: "var(--fondo)" }}>
-      <nav className="nav">
-        <div className="nav-logo" style={{ cursor: "pointer" }} onClick={() => navigate("/")}>
-          <LogoSVG width={44} height={44} />
-          <div className="nav-brand">INTIWATANA S.R.L.<span>Transportes</span></div>
-        </div>
-        <ul className="nav-links hidden md:flex items-center">
-          <li><a onClick={() => navigate("/")} style={{ cursor: "pointer" }}>Inicio</a></li>
-          <li><a onClick={() => cambiarTab("pasajes")} style={{ cursor: "pointer", color: tabActivo === "pasajes" ? "var(--amarillo)" : undefined, display: "flex", alignItems: "center", gap: 6 }}><Ticket size={15} /> Pasajes</a></li>
-          <li><a onClick={() => cambiarTab("encomiendas")} style={{ cursor: "pointer", color: tabActivo === "encomiendas" ? "var(--amarillo)" : undefined, display: "flex", alignItems: "center", gap: 6 }}><Package size={15} /> Encomiendas</a></li>
+    <div className="iwr-page">
+      <nav className={`iwr-nav ${menuNavAbierto ? "open" : ""}`}>
+        <button type="button" className="iwr-nav-logo" onClick={() => navigate("/")} aria-label="Ir al inicio">
+          <LogoSVG width={42} height={42} />
+          <div className="iwr-nav-brand">INTIWATANA S.R.L.<span>Transportes</span></div>
+        </button>
+        <ul className="iwr-nav-links">
+          <li><a onClick={() => irASeccion("inicio")}>Inicio</a></li>
+          <li><a onClick={() => irASeccion("destinos")}>Destinos</a></li>
+          <li><a onClick={() => irASeccion("destinos")}>Horarios</a></li>
+          <li><a aria-current={tabActivo === "pasajes" ? "page" : undefined} onClick={() => { setMenuNavAbierto(false); cambiarTab("pasajes"); }}><Ticket size={14} /> Pasajes</a></li>
+          <li><a onClick={irAMisReservas}><FileText size={14} /> Mis reservas</a></li>
+          <li><a onClick={irAEncomiendas}><Package size={14} /> Encomiendas</a></li>
+          <li><a onClick={() => irASeccion("nosotros")}>Nosotros</a></li>
+          <li><a onClick={() => irASeccion("contacto")}>Contacto</a></li>
         </ul>
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <button onClick={() => setModalRecuperar(true)} style={{ background: "rgba(255,255,255,0.06)", border: "1.5px solid rgba(138,166,163,0.2)", borderRadius: 10, color: "var(--verde-medio)", cursor: "pointer", padding: "0.45rem 0.9rem", fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s" }}>
-            <FileText size={16} /> Mis reservas
-          </button>
-          <button onClick={() => setCarritoAbierto(true)} style={{ position: "relative", background: carrito.length > 0 ? "rgba(245,197,24,0.15)" : "rgba(255,255,255,0.06)", border: carrito.length > 0 ? "1.5px solid rgba(245,197,24,0.5)" : "1.5px solid rgba(138,166,163,0.2)", borderRadius: 10, color: carrito.length > 0 ? "var(--amarillo)" : "var(--verde-medio)", cursor: "pointer", padding: "0.45rem 0.9rem", fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s" }}>
-            <ShoppingCart size={16} /> Carrito
-            {carrito.length > 0 && <span style={{ background: "var(--amarillo)", color: "var(--verde-oscuro)", borderRadius: 50, fontSize: 10, fontWeight: 900, padding: "1px 6px", marginLeft: 2 }}>{carrito.length}</span>}
+        <div className="iwr-nav-actions">
+          <button type="button" className="iwr-btn iwr-btn-ghost" onClick={() => { setMenuNavAbierto(false); setCarritoAbierto(true); }} aria-label="Abrir carrito">
+            <ShoppingCart size={16} /> <span className="iwr-nav-cart-label">Carrito</span>
+            {carrito.length > 0 && <span className="iwr-cart-count">{carrito.length}</span>}
           </button>
           {session ? (
-            <button className="btn-admin-nav btn-registrarse" onClick={() => navigate(rutaPanel(session.rol))} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <LayoutDashboard size={15} /> {session.nombreCompleto?.split(" ")[0] || "Mi cuenta"}
+            <button type="button" className="iwr-btn iwr-btn-gold" onClick={() => navigate(rutaPanel(session.rol))}>
+              <LayoutDashboard size={15} /> <span className="iwr-nav-username">{session.nombreCompleto?.split(" ")[0] || "Mi cuenta"}</span>
             </button>
           ) : (
-            <button className="btn-admin-nav btn-registrarse" onClick={() => irALogin()} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <LogIn size={15} /> Entrar
+            <button type="button" className="iwr-btn iwr-btn-gold" onClick={() => irALogin()}>
+              <LogIn size={15} /> Iniciar sesión
             </button>
           )}
         </div>
+        <button type="button" className="iwr-btn iwr-btn-ghost iwr-nav-toggle" aria-label="Abrir menú" aria-expanded={menuNavAbierto} onClick={() => setMenuNavAbierto((v) => !v)}>
+          {menuNavAbierto ? <X size={20} /> : <Menu size={20} />}
+        </button>
       </nav>
 
       {pagoExitoso && (
-        <div style={{ background: "linear-gradient(135deg, rgba(18,115,105,0.98), rgba(16,64,59,0.99))", border: "1px solid rgba(245,197,24,0.5)", padding: "1rem 2rem", display: "flex", alignItems: "center", gap: 16, justifyContent: "center" }}>
-          <CheckCircle size={20} color="var(--amarillo)" />
-          <span style={{ color: "white", fontWeight: 700, fontSize: 15 }}>{bannerExito}</span>
-          <button onClick={() => setPagoExitoso(false)} style={{ background: "transparent", border: "none", color: "var(--verde-medio)", cursor: "pointer" }}><X size={16} /></button>
+        <div className="iwr-container" style={{ paddingBottom: 0 }}>
+          <div className="iwr-alert iwr-alert-success" role="status">
+            <CheckCircle size={18} />
+            <span style={{ flex: 1 }}>{bannerExito}</span>
+            <button type="button" onClick={() => setPagoExitoso(false)} aria-label="Cerrar aviso" style={{ background: "none", border: "none", color: "inherit", cursor: "pointer" }}><X size={16} /></button>
+          </div>
         </div>
       )}
 
       {error && (
-        <div style={{ background: "rgba(220,38,38,0.1)", border: "1px solid rgba(220,38,38,0.3)", padding: "0.8rem 2rem", display: "flex", alignItems: "center", gap: 12, justifyContent: "center" }}>
-          <AlertTriangle size={18} color="#fca5a5" />
-          <span style={{ color: "#fca5a5", fontSize: 14 }}>{error}</span>
-          <button onClick={() => setError("")} style={{ background: "transparent", border: "none", color: "#fca5a5", cursor: "pointer" }}><X size={16} /></button>
+        <div className="iwr-container" style={{ paddingBottom: 0 }}>
+          <div className="iwr-alert iwr-alert-danger" role="alert">
+            <AlertTriangle size={18} />
+            <span style={{ flex: 1 }}>{error}</span>
+            <button type="button" onClick={() => setError("")} aria-label="Cerrar error" style={{ background: "none", border: "none", color: "inherit", cursor: "pointer" }}><X size={16} /></button>
+          </div>
         </div>
       )}
 
-      <div style={{ background: "linear-gradient(135deg, var(--verde-oscuro) 0%, var(--verde) 100%)", padding: "2.5rem 2rem 3.5rem", textAlign: "center", position: "relative", overflow: "hidden" }}>
-        <div style={{ display: "inline-flex", background: "rgba(0,0,0,0.25)", borderRadius: 50, padding: "4px", gap: 4, marginBottom: "1.5rem", position: "relative", zIndex: 1 }}>
+      <section className="iwr-banner">
+        <img
+          className="iwr-banner-img"
+          src={Vilcas}
+          alt=""
+          aria-hidden="true"
+          onError={(e) => { e.currentTarget.style.display = "none"; }}
+        />
+        <div className="iwr-banner-overlay" aria-hidden="true" />
+        <div className="iwr-banner-content">
+          <span className="iwr-banner-tag"><Ticket size={13} /> Compra de pasajes en línea</span>
+          <h1 className="iwr-banner-title">MÁS QUE UN DESTINO, ES TU HISTORIA</h1>
+          <p className="iwr-banner-sub">Selecciona tu origen y destino para ver los viajes disponibles. Reserva en línea y confirma el pago en caja.</p>
+        </div>
+      </section>
+
+      <div className="iwr-container">
+        <div role="tablist" aria-label="Tipo de servicio" style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 6 }}>
           {[
-            { key: "pasajes", label: "Comprar Pasaje", icon: <Ticket size={15} /> },
+            { key: "pasajes", label: "Comprar pasaje", icon: <Ticket size={15} /> },
             { key: "encomiendas", label: "Solicitar envío", icon: <Package size={15} /> },
           ].map((tab) => (
-            <button key={tab.key} onClick={() => cambiarTab(tab.key)} style={{ background: tabActivo === tab.key ? "var(--amarillo)" : "transparent", color: tabActivo === tab.key ? "var(--verde-oscuro)" : "rgba(255,255,255,0.75)", border: "none", borderRadius: 50, padding: "0.55rem 1.4rem", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", transition: "all 0.25s", display: "flex", alignItems: "center", gap: 7 }}>
+            <button
+              key={tab.key}
+              type="button"
+              role="tab"
+              aria-selected={tabActivo === tab.key}
+              className={`iwr-btn ${tabActivo === tab.key ? "iwr-btn-primary" : "iwr-btn-outline"}`}
+              onClick={() => cambiarTab(tab.key)}
+            >
               {tab.icon} {tab.label}
             </button>
           ))}
         </div>
 
-        {tabActivo === "pasajes" && (
-          <>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "2.2rem", color: "white", marginBottom: "0.5rem", position: "relative", zIndex: 1 }}>Busca tu viaje</h1>
-            <p style={{ color: "rgba(255,255,255,0.75)", marginBottom: "2rem", position: "relative", zIndex: 1 }}>Selecciona tu origen y destino para ver los viajes disponibles</p>
-            {cargandoSucursales ? (
-              <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}><span className="spin-icon"><Loader2 size={16} /></span> Cargando terminales...</p>
-            ) : errorSucursales ? (
-              <div style={{ color: "#fca5a5", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                <AlertTriangle size={16} /> No se pudieron cargar las sucursales.{" "}
-                <button onClick={cargarSucursales} style={{ background: "none", border: "none", color: "var(--amarillo)", cursor: "pointer", fontWeight: 700 }}>Reintentar</button>
-              </div>
-            ) : (
-              <form onSubmit={buscar} translate="no" style={{ background: "white", borderRadius: 60, padding: "0.5rem 0.5rem 0.5rem 1.2rem", display: "inline-flex", gap: "0.8rem", alignItems: "center", maxWidth: 660, width: "100%", boxShadow: "0 8px 32px rgba(16,64,59,0.4)", position: "relative", zIndex: 1 }}>
-                <MapPin size={18} color="var(--verde-oscuro)" />
-                <select value={origenId} onChange={(e) => setOrigenId(e.target.value)} required style={{ border: "none", outline: "none", flex: 1, fontSize: 14, color: "var(--verde-oscuro)", background: "transparent", padding: "0.5rem 0" }}>
-                  <option value="">Origen</option>
-                  {sucursales.map((s) => <option key={s.id} value={s.id}>{s.ciudad}</option>)}
-                </select>
-                <div style={{ width: 1, height: 28, background: "#ddd" }} />
-                <Flag size={18} color="var(--verde-oscuro)" />
-                <select value={destinoId} onChange={(e) => setDestinoId(e.target.value)} required style={{ border: "none", outline: "none", flex: 1, fontSize: 14, color: "var(--verde-oscuro)", background: "transparent", padding: "0.5rem 0" }}>
-                  <option value="">Destino</option>
-                  {sucursales.filter((s) => s.id !== Number(origenId)).map((s) => <option key={s.id} value={s.id}>{s.ciudad}</option>)}
-                </select>
-                <div style={{ width: 1, height: 28, background: "#ddd" }} />
-                <Calendar size={18} color="var(--verde-oscuro)" />
-                <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} style={{ border: "none", outline: "none", flex: 1, fontSize: 14, color: "var(--verde-oscuro)", background: "transparent", padding: "0.5rem 0", fontFamily: "inherit" }} />
-                {/* FIXED: sin position alternante en el spinner */}
-                <button type="submit" className="btn-buscar" disabled={buscando}
-                  style={{ borderRadius: 50, padding: "0.7rem 1.5rem", flexShrink: 0, minWidth: 100, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                  {buscando
-                    ? <span className="spin-icon"><Loader2 size={16} /></span>
-                    : <><Search size={16} /> Buscar</>
-                  }
-                </button>
-              </form>
-            )}
-          </>
-        )}
-
         {tabActivo === "encomiendas" && (
-          <>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "2.2rem", color: "white", marginBottom: "0.5rem", position: "relative", zIndex: 1 }}>Solicita tu envío</h1>
-            <p style={{ color: "rgba(255,255,255,0.75)", marginBottom: "0.5rem", position: "relative", zIndex: 1 }}>Registra tu solicitud; el personal de agencia confirma el peso y la tarifa oficial</p>
-          </>
-        )}
-      </div>
-
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "2rem 1.5rem" }}>
-        {tabActivo === "encomiendas" && (
-          <div>
+          <div style={{ background: "var(--iwr-verde-profundo)", borderRadius: 20, padding: "1.4rem", marginTop: "1rem" }}>
             {!session && (
-              <div style={{ background: "rgba(245,197,24,0.08)", border: "1px solid rgba(245,197,24,0.3)", borderRadius: 12, padding: "1rem 1.4rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ background: "rgba(245,197,24,0.12)", border: "1px solid rgba(245,197,24,0.4)", borderRadius: 12, padding: "1rem 1.4rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: 12 }}>
                 <Info size={20} color="var(--amarillo)" />
                 <div style={{ flex: 1, fontSize: 13, color: "var(--amarillo)" }}>
                   <strong>Inicia sesión</strong> para guardar tus encomiendas y hacer seguimiento.{" "}
@@ -1865,7 +2331,7 @@ function PasajesPage() {
                 <p style={{ color: "var(--verde-medio)", fontSize: 13 }}>Completa el formulario; la tarifa final se confirma en agencia al recibir el paquete</p>
               </div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "1.5rem", alignItems: "start" }}>
+            <div className="iwr-enc-grid">
               <FormEncomienda sucursales={sucursales} session={session} onIrLogin={irALogin} />
               <div style={{ background: "rgba(18,115,105,0.1)", border: "1px solid rgba(18,115,105,0.2)", borderRadius: 14, padding: "1.2rem" }}>
                 <h3 style={{ color: "white", fontSize: 14, fontWeight: 700, marginBottom: 12, display: "flex", alignItems: "center", gap: 7 }}><Info size={16} color="var(--amarillo)" /> ¿Cómo funciona?</h3>
@@ -1888,31 +2354,74 @@ function PasajesPage() {
 
         {tabActivo === "pasajes" && (
           <>
-            {buscando && (
-              <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--verde-medio)", fontSize: 15 }}>
-                <span className="spin-icon"><Loader2 size={40} style={{ marginBottom: 16, opacity: 0.6 }} /></span>
-                <p style={{ fontWeight: 600 }}>Buscando viajes disponibles...</p>
+            <ReservaProgress actual={pasoActual} />
+
+            {cargandoSucursales ? (
+              <div className="iwr-alert iwr-alert-info" role="status">
+                <span className="spin-icon"><Loader2 size={16} /></span> Cargando terminales…
               </div>
+            ) : errorSucursales ? (
+              <div className="iwr-alert iwr-alert-danger" role="alert">
+                <AlertTriangle size={18} />
+                <span style={{ flex: 1 }}>No se pudieron cargar las sucursales.</span>
+                <button type="button" className="iwr-btn iwr-btn-outline" onClick={cargarSucursales}>Reintentar</button>
+              </div>
+            ) : (
+              <form className="iwr-search" onSubmit={buscar} translate="no">
+                <div className="iwr-field">
+                  <label htmlFor="iwr-origen"><MapPin size={12} /> Origen</label>
+                  <div className="iwr-control">
+                    <MapPin size={16} color="var(--iwr-verde)" />
+                    <select id="iwr-origen" value={origenId} onChange={(e) => setOrigenId(e.target.value)} required>
+                      <option value="">Selecciona origen</option>
+                      {sucursales.map((s) => <option key={s.id} value={s.id}>{s.ciudad}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="iwr-field">
+                  <label htmlFor="iwr-destino"><Flag size={12} /> Destino</label>
+                  <div className="iwr-control">
+                    <Flag size={16} color="var(--iwr-verde)" />
+                    <select id="iwr-destino" value={destinoId} onChange={(e) => setDestinoId(e.target.value)} required>
+                      <option value="">Selecciona destino</option>
+                      {sucursales.filter((s) => s.id !== Number(origenId)).map((s) => <option key={s.id} value={s.id}>{s.ciudad}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="iwr-field">
+                  <label htmlFor="iwr-fecha"><Calendar size={12} /> Fecha de viaje</label>
+                  <div className="iwr-control">
+                    <Calendar size={16} color="var(--iwr-verde)" />
+                    <input id="iwr-fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+                  </div>
+                </div>
+                <div className="iwr-field iwr-field-submit">
+                  <button type="submit" className="iwr-btn iwr-btn-primary" style={{ minHeight: 48 }} disabled={buscando}>
+                    {buscando ? <span className="spin-icon"><Loader2 size={16} /></span> : <><Search size={16} /> Buscar viajes</>}
+                  </button>
+                </div>
+              </form>
             )}
+
+            {buscando && <ReservationSkeleton />}
+
             {buscado && !buscando && (
               <>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-                  <Bus size={24} color="var(--amarillo)" />
-                  <h2 style={{ fontFamily: "'Playfair Display', serif", color: "var(--blanco)", fontSize: "1.4rem", margin: 0 }}>
-                    {viajes.length === 0 ? "Sin viajes para esta ruta" : `${viajes.length} viaje(s) disponible(s)`}
-                  </h2>
+                <div className="iwr-section-head">
+                  <Bus size={22} color="var(--iwr-verde)" />
+                  <h2>{viajes.length === 0 ? "Sin viajes para esta ruta" : "Viajes disponibles"}</h2>
+                  {viajes.length > 0 && <span className="iwr-count-badge">{viajes.length}</span>}
                 </div>
-                {viajes.length > 0 && (
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.2rem" }}>
+                {viajes.length > 0 ? (
+                  <div className="iwr-grid">
                     {viajes.map((v) => <ViajeCard key={v.id} viaje={v} seleccionado={viajeSelec?.id === v.id} onSeleccionar={seleccionarViaje} />)}
                   </div>
-                )}
-                {viajes.length === 0 && (
-                  <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--verde-medio)" }}>
-                    <Frown size={48} style={{ marginBottom: 12, opacity: 0.5 }} />
-                    <p style={{ fontWeight: 600, color: "white", marginBottom: 8 }}>No encontramos viajes disponibles</p>
-                    <p style={{ fontSize: 13 }}>Prueba con otra fecha o diferente combinación de origen/destino.</p>
-                  </div>
+                ) : (
+                  <ReservationErrorState
+                    titulo="No encontramos viajes disponibles"
+                    mensaje="Prueba con otra fecha o una combinación de origen y destino diferente."
+                    onReintentar={() => buscarViajes(origenId, destinoId)}
+                  />
                 )}
               </>
             )}
@@ -1921,67 +2430,43 @@ function PasajesPage() {
       </div>
 
       {modalMapa && viajeSelec && createPortal(
-        <div className="modal-overlay" onClick={() => setModalMapa(false)}>
-          <div className="modal" style={{ maxWidth: 800, width: "95%" }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <div className="modal-badge"><Armchair size={22} /></div>
+        <div className="iwr-modal-overlay" onClick={() => setModalMapa(false)}>
+          <div className="iwr-modal wide seat-modal" role="dialog" aria-modal="true" aria-label="Elegir asientos" onClick={(e) => e.stopPropagation()} tabIndex={-1}>
+            <div className="iwr-modal-head">
+              <div className="iwr-modal-badge"><Armchair size={22} /></div>
               <div>
-                <div className="modal-title">Elige tus asientos</div>
-                <div className="modal-subtitle">Combi 15 Pasajeros · {viajeSelec.ruta?.origen?.ciudad} → {viajeSelec.ruta?.destino?.ciudad} · Selecciona hasta {pasajeros} asiento(s) ({asientosSel.length}/{pasajeros})</div>
+                <div className="iwr-modal-title">Elige tus asientos</div>
+                <div className="iwr-modal-sub">
+                  {viajeSelec.bus?.tipo || "Bus"} · {viajeSelec.ruta?.origen?.ciudad} → {viajeSelec.ruta?.destino?.ciudad} · Selecciona hasta {pasajeros} asiento(s) ({asientosSel.length}/{pasajeros})
+                </div>
               </div>
-              <button className="modal-close" onClick={() => setModalMapa(false)}><X size={18} /></button>
+              <button className="iwr-modal-close" onClick={() => setModalMapa(false)} aria-label="Cerrar"><X size={18} /></button>
             </div>
-            <div className="modal-body" style={{ background: "var(--fondo)" }}>
+            <div className="iwr-modal-body">
               {cargandoAsientos ? (
-                <div style={{ textAlign: "center", padding: "2.5rem", color: "var(--verde-medio)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
-                  <span className="spin-icon"><Loader2 size={20} /></span> Cargando mapa de asientos...
+                <div className="iwr-alert iwr-alert-info" role="status">
+                  <span className="spin-icon"><Loader2 size={16} /></span> Cargando mapa de asientos…
                 </div>
               ) : (
-                <div style={{ display: "grid", gridTemplateColumns: "minmax(300px, 1fr) 300px", gap: "1.5rem", alignItems: "start" }}>
-                  <MapaAsientos asientos={asientos} seleccionados={asientosSel} onSeleccionar={toggleAsiento} />
-                  <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                    <div style={{ background: "rgba(18,115,105,0.12)", border: "1px solid rgba(18,115,105,0.25)", borderRadius: 12, padding: "1.2rem" }}>
-                      <h3 style={{ color: "white", fontWeight: 600, marginBottom: 16, fontSize: 16, borderBottom: "1px solid rgba(138,166,163,0.2)", paddingBottom: 10 }}>Resumen de selección</h3>
-                      {(() => {
-                        const selList = asientosSel;
-                        const precioUnit = getPrecioViaje(viajeSelec);
-                        const totalSel = selList.length * precioUnit;
-                        return selList.length === 0 ? (
-                          <>
-                            <p style={{ color: "var(--verde-medio)", fontSize: 13, fontStyle: "italic" }}>No has seleccionado ningún asiento aún.</p>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16, paddingTop: 12, borderTop: "1px solid rgba(138,166,163,0.2)" }}>
-                              <span style={{ color: "var(--verde-medio)", fontSize: 13 }}>Total (0 asientos)</span>
-                              <span style={{ color: "var(--amarillo)", fontWeight: 800, fontSize: 20 }}>S/ 0.00</span>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 160, overflowY: "auto" }}>
-                              {selList.map((a) => (
-                                <div key={a.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 13 }}>
-                                  <span style={{ color: "var(--verde-medio)", display: "flex", alignItems: "center", gap: 5 }}><Armchair size={13} /> Asiento {a.numeroAsiento}</span>
-                                  <span style={{ color: "white", fontWeight: 700 }}>S/ {precioUnit.toFixed(2)}</span>
-                                </div>
-                              ))}
-                            </div>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16, paddingTop: 12, borderTop: "1px solid rgba(138,166,163,0.2)" }}>
-                              <span style={{ color: "var(--verde-medio)", fontSize: 13 }}>Total ({selList.length} asientos)</span>
-                              <span style={{ color: "var(--amarillo)", fontWeight: 800, fontSize: 20 }}>S/ {totalSel.toFixed(2)}</span>
-                            </div>
-                          </>
-                        );
-                      })()}
+                <div className="iwr-modal-grid">
+                  <div className="iwr-seat-map-wrap"><MapaAsientos asientos={asientos} seleccionados={asientosSel} onSeleccionar={toggleAsiento} configuracion={viajeSelec?.bus?.configuracionAsientos} /></div>
+                  <div className="iwr-seat-side">
+                    <SeatSelectionSummary asientos={asientosSel} viaje={viajeSelec} precioUnit={getPrecioViaje(viajeSelec)} />
+                    <div className="iwr-pay-block">
+                      <span className="iwr-pay-block-icon"><Wallet size={18} /></span>
+                      <span>
+                        <strong>Pago presencial en caja</strong>
+                        <small>Reserva ahora y paga en cualquier agencia INTIWATANA antes del vencimiento.</small>
+                      </span>
                     </div>
                     {!session && (
-                      <div style={{ background: "rgba(245,197,24,0.08)", border: "1px solid rgba(245,197,24,0.25)", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "var(--amarillo)", display: "flex", alignItems: "center", gap: 8 }}>
-                        <Info size={15} /> Puedes reservar y pagar como <strong style={{ color: "white" }}>invitado</strong>, sin crear una cuenta.
+                      <div className="iwr-alert iwr-alert-info">
+                        <Info size={16} />
+                        <span>Puedes reservar y pagar como <strong>invitado</strong>, sin crear una cuenta.</span>
                       </div>
                     )}
-                    <button className="btn-reservar" style={{ width: "100%", padding: "0.9rem", display: "flex", justifyContent: "center", alignItems: "center", gap: 8, opacity: asientosSel.length === 0 ? 0.5 : 1 }} disabled={asientosSel.length === 0} onClick={() => setModalReserva(true)}>
-                      <CreditCard size={17} /> Reservar y pagar
-                    </button>
-                    <button style={{ width: "100%", padding: "0.9rem", display: "flex", justifyContent: "center", alignItems: "center", gap: 8, background: "rgba(18,115,105,0.4)", border: "1px solid var(--verde)", borderRadius: 10, color: "white", fontWeight: 700, cursor: "pointer", fontFamily: "inherit", opacity: asientosSel.length === 0 ? 0.5 : 1 }} disabled={asientosSel.length === 0} onClick={agregarPasajesAlCarrito}>
-                      <ShoppingCart size={17} /> Agregar al carrito
+                    <button className="iwr-btn iwr-btn-primary iwr-btn-block iwr-btn-continuar" disabled={asientosSel.length === 0} onClick={continuarReserva}>
+                      <ChevronRight size={18} /> Continuar
                     </button>
                   </div>
                 </div>
@@ -2002,6 +2487,7 @@ function PasajesPage() {
           asientosSeleccionados={asientosSel}
           session={session}
           onCerrar={() => { setModalReserva(false); setAsientosSel([]); }}
+          onVolver={() => { setModalReserva(false); setModalMapa(true); }}
           onReservaCreada={(data) => {
             setAsientos((prev) => prev.map((a) => asientosSel.some((s) => s.id === a.id) ? { ...a, estado: "RESERVADO" } : a));
             setModalMapa(false);
@@ -2012,6 +2498,8 @@ function PasajesPage() {
             }
           }}
           onVencida={() => { setModalReserva(false); setAsientosSel([]); refrescarAsientos(viajeSelec?.id); }}
+          onIrMisReservas={() => { setModalReserva(false); setModalRecuperar(true); }}
+          onVolverInicio={() => { setModalReserva(false); setAsientosSel([]); navigate("/"); }}
         />, document.body)}
       {modalRecuperar && createPortal(<ModalRecuperar onCerrar={() => setModalRecuperar(false)} />, document.body)}
       {modalPagoCarrito && createPortal(<ModalPago itemsCarrito={carrito} onConfirmar={confirmarPagoCarrito} onCerrar={() => setModalPagoCarrito(false)} comprando={procesandoCarrito} />, document.body)}

@@ -67,4 +67,16 @@ public interface PagoRepository extends JpaRepository<Pago, Long> {
             + "ORDER BY p.fechaPago ASC")
     List<Object[]> ingresosSerieDiaria(@Param("desde") LocalDateTime desde,
                                        @Param("hasta") LocalDateTime hasta);
+
+    // ── Flujo de pago seguro ─────────────────────────────────────────────────
+
+    boolean existsByReferencia(String referencia);
+
+    /** Desglose cobrado (solo Pago COMPLETADO) de los boletos ACTIVOS de un viaje. */
+    @Query("SELECT p.metodo, COALESCE(SUM(p.monto), 0), COUNT(p) FROM Pago p "
+            + "WHERE p.estado = com.transporte.sistema.enums.EstadoPago.COMPLETADO "
+            + "AND p IN (SELECT b.pago FROM Boleto b "
+            + "          WHERE b.viaje.id = :viajeId AND b.estado = 'ACTIVO') "
+            + "GROUP BY p.metodo")
+    List<Object[]> pagosPorMetodoDeViaje(@Param("viajeId") Long viajeId);
 }

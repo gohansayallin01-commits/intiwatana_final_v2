@@ -97,6 +97,11 @@ public class Retencion extends BaseEntity {
     @Column(name = "expira_en", nullable = false)
     private LocalDateTime expiraEn;
 
+    /** Ventana única de tolerancia de verificación Yape ya utilizada (no renovable). */
+    @Column(name = "tolerancia_usada", nullable = false)
+    @Builder.Default
+    private Boolean toleranciaUsada = false;
+
     @Column(name = "confirmada_en")
     private LocalDateTime confirmadaEn;
 

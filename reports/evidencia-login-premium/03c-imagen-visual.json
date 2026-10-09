@@ -1,0 +1,34 @@
+{
+  "casos": [
+    {
+      "id": "A37b",
+      "v": "OK",
+      "detalle": "token admin obtenido"
+    },
+    {
+      "id": "A37c",
+      "v": "OK",
+      "detalle": "el LOGIN publicado trae la imagen: /media/portal/73ffd04960a140dc9439b3942e51971f.png"
+    },
+    {
+      "id": "A37d",
+      "v": "OK",
+      "detalle": "la imagen publicada se renderiza en el fondo del Login: url(\"http://localhost:5173/media/portal/73ffd04960a140dc9439b3942e51971f.png\")"
+    }
+  ],
+  "fallidos": [],
+  "info": {
+    "screenshot": "03c-login-imagen-portal.png",
+    "bg": {
+      "url": "url(\"http://localhost:5173/media/portal/73ffd04960a140dc9439b3942e51971f.png\")",
+      "vis": "visible",
+      "altura": 230
+    },
+    "ahora": 1791487556712
+  },
+  "resumen": {
+    "total": 3,
+    "ok": 3,
+    "fallidos": []
+  }
+}

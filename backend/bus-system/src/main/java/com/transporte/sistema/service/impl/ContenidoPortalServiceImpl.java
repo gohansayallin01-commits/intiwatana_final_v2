@@ -32,7 +32,7 @@ import java.util.Map;
 public class ContenidoPortalServiceImpl implements ContenidoPortalService {
 
     private static final List<String> SECCIONES = List.of(
-            "HERO", "DESTINOS", "BENEFICIOS", "NOSOTROS", "CONTACTO", "FOOTER");
+            "HERO", "DESTINOS", "BENEFICIOS", "NOSOTROS", "CONTACTO", "FOOTER", "LOGIN");
 
     private final ContenidoPortalRepository contenidoRepository;
     private final ContenidoPortalVersionRepository versionRepository;
@@ -278,6 +278,7 @@ public class ContenidoPortalServiceImpl implements ContenidoPortalService {
             case "NOSOTROS" -> seedNosotros();
             case "CONTACTO" -> seedContacto();
             case "FOOTER" -> seedFooter();
+            case "LOGIN" -> seedLogin();
             default -> objectMapper.createObjectNode();
         };
     }
@@ -381,6 +382,40 @@ public class ContenidoPortalServiceImpl implements ContenidoPortalService {
         enlaces.addObject().put("texto", "Sobre nosotros").put("url", "/#nosotros");
         n.put("infoLegal", "© 2026 Empresa de Transportes INTIWATANA S.R.L. · Todos los derechos reservados");
         n.put("creditosFotograficos", "");
+        return n;
+    }
+
+    private ObjectNode seedLogin() {
+        ObjectNode n = objectMapper.createObjectNode();
+        n.put("imagenUrl", "");
+        n.put("imagenMobileUrl", "");
+        n.put("imagenAlt", "Imagen principal del Login de Transportes INTIWATANA");
+        n.put("tituloInstitucional", "INTIWATANA");
+        n.put("frasePrincipal", "MÁS QUE UN DESTINO,\nES TU HISTORIA");
+        n.put("textoComplementario",
+                "Reservas, pasajes y encomiendas en un solo lugar. Viaja con seguridad, comodidad y confianza.");
+        n.put("autor", "");
+        n.put("fuente", "");
+        n.put("licencia", "");
+        n.put("atribucion", "");
+        n.put("focoX", 50);
+        n.put("focoY", 35);
+        n.put("overlay", 0.55);
+        n.put("serviciosVisible", true);
+        ArrayNode servicios = n.putArray("servicios");
+        String[][] datos = {
+                {"Pasajes y reservas", "Compra, elige y reserva tu asiento en línea.", "ticket"},
+                {"Selección de asientos", "Elige tu asiento y viaja con comodidad.", "bus"},
+                {"Encomiendas y tracking", "Registra tu envío y sigue tu guía.", "package"},
+                {"Destinos y horarios", "Horarios, rutas y destinos con atención cercana.", "mappin"},
+        };
+        for (String[] s : datos) {
+            ObjectNode o = servicios.addObject();
+            o.put("titulo", s[0]);
+            o.put("subtitulo", s[1]);
+            o.put("icono", s[2]);
+            o.put("visible", true);
+        }
         return n;
     }
 }

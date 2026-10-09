@@ -1,0 +1,1 @@
+BACKEND:+VentaPresencialRequest,endpoint,/api/v1/ventas/presencial,reutiliza VentaService. FRONTEND:+MapaAsientos export. QA_BASE:110/110 PASS. LINT+BUILD OK. PENDIENTE:UI+QA+Cierre.

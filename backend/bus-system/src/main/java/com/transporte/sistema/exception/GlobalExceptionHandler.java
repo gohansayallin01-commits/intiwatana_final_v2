@@ -20,6 +20,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -155,6 +156,14 @@ public class GlobalExceptionHandler {
                 ? "No autenticado. Inicie sesión para continuar"
                 : "No tiene permisos para esta acción";
         return build(status, msg, req, null);
+    }
+
+    // ── 404 – Recurso estático no encontrado (e.g. /media/portal/xxx) ───────
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResource(
+            NoResourceFoundException ex, HttpServletRequest req) {
+        log.warn("Recurso estático no encontrado [{}]", req.getRequestURI());
+        return build(HttpStatus.NOT_FOUND, "Recurso no encontrado", req, null);
     }
 
     // ── 429 – Demasiados intentos (H-06: rate limiting del login) ───────────

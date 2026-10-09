@@ -1,0 +1,68 @@
+﻿{
+    "paso1_respaldo":  {
+                           "hero_estado":  "PUBLICADO",
+                           "hero_version":  1,
+                           "hero_subtitulo":  "Conectamos destinos con seguridad, comodidad y atenciÃ³n cercana.",
+                           "footer_estado":  "BORRADOR",
+                           "footer_version":  0,
+                           "publico_claves":  "HERO,LOGIN"
+                       },
+    "paso2_guardar_borrador":  {
+                                   "estado":  "PUBLICADO",
+                                   "version":  1,
+                                   "subtitulo_borrador":  "Conectamos destinos con seguridad, comodidad y atenciÃ³n cercana. [QA-TMP]",
+                                   "persistido":  true
+                               },
+    "paso3_relectura":  {
+                            "borrador_persiste":  true,
+                            "publico_hero_subtitulo":  "Conectamos destinos con seguridad, comodidad y atenciÃ³n cercana.",
+                            "publico_sin_cambios":  true
+                        },
+    "paso4_publicar":  {
+                           "estado":  "PUBLICADO",
+                           "version":  2,
+                           "nueva_version":  true,
+                           "publicado_subtitulo":  "Conectamos destinos con seguridad, comodidad y atenciÃ³n cercana. [QA-TMP]",
+                           "publico_hero_subtitulo":  "Conectamos destinos con seguridad, comodidad y atenciÃ³n cercana. [QA-TMP]",
+                           "publico_usa_publicado":  true
+                       },
+    "paso5_restaurar":  {
+                            "version_id_usada":  40,
+                            "estado":  "PUBLICADO",
+                            "version":  1,
+                            "borrador_igual_original":  true,
+                            "publicado_igual_original":  true,
+                            "publico_igual_inicial":  true
+                        },
+    "paso6_archivar":  {
+                           "estado":  "ARCHIVADO",
+                           "archivado_ok":  true,
+                           "publico_sin_cambios":  true
+                       },
+    "paso7_recuperar_footer":  {
+                                   "version_id_usada":  6,
+                                   "estado":  "BORRADOR",
+                                   "borrador_igual_original":  true
+                               },
+    "paso8_verificacion_final":  {
+                                     "hero_estado_ok":  true,
+                                     "hero_version_ok":  true,
+                                     "hero_borrador_ok":  true,
+                                     "hero_publicado_ok":  true,
+                                     "footer_estado_ok":  true,
+                                     "footer_borrador_ok":  true,
+                                     "publico_igual_inicial":  true,
+                                     "publico_claves":  "HERO,LOGIN"
+                                 },
+    "log":  [
+                "[1] Backup inicial leido: HERO=PUBLICADO/v1  FOOTER=BORRADOR/v0  publico=HERO,LOGIN",
+                "[2] Guardar borrador HERO -\u003e estado=PUBLICADO version=1 subtitulo=\u0027Conectamos destinos con seguridad, comodidad y atenciÃ³n cercana. [QA-TMP]\u0027",
+                "[3] Relectura: borrador persiste=True  publico sin cambios=True",
+                "[4] Publicar HERO -\u003e estado=PUBLICADO version=2  publico usa publicado=True",
+                "[5] Restaurar HERO id=40 -\u003e estado=PUBLICADO version=1  borrador=orig:True  publico=inicial:True",
+                "[6] Archivar FOOTER -\u003e estado=ARCHIVADO  publico sin cambios=True",
+                "[7] Recuperar FOOTER id=6 -\u003e estado=BORRADOR  borrador=orig:True",
+                "[rollback] ejecutado=False",
+                "[8] Final: HERO estado/version/borrador/publicado ok=True/True/True/True  FOOTER ok=True/True  publico=inicial:True"
+            ]
+}

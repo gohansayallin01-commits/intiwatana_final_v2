@@ -1,0 +1,809 @@
+{
+  "viewports": {
+    "desktop": {
+      "bodyW": 1440,
+      "dpr": 1,
+      "left": {
+        "w": 821,
+        "h": 828,
+        "frac": 0.57
+      },
+      "right": {
+        "w": 547,
+        "h": 828,
+        "frac": 0.38
+      },
+      "boxRadius": "26px",
+      "boxAnim": "login-card-in",
+      "boxAnimDur": "0.35s",
+      "inputMinH": "50px",
+      "inputFont": "16px",
+      "btn": {
+        "h": 52,
+        "txt": "INGRESAR"
+      },
+      "overlayVar": "",
+      "hasRolesSelector": false,
+      "noForgot": true,
+      "reducedMotionBlock": true,
+      "animations": [
+        {
+          "name": "slideUp",
+          "dur": "0.3s"
+        },
+        {
+          "name": "cd-giro",
+          "dur": "0.9s"
+        },
+        {
+          "name": "cd-giro",
+          "dur": "0.8s"
+        },
+        {
+          "name": "cd-toast-in",
+          "dur": "0.22s"
+        },
+        {
+          "name": "modalIn",
+          "dur": "0.25s"
+        },
+        {
+          "name": "login-card-in",
+          "dur": "0.35s"
+        },
+        {
+          "name": "spin",
+          "dur": "1s"
+        },
+        {
+          "name": "iwrModalIn",
+          "dur": "0.22s"
+        },
+        {
+          "name": "iwrShimmer",
+          "dur": "1.4s"
+        },
+        {
+          "name": "iwrModalIn",
+          "dur": "0.24s"
+        }
+      ],
+      "links": [
+        {
+          "t": "Volver al inicio",
+          "href": "/"
+        },
+        {
+          "t": "Consultar mis reservas",
+          "href": "/pasajes"
+        },
+        {
+          "t": "Regístrate gratis",
+          "href": "/registrar"
+        },
+        {
+          "t": "Volver al inicio",
+          "href": "/"
+        }
+      ],
+      "texts": {
+        "marca": "presente",
+        "frase": "presente",
+        "bienvenido": "presente"
+      },
+      "bgImage": {
+        "img": "linear-gradient(155deg, rgb(13, 51, 48) 0%, rgb(16, 64, 59) 60%, rgb(18, 115, 10",
+        "size": "auto",
+        "pos": "0% 0%"
+      },
+      "name": "desktop",
+      "shot": "01a-login-desktop.png"
+    },
+    "laptop1280": {
+      "bodyW": 1280,
+      "dpr": 1,
+      "left": {
+        "w": 730,
+        "h": 736,
+        "frac": 0.57
+      },
+      "right": {
+        "w": 486,
+        "h": 736,
+        "frac": 0.38
+      },
+      "boxRadius": "26px",
+      "boxAnim": "login-card-in",
+      "boxAnimDur": "0.35s",
+      "inputMinH": "50px",
+      "inputFont": "16px",
+      "btn": {
+        "h": 52,
+        "txt": "INGRESAR"
+      },
+      "overlayVar": "",
+      "hasRolesSelector": false,
+      "noForgot": true,
+      "reducedMotionBlock": true,
+      "animations": [
+        {
+          "name": "slideUp",
+          "dur": "0.3s"
+        },
+        {
+          "name": "cd-giro",
+          "dur": "0.9s"
+        },
+        {
+          "name": "cd-giro",
+          "dur": "0.8s"
+        },
+        {
+          "name": "cd-toast-in",
+          "dur": "0.22s"
+        },
+        {
+          "name": "modalIn",
+          "dur": "0.25s"
+        },
+        {
+          "name": "login-card-in",
+          "dur": "0.35s"
+        },
+        {
+          "name": "spin",
+          "dur": "1s"
+        },
+        {
+          "name": "iwrModalIn",
+          "dur": "0.22s"
+        },
+        {
+          "name": "iwrShimmer",
+          "dur": "1.4s"
+        },
+        {
+          "name": "iwrModalIn",
+          "dur": "0.24s"
+        }
+      ],
+      "links": [
+        {
+          "t": "Volver al inicio",
+          "href": "/"
+        },
+        {
+          "t": "Consultar mis reservas",
+          "href": "/pasajes"
+        },
+        {
+          "t": "Regístrate gratis",
+          "href": "/registrar"
+        },
+        {
+          "t": "Volver al inicio",
+          "href": "/"
+        }
+      ],
+      "texts": {
+        "marca": "presente",
+        "frase": "presente",
+        "bienvenido": "presente"
+      },
+      "bgImage": {
+        "img": "linear-gradient(155deg, rgb(13, 51, 48) 0%, rgb(16, 64, 59) 60%, rgb(18, 115, 10",
+        "size": "auto",
+        "pos": "0% 0%"
+      },
+      "name": "laptop1280",
+      "shot": null
+    },
+    "tablet1200": {
+      "bodyW": 1200,
+      "dpr": 1,
+      "left": {
+        "w": 638,
+        "h": 740,
+        "frac": 0.532
+      },
+      "right": {
+        "w": 502,
+        "h": 740,
+        "frac": 0.418
+      },
+      "boxRadius": "26px",
+      "boxAnim": "login-card-in",
+      "boxAnimDur": "0.35s",
+      "inputMinH": "50px",
+      "inputFont": "16px",
+      "btn": {
+        "h": 52,
+        "txt": "INGRESAR"
+      },
+      "overlayVar": "",
+      "hasRolesSelector": false,
+      "noForgot": true,
+      "reducedMotionBlock": true,
+      "animations": [
+        {
+          "name": "slideUp",
+          "dur": "0.3s"
+        },
+        {
+          "name": "cd-giro",
+          "dur": "0.9s"
+        },
+        {
+          "name": "cd-giro",
+          "dur": "0.8s"
+        },
+        {
+          "name": "cd-toast-in",
+          "dur": "0.22s"
+        },
+        {
+          "name": "modalIn",
+          "dur": "0.25s"
+        },
+        {
+          "name": "login-card-in",
+          "dur": "0.35s"
+        },
+        {
+          "name": "spin",
+          "dur": "1s"
+        },
+        {
+          "name": "iwrModalIn",
+          "dur": "0.22s"
+        },
+        {
+          "name": "iwrShimmer",
+          "dur": "1.4s"
+        },
+        {
+          "name": "iwrModalIn",
+          "dur": "0.24s"
+        }
+      ],
+      "links": [
+        {
+          "t": "Volver al inicio",
+          "href": "/"
+        },
+        {
+          "t": "Consultar mis reservas",
+          "href": "/pasajes"
+        },
+        {
+          "t": "Regístrate gratis",
+          "href": "/registrar"
+        },
+        {
+          "t": "Volver al inicio",
+          "href": "/"
+        }
+      ],
+      "texts": {
+        "marca": "presente",
+        "frase": "presente",
+        "bienvenido": "presente"
+      },
+      "bgImage": {
+        "img": "linear-gradient(155deg, rgb(13, 51, 48) 0%, rgb(16, 64, 59) 60%, rgb(18, 115, 10",
+        "size": "auto",
+        "pos": "0% 0%"
+      },
+      "name": "tablet1200",
+      "shot": null
+    },
+    "tablet1024": {
+      "bodyW": 1024,
+      "dpr": 1,
+      "left": {
+        "w": 486,
+        "h": 717,
+        "frac": 0.475
+      },
+      "right": {
+        "w": 486,
+        "h": 717,
+        "frac": 0.475
+      },
+      "boxRadius": "26px",
+      "boxAnim": "login-card-in",
+      "boxAnimDur": "0.35s",
+      "inputMinH": "50px",
+      "inputFont": "16px",
+      "btn": {
+        "h": 52,
+        "txt": "INGRESAR"
+      },
+      "overlayVar": "",
+      "hasRolesSelector": false,
+      "noForgot": true,
+      "reducedMotionBlock": true,
+      "animations": [
+        {
+          "name": "slideUp",
+          "dur": "0.3s"
+        },
+        {
+          "name": "cd-giro",
+          "dur": "0.9s"
+        },
+        {
+          "name": "cd-giro",
+          "dur": "0.8s"
+        },
+        {
+          "name": "cd-toast-in",
+          "dur": "0.22s"
+        },
+        {
+          "name": "modalIn",
+          "dur": "0.25s"
+        },
+        {
+          "name": "login-card-in",
+          "dur": "0.35s"
+        },
+        {
+          "name": "spin",
+          "dur": "1s"
+        },
+        {
+          "name": "iwrModalIn",
+          "dur": "0.22s"
+        },
+        {
+          "name": "iwrShimmer",
+          "dur": "1.4s"
+        },
+        {
+          "name": "iwrModalIn",
+          "dur": "0.24s"
+        }
+      ],
+      "links": [
+        {
+          "t": "Volver al inicio",
+          "href": "/"
+        },
+        {
+          "t": "Consultar mis reservas",
+          "href": "/pasajes"
+        },
+        {
+          "t": "Regístrate gratis",
+          "href": "/registrar"
+        },
+        {
+          "t": "Volver al inicio",
+          "href": "/"
+        }
+      ],
+      "texts": {
+        "marca": "presente",
+        "frase": "presente",
+        "bienvenido": "presente"
+      },
+      "bgImage": {
+        "img": "linear-gradient(155deg, rgb(13, 51, 48) 0%, rgb(16, 64, 59) 60%, rgb(18, 115, 10",
+        "size": "auto",
+        "pos": "0% 0%"
+      },
+      "name": "tablet1024",
+      "shot": null
+    },
+    "tablet860": {
+      "bodyW": 860,
+      "dpr": 1,
+      "left": {
+        "w": 845,
+        "h": 876,
+        "frac": 0.983
+      },
+      "right": {
+        "w": 845,
+        "h": 741,
+        "frac": 0.983
+      },
+      "boxRadius": "22px",
+      "boxAnim": "login-card-in",
+      "boxAnimDur": "0.35s",
+      "inputMinH": "50px",
+      "inputFont": "16px",
+      "btn": {
+        "h": 52,
+        "txt": "INGRESAR"
+      },
+      "overlayVar": "",
+      "hasRolesSelector": false,
+      "noForgot": true,
+      "reducedMotionBlock": true,
+      "animations": [
+        {
+          "name": "slideUp",
+          "dur": "0.3s"
+        },
+        {
+          "name": "cd-giro",
+          "dur": "0.9s"
+        },
+        {
+          "name": "cd-giro",
+          "dur": "0.8s"
+        },
+        {
+          "name": "cd-toast-in",
+          "dur": "0.22s"
+        },
+        {
+          "name": "modalIn",
+          "dur": "0.25s"
+        },
+        {
+          "name": "login-card-in",
+          "dur": "0.35s"
+        },
+        {
+          "name": "spin",
+          "dur": "1s"
+        },
+        {
+          "name": "iwrModalIn",
+          "dur": "0.22s"
+        },
+        {
+          "name": "iwrShimmer",
+          "dur": "1.4s"
+        },
+        {
+          "name": "iwrModalIn",
+          "dur": "0.24s"
+        }
+      ],
+      "links": [
+        {
+          "t": "Volver al inicio",
+          "href": "/"
+        },
+        {
+          "t": "Consultar mis reservas",
+          "href": "/pasajes"
+        },
+        {
+          "t": "Regístrate gratis",
+          "href": "/registrar"
+        },
+        {
+          "t": "Volver al inicio",
+          "href": "/"
+        }
+      ],
+      "texts": {
+        "marca": "presente",
+        "frase": "presente",
+        "bienvenido": "presente"
+      },
+      "bgImage": {
+        "img": "linear-gradient(155deg, rgb(13, 51, 48) 0%, rgb(16, 64, 59) 60%, rgb(18, 115, 10",
+        "size": "auto",
+        "pos": "0% 0%"
+      },
+      "name": "tablet860",
+      "shot": "01c-login-tablet-860.png"
+    },
+    "mobile768": {
+      "bodyW": 768,
+      "dpr": 1,
+      "left": {
+        "w": 753,
+        "h": 876,
+        "frac": 0.98
+      },
+      "right": {
+        "w": 753,
+        "h": 741,
+        "frac": 0.98
+      },
+      "boxRadius": "22px",
+      "boxAnim": "login-card-in",
+      "boxAnimDur": "0.35s",
+      "inputMinH": "50px",
+      "inputFont": "16px",
+      "btn": {
+        "h": 52,
+        "txt": "INGRESAR"
+      },
+      "overlayVar": "",
+      "hasRolesSelector": false,
+      "noForgot": true,
+      "reducedMotionBlock": true,
+      "animations": [
+        {
+          "name": "slideUp",
+          "dur": "0.3s"
+        },
+        {
+          "name": "cd-giro",
+          "dur": "0.9s"
+        },
+        {
+          "name": "cd-giro",
+          "dur": "0.8s"
+        },
+        {
+          "name": "cd-toast-in",
+          "dur": "0.22s"
+        },
+        {
+          "name": "modalIn",
+          "dur": "0.25s"
+        },
+        {
+          "name": "login-card-in",
+          "dur": "0.35s"
+        },
+        {
+          "name": "spin",
+          "dur": "1s"
+        },
+        {
+          "name": "iwrModalIn",
+          "dur": "0.22s"
+        },
+        {
+          "name": "iwrShimmer",
+          "dur": "1.4s"
+        },
+        {
+          "name": "iwrModalIn",
+          "dur": "0.24s"
+        }
+      ],
+      "links": [
+        {
+          "t": "Volver al inicio",
+          "href": "/"
+        },
+        {
+          "t": "Consultar mis reservas",
+          "href": "/pasajes"
+        },
+        {
+          "t": "Regístrate gratis",
+          "href": "/registrar"
+        },
+        {
+          "t": "Volver al inicio",
+          "href": "/"
+        }
+      ],
+      "texts": {
+        "marca": "presente",
+        "frase": "presente",
+        "bienvenido": "presente"
+      },
+      "bgImage": {
+        "img": "linear-gradient(155deg, rgb(13, 51, 48) 0%, rgb(16, 64, 59) 60%, rgb(18, 115, 10",
+        "size": "auto",
+        "pos": "0% 0%"
+      },
+      "name": "mobile768",
+      "shot": null
+    },
+    "mobile420": {
+      "bodyW": 420,
+      "dpr": 1,
+      "left": {
+        "w": 405,
+        "h": 975,
+        "frac": 0.964
+      },
+      "right": {
+        "w": 405,
+        "h": 716,
+        "frac": 0.964
+      },
+      "boxRadius": "20px",
+      "boxAnim": "login-card-in",
+      "boxAnimDur": "0.35s",
+      "inputMinH": "50px",
+      "inputFont": "16px",
+      "btn": {
+        "h": 52,
+        "txt": "INGRESAR"
+      },
+      "overlayVar": "",
+      "hasRolesSelector": false,
+      "noForgot": true,
+      "reducedMotionBlock": true,
+      "animations": [
+        {
+          "name": "slideUp",
+          "dur": "0.3s"
+        },
+        {
+          "name": "cd-giro",
+          "dur": "0.9s"
+        },
+        {
+          "name": "cd-giro",
+          "dur": "0.8s"
+        },
+        {
+          "name": "cd-toast-in",
+          "dur": "0.22s"
+        },
+        {
+          "name": "modalIn",
+          "dur": "0.25s"
+        },
+        {
+          "name": "login-card-in",
+          "dur": "0.35s"
+        },
+        {
+          "name": "spin",
+          "dur": "1s"
+        },
+        {
+          "name": "iwrModalIn",
+          "dur": "0.22s"
+        },
+        {
+          "name": "iwrShimmer",
+          "dur": "1.4s"
+        },
+        {
+          "name": "iwrModalIn",
+          "dur": "0.24s"
+        }
+      ],
+      "links": [
+        {
+          "t": "Volver al inicio",
+          "href": "/"
+        },
+        {
+          "t": "Consultar mis reservas",
+          "href": "/pasajes"
+        },
+        {
+          "t": "Regístrate gratis",
+          "href": "/registrar"
+        },
+        {
+          "t": "Volver al inicio",
+          "href": "/"
+        }
+      ],
+      "texts": {
+        "marca": "presente",
+        "frase": "presente",
+        "bienvenido": "presente"
+      },
+      "bgImage": {
+        "img": "linear-gradient(155deg, rgb(13, 51, 48) 0%, rgb(16, 64, 59) 60%, rgb(18, 115, 10",
+        "size": "auto",
+        "pos": "0% 0%"
+      },
+      "name": "mobile420",
+      "shot": "01e-login-mobile-420.png"
+    },
+    "mobile375": {
+      "bodyW": 375,
+      "dpr": 1,
+      "left": {
+        "w": 360,
+        "h": 1038,
+        "frac": 0.96
+      },
+      "right": {
+        "w": 360,
+        "h": 733,
+        "frac": 0.96
+      },
+      "boxRadius": "20px",
+      "boxAnim": "login-card-in",
+      "boxAnimDur": "0.35s",
+      "inputMinH": "50px",
+      "inputFont": "16px",
+      "btn": {
+        "h": 52,
+        "txt": "INGRESAR"
+      },
+      "overlayVar": "",
+      "hasRolesSelector": false,
+      "noForgot": true,
+      "reducedMotionBlock": true,
+      "animations": [
+        {
+          "name": "slideUp",
+          "dur": "0.3s"
+        },
+        {
+          "name": "cd-giro",
+          "dur": "0.9s"
+        },
+        {
+          "name": "cd-giro",
+          "dur": "0.8s"
+        },
+        {
+          "name": "cd-toast-in",
+          "dur": "0.22s"
+        },
+        {
+          "name": "modalIn",
+          "dur": "0.25s"
+        },
+        {
+          "name": "login-card-in",
+          "dur": "0.35s"
+        },
+        {
+          "name": "spin",
+          "dur": "1s"
+        },
+        {
+          "name": "iwrModalIn",
+          "dur": "0.22s"
+        },
+        {
+          "name": "iwrShimmer",
+          "dur": "1.4s"
+        },
+        {
+          "name": "iwrModalIn",
+          "dur": "0.24s"
+        }
+      ],
+      "links": [
+        {
+          "t": "Volver al inicio",
+          "href": "/"
+        },
+        {
+          "t": "Consultar mis reservas",
+          "href": "/pasajes"
+        },
+        {
+          "t": "Regístrate gratis",
+          "href": "/registrar"
+        },
+        {
+          "t": "Volver al inicio",
+          "href": "/"
+        }
+      ],
+      "texts": {
+        "marca": "presente",
+        "frase": "presente",
+        "bienvenido": "presente"
+      },
+      "bgImage": {
+        "img": "linear-gradient(155deg, rgb(13, 51, 48) 0%, rgb(16, 64, 59) 60%, rgb(18, 115, 10",
+        "size": "auto",
+        "pos": "0% 0%"
+      },
+      "name": "mobile375",
+      "shot": "01g-login-mobile-375.png"
+    }
+  },
+  "conclusions": {
+    "L_desktopSplit": true,
+    "L_cardRadius_22_28": true,
+    "L_mobileImageHeader": true,
+    "L_inputMin50": true,
+    "L_noRolesSelector": true,
+    "L_noForgot": true,
+    "L_reducedMotion": true,
+    "L_animations180_500": true,
+    "L_exactPhrase": "presente",
+    "L_noConsoleErrors": "see-runner-report",
+    "L_loginCardAnim": "login-card-in 0.35s"
+  }
+}

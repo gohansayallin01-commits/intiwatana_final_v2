@@ -2,6 +2,7 @@ package com.transporte.sistema.service;
 
 import com.transporte.sistema.dto.request.ConfirmarReservaRequest;
 import com.transporte.sistema.dto.request.CrearRetencionRequest;
+import com.transporte.sistema.dto.request.VentaPresencialRequest;
 import com.transporte.sistema.dto.response.BoletoResponse;
 import com.transporte.sistema.dto.response.RecuperacionResponse;
 import com.transporte.sistema.dto.response.RetencionResponse;
@@ -19,6 +20,13 @@ public interface VentaService {
 
     /** Crea una retención temporal de asientos (web/invitado). */
     RetencionResponse crearRetencion(CrearRetencionRequest request);
+
+    /**
+     * Venta presencial de caja (ADMIN/CAJERO): bloquea los asientos, registra el
+     * pago en efectivo y emite los boletos con QR en una única transacción.
+     * Reutiliza la misma disponibilidad (viaje + asiento) que la web. Idempotente.
+     */
+    List<BoletoResponse> ventaPresencial(VentaPresencialRequest request, String username);
 
     /** Consulta segura de una reserva (requiere el documento del comprador). */
     RetencionResponse obtenerPorReferencia(String referencia, String documento);

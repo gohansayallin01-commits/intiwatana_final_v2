@@ -55,4 +55,9 @@ public interface BoletoRepository extends JpaRepository<Boleto, Long> {
             "AND b.estado <> 'CANCELADO'")
     long boletosVendidosDelPeriodo(@Param("desde") LocalDateTime desde,
                                    @Param("hasta") LocalDateTime hasta);
+
+    /** Boletos ACTIVOS de un viaje (para el cierre operativo por viaje). */
+    @Query("SELECT b FROM Boleto b WHERE b.viaje.id = :viajeId AND b.estado = 'ACTIVO' "
+            + "ORDER BY b.numeroBoleto")
+    java.util.List<Boleto> findActivosPorViaje(@Param("viajeId") Long viajeId);
 }

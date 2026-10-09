@@ -40,4 +40,40 @@ public interface RetencionRepository extends JpaRepository<Retencion, Long> {
     @Query("SELECT r FROM Retencion r WHERE r.estado IN :estados AND r.expiraEn < :ahora")
     List<Retencion> findVencidas(@Param("estados") Collection<EstadoRetencion> estados,
                                  @Param("ahora") LocalDateTime ahora);
+
+    // ── Control de reservas pendientes (anti "reserva falsa") ───────────────
+
+    /** ¿Existen reservas activas (vigentes) del documento para este viaje? */
+    @Query("SELECT count(r) > 0 FROM Retencion r "
+            + "WHERE r.compradorDocumento = :documento AND r.viaje.id = :viajeId "
+            + "AND r.estado IN :activos AND r.expiraEn > :ahora")
+    boolean existeActivaPorDocumentoYViaje(@Param("documento") String documento,
+                                           @Param("viajeId") Long viajeId,
+                                           @Param("activos") Collection<EstadoRetencion> activos,
+                                           @Param("ahora") LocalDateTime ahora);
+
+    /** Cantidad de reservas activas (vigentes) del documento. */
+    @Query("SELECT count(r) FROM Retencion r "
+            + "WHERE r.compradorDocumento = :documento "
+            + "AND r.estado IN :activos AND r.expiraEn > :ahora")
+    long countActivasPorDocumento(@Param("documento") String documento,
+                                  @Param("activos") Collection<EstadoRetencion> activos,
+                                  @Param("ahora") LocalDateTime ahora);
+
+    /** Cantidad de reservas activas (vigentes) por teléfono (nominativo único). */
+    @Query("SELECT count(r) FROM Retencion r "
+            + "WHERE r.compradorTelefono = :telefono "
+            + "AND r.estado IN :activos AND r.expiraEn > :ahora")
+    long countActivasPorTelefono(@Param("telefono") String telefono,
+                                 @Param("activos") Collection<EstadoRetencion> activos,
+                                 @Param("ahora") LocalDateTime ahora);
+
+    // ── Cierre operativo por viaje (agregaciones read-only) ─────────────────
+
+    @Query("SELECT r.estado, COUNT(r) FROM Retencion r WHERE r.viaje.id = :viajeId GROUP BY r.estado")
+    List<Object[]> conteoEstadosPorViaje(@Param("viajeId") Long viajeId);
+
+    @Query("SELECT COALESCE(SUM(r.total), 0) FROM Retencion r "
+            + "WHERE r.viaje.id = :viajeId AND r.estado = 'PENDIENTE_PAGO'")
+    java.math.BigDecimal totalPendientePagoPorViaje(@Param("viajeId") Long viajeId);
 }
